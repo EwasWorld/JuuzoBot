@@ -1,0 +1,22 @@
+{
+  "races": [
+    {
+      "name": "Human",
+      "subrace": {},
+      "abilityIncreases": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "inte": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "ageUpperBound": 100,
+      "size": "Medium",
+      "speed": 30,
+      "languages": [
+        "Common", "WILDCARD"
+      ]
+    }
+  ]
+}

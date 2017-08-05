@@ -1,0 +1,29 @@
+{
+  "classes": [
+    {
+      "name": "Fighter",
+      "secondaryType": {
+        "value": "Finesse"
+      },
+      "hitDie": 10,
+      "abilityOrder": {
+        "str": 4,
+        "dex": 1,
+        "con": 3,
+        "inte": 2,
+        "wis": 5,
+        "cha": 6
+      },
+      "savingThrows": [
+        "Strength", "Constitution"
+      ],
+      "skillProficiencies": [
+        "Acrobatics", "Athletics"
+      ],
+      "funds": {
+        "quantity": 2,
+        "multiply": true
+      }
+    }
+  ]
+}
