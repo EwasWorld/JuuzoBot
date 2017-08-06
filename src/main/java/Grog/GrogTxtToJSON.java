@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-public class CreateGrogJSON {
+public class GrogTxtToJSON {
     public static void main(String[] args) {
         Scanner scanner = null;
         File file;
@@ -52,6 +52,4 @@ public class CreateGrogJSON {
         ps.print(", ");
         printToStream(ps, toPrint);
     }
-
-
 }

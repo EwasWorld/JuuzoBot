@@ -2,15 +2,13 @@
   "classes": [
     {
       "name": "Fighter",
-      "secondaryType": {
-        "value": "Finesse"
-      },
+      "secondaryType": "Finesse",
       "hitDie": 10,
       "abilityOrder": {
         "str": 4,
         "dex": 1,
         "con": 3,
-        "inte": 2,
+        "int": 2,
         "wis": 5,
         "cha": 6
       },

@@ -2,8 +2,6 @@ package main.java.Foo;
 
 
 
-import main.java.CharClassBox.CharClass;
-import main.java.CharClassBox.ClassJsonFormat;
 import main.java.Grog.GrogList;
 import main.java.RaceBox.*;
 import com.google.gson.Gson;
@@ -50,35 +48,11 @@ public class Main {
         }
     }
 
-    private static void createClassRaceDataFromFile() {
-        try {
-            final Gson gson = new Gson();
-
-            final String classJson = new String(Files.readAllBytes(Paths.get(CharClass.fileLocation)));
-            final ClassJsonFormat classJsonFormat = gson.fromJson(classJson, ClassJsonFormat.class);
-            final List<CharClass> classes = CharClass.createClassesFromFile(classJsonFormat);
-
-            final String raceJson = new String(Files.readAllBytes(Paths.get(Race.fileLocation)));
-            final RaceJsonFormat raceJsonFormat = gson.fromJson(raceJson, RaceJsonFormat.class);
-            final List<Race> races = Race.createClassesFromFile(raceJsonFormat);
-
-            final String grogJson = new String(Files.readAllBytes(Paths.get(GrogList.fileLocation)));
-            final GrogList grogList = gson.fromJson(grogJson, GrogList.class);
-
-            setInformationWrapper(new InformationWrapper(classes, races, grogList));
-        }
-        catch (IOException | IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static class CommandListener extends ListenerAdapter {
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             String message = event.getMessage().getContent();
             if (!event.getAuthor().isBot() && message.startsWith("!")) {
-                createClassRaceDataFromFile();
-
                 if (message.equals("!help")) {
                     event.getChannel().sendMessage("Working commands: \n" +
                             "!potion - drink a potion").queue();
