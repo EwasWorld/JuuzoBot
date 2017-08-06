@@ -67,7 +67,7 @@ public class Races {
     /*
      * If there is a wildcard language then it picks one at random
      */
-    private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) throws IllegalArgumentException {
+    private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) {
         Set<CharacterConstants.Language> languages = new HashSet<>();
         for (JsonElement language : languagesJson) {
             languages.add(CharacterConstants.Language.valueOf(language.getAsString().toUpperCase()));

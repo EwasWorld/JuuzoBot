@@ -34,28 +34,18 @@ public class Classes {
 
     private Classes(Object rawObj) {
         classes = new HashMap<>();
+
         for (JsonElement element : (JsonArray) rawObj) {
             final JsonObject object = (JsonObject) element;
+
             final ClassEnum classEnum = ClassEnum.valueOf(object.get("name").getAsString().toUpperCase());
-
-            final Set<AbilitySkillConstants.AbilityEnum> savingThrows = new HashSet<>();
-            for (JsonElement savingThrow : object.getAsJsonArray("savingThrows")) {
-                savingThrows.add(AbilitySkillConstants.AbilityEnum.valueOf(savingThrow.getAsString().toUpperCase()));
-            }
-            final Set<AbilitySkillConstants.SkillEnum> skillProficiencies = new HashSet<>();
-            for (JsonElement skillProficiency : object.getAsJsonArray("skillProficiencies")) {
-                skillProficiencies
-                        .add(AbilitySkillConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
-            }
-
             final JsonObject funds = object.getAsJsonObject("funds");
-
             classes.put(classEnum, new Class_(
                     object.get("secondaryType").getAsString(),
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
-                    savingThrows,
-                    skillProficiencies,
+                    createSavingThrows(object.getAsJsonArray("savingThrows")),
+                    createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
                     new Funds(
                             funds.get("quantity").getAsInt(),
                             funds.get("multiply").getAsBoolean()
@@ -80,6 +70,25 @@ public class Classes {
         newAbilityOrder[abilityOrderObj.get("cha").getAsInt() - 1]
                 = AbilitySkillConstants.AbilityEnum.CHARISMA;
         return newAbilityOrder;
+    }
+
+
+    private static Set<AbilitySkillConstants.AbilityEnum> createSavingThrows(JsonArray savingThrowsArray) {
+        final Set<AbilitySkillConstants.AbilityEnum> savingThrows = new HashSet<>();
+        for (JsonElement savingThrow : savingThrowsArray) {
+            savingThrows.add(AbilitySkillConstants.AbilityEnum.valueOf(savingThrow.getAsString().toUpperCase()));
+        }
+        return savingThrows;
+    }
+
+
+    private static Set<AbilitySkillConstants.SkillEnum> createSkillProficiencies(JsonArray skillProficienciesArray) {
+        final Set<AbilitySkillConstants.SkillEnum> skillProficiencies = new HashSet<>();
+        for (JsonElement skillProficiency : skillProficienciesArray) {
+            skillProficiencies
+                    .add(AbilitySkillConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
+        }
+        return skillProficiencies;
     }
 
 

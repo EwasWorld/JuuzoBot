@@ -5,6 +5,8 @@ import main.java.CharacterBox.CharacterConstants;
 
 import java.util.*;
 
+
+
 /*
  * Class information used for setting up a character
  */
@@ -19,10 +21,8 @@ public class Race {
     private Set<CharacterConstants.Language> languages;
 
 
-    public Race(String secondary,
-                Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreases, int ageLowerBound, int ageUpperBound,
-                CharacterConstants.Size size, int speed,
-                Set<CharacterConstants.Language> languages)
+    public Race(String secondary, Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreases, int ageLowerBound,
+                int ageUpperBound, CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
     {
         if (ageLowerBound >= ageUpperBound) {
             throw new IllegalArgumentException("Lower bound age must be larger than upper bound");
@@ -42,6 +42,7 @@ public class Race {
         return Optional.of(secondary);
     }
 
+
     public Map<AbilitySkillConstants.AbilityEnum, Integer> getAbilityIncreases() {
         return abilityIncreases;
     }
@@ -56,13 +57,16 @@ public class Race {
         return ageUpperBound;
     }
 
+
     public CharacterConstants.Size getSize() {
         return size;
     }
 
+
     public int getSpeed() {
         return speed;
     }
+
 
     public Set<CharacterConstants.Language> getLanguages() {
         return languages;

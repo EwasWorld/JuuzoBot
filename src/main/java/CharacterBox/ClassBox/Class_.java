@@ -16,9 +16,9 @@ public class Class_ {
     private Funds funds;
 
 
-    public Class_(String secondary, int hitDie, AbilitySkillConstants.AbilityEnum[]
-            abilityOrder, Set<AbilitySkillConstants.AbilityEnum> savingThrows, Set<AbilitySkillConstants
-            .SkillEnum> skillProficiencies, Funds funds)
+    public Class_(String secondary, int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
+                  Set<AbilitySkillConstants.AbilityEnum> savingThrows,
+                  Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds)
     {
         this.secondary = secondary;
         this.hitDie = hitDie;

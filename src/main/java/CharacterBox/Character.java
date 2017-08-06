@@ -3,8 +3,10 @@ package main.java.CharacterBox;
 
 import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
+import main.java.CharacterBox.ClassBox.Funds;
 import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
+import main.java.Foo.DiceRoller;
 
 import java.util.Map;
 import java.util.Random;
@@ -40,7 +42,11 @@ public class Character {
         savingThrows = classInfo.getSavingThrows();
         skillProficiencies = classInfo.getSkillProficiencies();
 
-        // TODO funds
+        Funds fundsSetUp = classInfo.getFunds();
+        funds = DiceRoller.roll(fundsSetUp.getQuantity(), 4, 0);
+        if (fundsSetUp.isMultiply()) {
+            funds *= 10;
+        }
 
         age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo.getAgeLowerBound();
         languages = raceInfo.getLanguages();
