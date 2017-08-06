@@ -37,12 +37,12 @@ public class Races {
 
         for (JsonElement element : (JsonArray) rawObj) {
             final JsonObject object = (JsonObject) element;
-
             final RaceEnum raceEnum = RaceEnum.valueOf(object.get("name").getAsString().toUpperCase());
 
             races.put(raceEnum, new Race(
                     object.get("subrace").getAsString(),
                     createAbilityIncreases(object.getAsJsonObject("abilityIncreases")),
+                    object.get("ageLowerBound").getAsInt(),
                     object.get("ageUpperBound").getAsInt(),
                     CharacterConstants.Size.valueOf(object.get("size").getAsString().toUpperCase()),
                     object.get("speed").getAsInt(),
@@ -70,14 +70,7 @@ public class Races {
     private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) throws IllegalArgumentException {
         Set<CharacterConstants.Language> languages = new HashSet<>();
         for (JsonElement language : languagesJson) {
-            final String languageString = language.getAsString().toUpperCase();
-            if (!languageString.equals("WILDCARD")) {
-                languages.add(CharacterConstants.Language.valueOf(languageString));
-            }
-            else {
-                CharacterConstants.Language[] allLanguages = CharacterConstants.Language.values();
-                languages.add(allLanguages[new Random().nextInt(allLanguages.length)]);
-            }
+            languages.add(CharacterConstants.Language.valueOf(language.getAsString().toUpperCase()));
         }
         return languages;
     }

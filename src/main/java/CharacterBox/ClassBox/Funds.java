@@ -4,7 +4,7 @@ package main.java.CharacterBox.ClassBox;
  * Starting funds for a character
  */
 public class Funds {
-    // number of d4 to roll
+    // number of d4 to getStringForRoll
     private int quantity;
     // true: multiply by 10
     private boolean multiply;

@@ -2,7 +2,6 @@ package main.java.Grog;
 
 import com.google.gson.Gson;
 import main.java.Foo.DiceRoller;
-import main.java.Foo.Main;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.FileNotFoundException;

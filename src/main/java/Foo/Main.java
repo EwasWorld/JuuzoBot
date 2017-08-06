@@ -43,7 +43,7 @@ public class Main {
                             "!potion - drink a potion").queue();
                 }
                 else if (message.startsWith("roll", 1)) {
-                    DiceRoller.roll(event);
+                    DiceRoller.getStringForRoll(event);
                 }
                 else if (message.startsWith("newChar", 1)) {
 
