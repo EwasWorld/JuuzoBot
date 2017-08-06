@@ -1,6 +1,6 @@
-package main.java.Const;
+package main.java.CharacterBox;
 
-public class Constants {
+public class CharacterConstants {
     public enum BackgroundEnum {
         ACOLYTE, CHARLATAN,
         CRIMINAL, ENTERTAINER,

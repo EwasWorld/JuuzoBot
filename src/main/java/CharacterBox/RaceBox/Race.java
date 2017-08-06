@@ -1,7 +1,7 @@
-package main.java.RaceBox;
+package main.java.CharacterBox.RaceBox;
 
-import main.java.Const.AbilitySkillConstants;
-import main.java.Const.Constants;
+import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.CharacterConstants;
 
 import java.util.*;
 
@@ -13,12 +13,12 @@ public class Race {
     private String secondary;
     private Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreases;
     private int ageUpperBound;
-    private Constants.Size size;
+    private CharacterConstants.Size size;
     private int speed;
-    private Set<Constants.Language> languages;
+    private Set<CharacterConstants.Language> languages;
 
     public Race(String secondary, Map<AbilitySkillConstants.AbilityEnum, Integer>
-            abilityIncreases, int ageUpperBound, Constants.Size size, int speed, Set<Constants.Language> languages) {
+            abilityIncreases, int ageUpperBound, CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages) {
         this.secondary = secondary;
         this.abilityIncreases = abilityIncreases;
         this.ageUpperBound = ageUpperBound;
@@ -39,7 +39,7 @@ public class Race {
         return ageUpperBound;
     }
 
-    public Constants.Size getSize() {
+    public CharacterConstants.Size getSize() {
         return size;
     }
 
@@ -47,7 +47,7 @@ public class Race {
         return speed;
     }
 
-    public Set<Constants.Language> getLanguages() {
+    public Set<CharacterConstants.Language> getLanguages() {
         return languages;
     }
 }

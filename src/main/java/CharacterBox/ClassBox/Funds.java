@@ -1,4 +1,4 @@
-package main.java.CharClassBox;
+package main.java.CharacterBox.ClassBox;
 
 /*
  * Starting funds for a character

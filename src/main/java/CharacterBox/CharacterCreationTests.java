@@ -1,7 +1,7 @@
-package main.java;
+package main.java.CharacterBox;
 
-import main.java.CharClassBox.Classes;
-import main.java.RaceBox.Races;
+import main.java.CharacterBox.ClassBox.Classes;
+import main.java.CharacterBox.RaceBox.Races;
 
 
 

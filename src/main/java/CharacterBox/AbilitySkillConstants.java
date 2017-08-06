@@ -1,4 +1,4 @@
-package main.java.Const;
+package main.java.CharacterBox;
 
 public class AbilitySkillConstants {
     public enum AbilityEnum {

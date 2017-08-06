@@ -1,8 +1,8 @@
-package main.java.CharClassBox;
+package main.java.CharacterBox.ClassBox;
 
 
 import com.google.gson.*;
-import main.java.Const.AbilitySkillConstants;
+import main.java.CharacterBox.AbilitySkillConstants;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,7 +17,7 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Classes {
-    private static final String fileLocation = "src/main/java/CharClassBox/Classes.json";
+    private static final String fileLocation = "src/main/java/ClassBox/Classes.json";
     private static Map<ClassEnum, Class_> classes;
 
 

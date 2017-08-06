@@ -1,9 +1,8 @@
-package main.java.Foo;
+package main.java.CharacterBox;
 
 
-import main.java.CharClassBox.Classes;
-import main.java.Const.AbilitySkillConstants;
-import main.java.RaceBox.Races;
+import main.java.CharacterBox.ClassBox.Classes;
+import main.java.CharacterBox.RaceBox.Races;
 
 import java.util.Map;
 import java.util.Set;

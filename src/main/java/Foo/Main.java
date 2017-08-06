@@ -3,8 +3,6 @@ package main.java.Foo;
 
 
 import main.java.Grog.GrogList;
-import main.java.RaceBox.*;
-import com.google.gson.Gson;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -14,24 +12,11 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+
+
 
 public class Main {
     public static JDA jda;
-    private static InformationWrapper informationWrapper = null;
-
-    public static InformationWrapper getInformationWrapper() {
-        return informationWrapper;
-    }
-
-    private static void setInformationWrapper(InformationWrapper informationWrapper) {
-        if (Main.informationWrapper == null) {
-            Main.informationWrapper = informationWrapper;
-        }
-    }
 
     public static void main(String[] args) {
         JDABuilder builder = new JDABuilder(AccountType.BOT);

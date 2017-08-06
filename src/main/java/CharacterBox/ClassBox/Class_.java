@@ -1,6 +1,6 @@
-package main.java.CharClassBox;
+package main.java.CharacterBox.ClassBox;
 
-import main.java.Const.AbilitySkillConstants;
+import main.java.CharacterBox.AbilitySkillConstants;
 
 import java.util.Optional;
 import java.util.Set;

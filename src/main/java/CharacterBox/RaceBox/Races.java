@@ -1,9 +1,9 @@
-package main.java.RaceBox;
+package main.java.CharacterBox.RaceBox;
 
 import com.google.gson.*;
-import main.java.CharClassBox.Classes;
-import main.java.Const.AbilitySkillConstants;
-import main.java.Const.Constants;
+import main.java.CharacterBox.ClassBox.Classes;
+import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.CharacterConstants;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -44,7 +44,7 @@ public class Races {
                     object.get("subrace").getAsString(),
                     createAbilityIncreases(object.getAsJsonObject("abilityIncreases")),
                     object.get("ageUpperBound").getAsInt(),
-                    Constants.Size.valueOf(object.get("size").getAsString().toUpperCase()),
+                    CharacterConstants.Size.valueOf(object.get("size").getAsString().toUpperCase()),
                     object.get("speed").getAsInt(),
                     createLanguages(object.getAsJsonArray("languages"))
             ));
@@ -67,15 +67,15 @@ public class Races {
     /*
      * If there is a wildcard language then it picks one at random
      */
-    private static Set<Constants.Language> createLanguages(JsonArray languagesJson) throws IllegalArgumentException {
-        Set<Constants.Language> languages = new HashSet<>();
+    private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) throws IllegalArgumentException {
+        Set<CharacterConstants.Language> languages = new HashSet<>();
         for (JsonElement language : languagesJson) {
             final String languageString = language.getAsString().toUpperCase();
             if (!languageString.equals("WILDCARD")) {
-                languages.add(Constants.Language.valueOf(languageString));
+                languages.add(CharacterConstants.Language.valueOf(languageString));
             }
             else {
-                Constants.Language[] allLanguages = Constants.Language.values();
+                CharacterConstants.Language[] allLanguages = CharacterConstants.Language.values();
                 languages.add(allLanguages[new Random().nextInt(allLanguages.length)]);
             }
         }

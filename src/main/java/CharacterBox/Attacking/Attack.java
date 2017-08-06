@@ -1,4 +1,4 @@
-package main.java.Foo;
+package main.java.CharacterBox.Attacking;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
