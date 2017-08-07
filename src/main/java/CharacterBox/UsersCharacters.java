@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 
@@ -13,9 +14,17 @@ public class UsersCharacters {
     private static Map<Long, Character> userCharacters;
 
 
+    private static Optional<Character> getCharacter(long id) {
+        if (userCharacters == null) {
+            userCharacters = new HashMap<>();
+        }
+        return Optional.of(userCharacters.get(id));
+    }
+
+
     public static void createUserCharacter(MessageChannel channel, long id, String creationString) {
         // TODO Temp for testing
-        if (creationString.endsWith(" human fighter")) {
+        if (creationString.endsWith(" human finessefighter")) {
             if (userCharacters == null) {
                 userCharacters = new HashMap<>();
             }

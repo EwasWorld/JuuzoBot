@@ -39,22 +39,27 @@ public class Main {
         public void onMessageReceived(MessageReceivedEvent event) {
             String message = event.getMessage().getContent();
             if (!event.getAuthor().isBot() && message.startsWith("!")) {
-                if (message.equals("!help")) {
+                message = message.substring(1);
+                if (message.equals("help")) {
                     event.getChannel().sendMessage("Working commands: \n" +
+                                                           "!ping - test bot is working\n" +
                                                            "!potion - drink a potion").queue();
                 }
-                else if (message.startsWith("roll", 1)) {
+                else if (message.equals("ping")) {
+                    event.getChannel().sendMessage("Pong").queue();
+                }
+                else if (message.startsWith("roll")) {
                     DiceRoller.getStringForRoll(event);
                 }
-                else if (message.startsWith("newChar", 1)) {
+                else if (message.startsWith("newChar")) {
                     UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
-                                                        message.substring(9)
+                                                        message.substring(8)
                     );
                 }
-                else if (message.startsWith("potion", 1)) {
+                else if (message.startsWith("potion")) {
                     GrogList.drinkGrog(event);
                 }
-                else if (message.startsWith("attack", 1)) {
+                else if (message.startsWith("attack")) {
 
                 }
             }

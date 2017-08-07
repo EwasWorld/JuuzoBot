@@ -11,6 +11,7 @@
         "wis": 1,
         "cha": 1
       },
+      "ageLowerBound": 18,
       "ageUpperBound": 100,
       "size": "Medium",
       "speed": 30,

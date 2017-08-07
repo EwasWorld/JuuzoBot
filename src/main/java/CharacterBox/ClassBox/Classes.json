@@ -1,7 +1,7 @@
 {
   "classes": [
     {
-      "name": "Fighter",
+      "name": "FinesseFighter",
       "secondaryType": "Finesse",
       "hitDie": 10,
       "abilityOrder": {

@@ -9,7 +9,6 @@ import java.util.Set;
 
 
 public class Class_ {
-    private String secondary;
     private int hitDie;
     private AbilitySkillConstants.AbilityEnum[] abilityOrder;
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
@@ -18,23 +17,17 @@ public class Class_ {
     private Weapons.WeaponsEnum startWeapon;
 
 
-    public Class_(String secondary, int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
+    public Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
                   Set<AbilitySkillConstants.AbilityEnum> savingThrows,
                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds,
                   Weapons.WeaponsEnum startWeapon)
     {
-        this.secondary = secondary;
         this.hitDie = hitDie;
         this.abilityOrder = abilityOrder;
         this.savingThrows = savingThrows;
         this.skillProficiencies = skillProficiencies;
         this.funds = funds;
         this.startWeapon = startWeapon;
-    }
-
-
-    public Optional<String> getSecondary() {
-        return Optional.of(secondary);
     }
 
 

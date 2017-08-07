@@ -39,8 +39,15 @@ public class Races {
             final JsonObject object = (JsonObject) element;
             final RaceEnum raceEnum = RaceEnum.valueOf(object.get("name").getAsString().toUpperCase());
 
+            String subrace = null;
+            try {
+                subrace = object.get("subrace").getAsString();
+            } catch (NullPointerException e) {
+                // Some classes don't have a subrace
+            }
+
             races.put(raceEnum, new Race(
-                    object.get("subrace").getAsString(),
+                    subrace,
                     createAbilityIncreases(object.getAsJsonObject("abilityIncreases")),
                     object.get("ageLowerBound").getAsInt(),
                     object.get("ageUpperBound").getAsInt(),
@@ -87,7 +94,7 @@ public class Races {
     private static void getRacesFromFile() {
         try {
             final GsonBuilder gsonBuilder = new GsonBuilder();
-            final Gson gson = gsonBuilder.registerTypeAdapter(Classes.class, new RaceSetUpDeserializer()).create();
+            final Gson gson = gsonBuilder.registerTypeAdapter(Races.class, new RaceSetUpDeserializer()).create();
 
             final String raceSetUpJSON = new String(readAllBytes(Paths.get(fileLocation)));
             gson.fromJson(raceSetUpJSON, Races.class);

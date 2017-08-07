@@ -9,6 +9,7 @@ import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.Foo.DiceRoller;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -34,6 +35,7 @@ public class Character {
         final Class_ classInfo = Classes.getClassInfo(class_);
         final Race raceInfo = Races.getRaceInfo(race);
 
+        abilities = new HashMap<>();
         for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
             AbilitySkillConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
             int score = AbilitySkillConstants.startingAbilityScores[i] + raceInfo.getAbilityIncreases().get(ability);

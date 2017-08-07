@@ -24,12 +24,9 @@ public class Classes {
 
 
     public enum ClassEnum {
-        BARBARIAN, BARD,
-        CLERIC, DRUID,
-        FIGHTER, MONK,
-        PALADIN, RANGER,
-        ROGUE, SORCERER,
-        WARLOCK, WIZARD
+        BARBARIAN, BARD, CLERIC, DRUID, FINESSEFIGHTER,
+        FIGHTER, MONK, PALADIN, RANGER, ROGUE,
+        SORCERER, WARLOCK, WIZARD
     }
 
 
@@ -42,7 +39,6 @@ public class Classes {
             final ClassEnum classEnum = ClassEnum.valueOf(object.get("name").getAsString().toUpperCase());
             final JsonObject funds = object.getAsJsonObject("funds");
             classes.put(classEnum, new Class_(
-                    object.get("secondaryType").getAsString(),
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
