@@ -3,6 +3,7 @@ package main.java.CharacterBox.ClassBox;
 
 import com.google.gson.*;
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.Attacking.Weapons;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,7 +18,7 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Classes {
-    private static final String fileLocation = "src/main/java/ClassBox/Classes.json";
+    private static final String fileLocation = "src/main/java/CharacterBox/ClassBox/Classes.json";
     private static Map<ClassEnum, Class_> classes;
 
 
@@ -49,7 +50,8 @@ public class Classes {
                     new Funds(
                             funds.get("quantity").getAsInt(),
                             funds.get("multiply").getAsBoolean()
-                    )
+                    ),
+                    Weapons.WeaponsEnum.valueOf(object.get("startWeapon").getAsString().toUpperCase())
             ));
         }
     }

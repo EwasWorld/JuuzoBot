@@ -1,6 +1,7 @@
 package main.java.CharacterBox.ClassBox;
 
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.Attacking.Weapons;
 
 import java.util.Optional;
 import java.util.Set;
@@ -14,11 +15,13 @@ public class Class_ {
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Funds funds;
+    private Weapons.WeaponsEnum startWeapon;
 
 
     public Class_(String secondary, int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
                   Set<AbilitySkillConstants.AbilityEnum> savingThrows,
-                  Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds)
+                  Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds,
+                  Weapons.WeaponsEnum startWeapon)
     {
         this.secondary = secondary;
         this.hitDie = hitDie;
@@ -26,6 +29,7 @@ public class Class_ {
         this.savingThrows = savingThrows;
         this.skillProficiencies = skillProficiencies;
         this.funds = funds;
+        this.startWeapon = startWeapon;
     }
 
 
@@ -56,5 +60,10 @@ public class Class_ {
 
     public Funds getFunds() {
         return funds;
+    }
+
+
+    public Weapons.WeaponsEnum getStartWeapon() {
+        return startWeapon;
     }
 }

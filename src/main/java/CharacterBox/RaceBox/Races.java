@@ -18,7 +18,7 @@ import static java.nio.file.Files.readAllBytes;
  * Used to import races from JSON file
  */
 public class Races {
-    private static final String fileLocation = "src/main/java/RaceBox/Races.json";
+    private static final String fileLocation = "src/main/java/CharacterBox/RaceBox/Races.json";
     private static Map<RaceEnum, Race> races;
 
 

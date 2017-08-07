@@ -1,6 +1,7 @@
 package main.java.CharacterBox;
 
 
+import main.java.CharacterBox.Attacking.Weapons;
 import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.ClassBox.Funds;
@@ -22,9 +23,10 @@ public class Character {
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Set<CharacterConstants.Language> languages;
     private int funds;
+    private Weapons.WeaponsEnum weapon;
 
 
-    public Character(String name, Classes.ClassEnum class_, Races.RaceEnum race) {
+    public Character(String name, Races.RaceEnum race, Classes.ClassEnum class_) {
         this.name = name;
         this.class_ = class_;
         this.race = race;
@@ -41,6 +43,7 @@ public class Character {
 
         savingThrows = classInfo.getSavingThrows();
         skillProficiencies = classInfo.getSkillProficiencies();
+        weapon = classInfo.getStartWeapon();
 
         Funds fundsSetUp = classInfo.getFunds();
         funds = DiceRoller.roll(fundsSetUp.getQuantity(), 4, 0);

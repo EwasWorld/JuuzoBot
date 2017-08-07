@@ -1,0 +1,43 @@
+{
+  "weapons": [
+    {
+      "name": "short sword",
+      "weaponType": "sword",
+      "attackLines": [
+        "PC slashed at VIC with their short sword."
+      ],
+      "hitLines": [
+        "VIC didn't even see it coming, but can see their intestines coming out of their belly."
+      ],
+      "missLines": [
+        "VIC did a perfectly timed back-flip just as PC stabbed their own foot."
+      ]
+    },
+    {
+      "name": "short bow",
+      "weaponType": "bow",
+      "attackLines": [
+        "PC takes a shot at VIC with their short bow."
+      ],
+      "hitLines": [
+        "Their aim was true, VIC took an arrow to the knee."
+      ],
+      "missLines": [
+        "The arrow went wild, does PC even have eyes?"
+      ]
+    },
+    {
+      "name": "rapier",
+      "weaponType": "rapier",
+      "attackLines": [
+        "PC stabbed at VIC with their short sword."
+      ],
+      "hitLines": [
+        "VIC didn't even see it coming, this new hole makes a wonderful addition to the look they were going for."
+      ],
+      "missLines": [
+        "VIC did a perfectly timed back-flip just as PC stabbed their own foot."
+      ]
+    }
+  ]
+}

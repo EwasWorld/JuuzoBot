@@ -150,6 +150,6 @@ public class DiceRoller {
 
 
     private static void sendInvalidFormatMessage(MessageChannel channel) {
-        channel.sendMessage("Invalid input use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'").queue();
+        channel.sendMessage("Invalid input. Use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'").queue();
     }
 }

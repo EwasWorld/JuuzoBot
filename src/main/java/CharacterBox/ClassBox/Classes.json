@@ -21,7 +21,8 @@
       "funds": {
         "quantity": 2,
         "multiply": true
-      }
+      },
+      "startWeapon": "rapier"
     }
   ]
 }

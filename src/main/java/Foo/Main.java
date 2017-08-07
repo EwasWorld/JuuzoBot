@@ -1,7 +1,7 @@
 package main.java.Foo;
 
 
-
+import main.java.CharacterBox.UsersCharacters;
 import main.java.Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -18,6 +18,7 @@ import javax.security.auth.login.LoginException;
 public class Main {
     public static JDA jda;
 
+
     public static void main(String[] args) {
         JDABuilder builder = new JDABuilder(AccountType.BOT);
         builder.setToken("MzM0Nzc2NjUxMzQ0NzczMTIw.DEgKHQ.UdhBjR1-KSzuZB5yPydIklito94");
@@ -27,11 +28,11 @@ public class Main {
         try {
             jda = builder.buildBlocking();
             jda.addEventListener(new CommandListener());
-        }
-        catch (LoginException | InterruptedException | RateLimitedException e) {
+        } catch (LoginException | InterruptedException | RateLimitedException e) {
             System.err.println(e);
         }
     }
+
 
     private static class CommandListener extends ListenerAdapter {
         @Override
@@ -40,13 +41,15 @@ public class Main {
             if (!event.getAuthor().isBot() && message.startsWith("!")) {
                 if (message.equals("!help")) {
                     event.getChannel().sendMessage("Working commands: \n" +
-                            "!potion - drink a potion").queue();
+                                                           "!potion - drink a potion").queue();
                 }
                 else if (message.startsWith("roll", 1)) {
                     DiceRoller.getStringForRoll(event);
                 }
                 else if (message.startsWith("newChar", 1)) {
-
+                    UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
+                                                        message.substring(9)
+                    );
                 }
                 else if (message.startsWith("potion", 1)) {
                     GrogList.drinkGrog(event);
