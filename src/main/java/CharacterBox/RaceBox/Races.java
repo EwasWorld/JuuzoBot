@@ -104,6 +104,22 @@ public class Races {
     }
 
 
+    public static String getRacesList() {
+        String races = "Available races: ";
+        RaceEnum[] raceEnums = RaceEnum.values();
+
+        for (int i = 0; i < raceEnums.length; i++) {
+            races += raceEnums[i].toString();
+
+            if (i < raceEnums.length - 1) {
+                races += ", ";
+            }
+        }
+
+        return races;
+    }
+
+
     private static class RaceSetUpDeserializer implements JsonDeserializer<Races> {
         public Races deserialize(JsonElement json, Type typeOfT,
                                  JsonDeserializationContext context) throws JsonParseException

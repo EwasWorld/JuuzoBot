@@ -1,8 +1,172 @@
 {
   "classes": [
     {
+      "name": "Barbarian",
+      "hitDie": 12,
+      "abilityOrder": {
+        "str": 1,
+        "dex": 3,
+        "con": 2,
+        "int": 5,
+        "wis": 6,
+        "cha": 4
+      },
+      "savingThrows": [
+        "Strength",
+        "Constitution"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "AnimalHandling",
+        "Athletics",
+        "Intimidation",
+        "Nature",
+        "Perception",
+        "Survival"
+      ],
+      "funds": {
+        "quantity": 2,
+        "multiply": true
+      },
+      "startWeapon": "greataxe"
+    },
+    {
+      "name": "Bard",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 6,
+        "dex": 2,
+        "con": 5,
+        "int": 3,
+        "wis": 4,
+        "cha": 1
+      },
+      "savingThrows": [
+        "Dexterity",
+        "Charisma"
+      ],
+      "skillProficienciesQuantity": 3,
+      "skillProficiencies": [
+        "Acrobatics",
+        "AnimalHandling",
+        "Arcana",
+        "Athletics",
+        "Deception",
+        "History",
+        "Insight",
+        "Intimidation",
+        "Investigation",
+        "Medicine",
+        "Nature",
+        "Perception",
+        "Performance",
+        "Persuasion",
+        "Religion",
+        "SleightOfHand",
+        "Stealth",
+        "Survival"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": true
+      },
+      "startWeapon": "rapier"
+    },
+    {
+      "name": "Cleric",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 3,
+        "dex": 6,
+        "con": 2,
+        "int": 4,
+        "wis": 1,
+        "cha": 5
+      },
+      "savingThrows": [
+        "Wisdom",
+        "Charisma"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "History",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": true
+      },
+      "startWeapon": "Mace"
+    },
+    {
+      "name": "Druid",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 5,
+        "dex": 4,
+        "con": 2,
+        "int": 3,
+        "wis": 1,
+        "cha": 6
+      },
+      "savingThrows": [
+        "Intelligence",
+        "Wisdom"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "AnimalHandling",
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Nature",
+        "Perception",
+        "Religion",
+        "Survival"
+      ],
+      "funds": {
+        "quantity": 2,
+        "multiply": true
+      },
+      "startWeapon": "Improvised"
+    },
+    {
+      "name": "Fighter",
+      "hitDie": 10,
+      "abilityOrder": {
+        "str": 1,
+        "dex": 3,
+        "con": 2,
+        "int": 4,
+        "wis": 6,
+        "cha": 5
+      },
+      "savingThrows": [
+        "Strength",
+        "Constitution"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Acrobatics",
+        "AnimalHandling",
+        "Athletics",
+        "History",
+        "Insight",
+        "Intimidation",
+        "Perception",
+        "Survival"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": true
+      },
+      "startWeapon": "longsword"
+    },
+    {
       "name": "FinesseFighter",
-      "secondaryType": "Finesse",
       "hitDie": 10,
       "abilityOrder": {
         "str": 4,
@@ -13,16 +177,243 @@
         "cha": 6
       },
       "savingThrows": [
-        "Strength", "Constitution"
+        "Strength",
+        "Constitution"
       ],
+      "skillProficienciesQuantity": 2,
       "skillProficiencies": [
-        "Acrobatics", "Athletics"
+        "Acrobatics",
+        "AnimalHandling",
+        "Athletics",
+        "History",
+        "Insight",
+        "Intimidation",
+        "Perception",
+        "Survival"
       ],
       "funds": {
-        "quantity": 2,
+        "quantity": 5,
         "multiply": true
       },
       "startWeapon": "rapier"
+    },
+    {
+      "name": "Monk",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 4,
+        "dex": 1,
+        "con": 5,
+        "int": 3,
+        "wis": 2,
+        "cha": 6
+      },
+      "savingThrows": [
+        "Strength",
+        "Dexterity"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Acrobatics",
+        "Athletics",
+        "History",
+        "Insight",
+        "Religion",
+        "Stealth"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": false
+      },
+      "startWeapon": "Shortsword"
+    },
+    {
+      "name": "Paladin",
+      "hitDie": 10,
+      "abilityOrder": {
+        "str": 1,
+        "dex": 5,
+        "con": 3,
+        "int": 6,
+        "wis": 4,
+        "cha": 2
+      },
+      "savingThrows": [
+        "Wisdom",
+        "Charisma"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Athletics",
+        "Insight",
+        "Intimidation",
+        "Medicine",
+        "Persuasion",
+        "Religion"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": true
+      },
+      "startWeapon": "longsword"
+    },
+    {
+      "name": "Ranger",
+      "hitDie": 10,
+      "abilityOrder": {
+        "str": 3,
+        "dex": 1,
+        "con": 5,
+        "int": 6,
+        "wis": 2,
+        "cha": 4
+      },
+      "savingThrows": [
+        "Strength",
+        "Dexterity"
+      ],
+      "skillProficienciesQuantity": 3,
+      "skillProficiencies": [
+        "AnimalHandling",
+        "Athletics",
+        "Insight",
+        "Investigation",
+        "Nature",
+        "Perception",
+        "Stealth",
+        "Survival"
+      ],
+      "funds": {
+        "quantity": 5,
+        "multiply": true
+      },
+      "startWeapon": "longbow"
+    },
+    {
+      "name": "Rogue",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 5,
+        "dex": 1,
+        "con": 6,
+        "int": 2,
+        "wis": 3,
+        "cha": 4
+      },
+      "savingThrows": [
+        "Dexterity",
+        "Intelligence"
+      ],
+      "skillProficienciesQuantity": 4,
+      "skillProficiencies": [
+        "Acrobatics",
+        "Athletics",
+        "Deception",
+        "Insight",
+        "Intimidation",
+        "Investigation",
+        "Perception",
+        "Performance",
+        "Persuasion",
+        "SleightOfHand",
+        "Stealth"
+      ],
+      "funds": {
+        "quantity": 4,
+        "multiply": true
+      },
+      "startWeapon": "shortsword"
+    },
+    {
+      "name": "Sorcerer",
+      "hitDie": 6,
+      "abilityOrder": {
+        "str": 6,
+        "dex": 5,
+        "con": 2,
+        "int": 3,
+        "wis": 4,
+        "cha": 1
+      },
+      "savingThrows": [
+        "Constitution",
+        "Charisma"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Arcana",
+        "Deception",
+        "Insight",
+        "Intimidation",
+        "Persuasion",
+        "Religion"
+      ],
+      "funds": {
+        "quantity": 3,
+        "multiply": true
+      },
+      "startWeapon": "crossbow"
+    },
+    {
+      "name": "Warlock",
+      "hitDie": 8,
+      "abilityOrder": {
+        "str": 6,
+        "dex": 5,
+        "con": 2,
+        "int": 4,
+        "wis": 3,
+        "cha": 1
+      },
+      "savingThrows": [
+        "Wisdom",
+        "Charisma"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Arcana",
+        "Deception",
+        "History",
+        "Intimidation",
+        "Investigation",
+        "Nature",
+        "Religion"
+      ],
+      "funds": {
+        "quantity": 4,
+        "multiply": true
+      },
+      "startWeapon": "LightCrossbow"
+    },
+    {
+      "name": "Wizard",
+      "hitDie": 6,
+      "abilityOrder": {
+        "str": 6,
+        "dex": 2,
+        "con": 4,
+        "int": 1,
+        "wis": 3,
+        "cha": 5
+      },
+      "savingThrows": [
+        "Intelligence",
+        "Wisdom"
+      ],
+      "skillProficienciesQuantity": 2,
+      "skillProficiencies": [
+        "Arcana",
+        "History",
+        "Insight",
+        "Investigation",
+        "Medicine",
+        "Religion"
+      ],
+      "funds": {
+        "quantity": 4,
+        "multiply": true
+      },
+      "startWeapon": "Improvised"
     }
   ]
 }

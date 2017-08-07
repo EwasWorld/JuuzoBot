@@ -21,48 +21,19 @@ public class Weapons {
 
 
     public enum WeaponsEnum {
-        SHORTSWORD, SHORTBOW, RAPIER;
+        IMPROVISED, SHORTSWORD, LONGSWORD, SHORTBOW, LONGBOW, RAPIER, GREATAXE, MACE, CROSSBOW, LIGHTCROSSBOW
     }
 
 
 
+    // TODO: Finesse - use highest of str or dex
     public enum AttackTypeEnum {
-        RANGE, MELEE, FINESSE;
-
-        private AbilitySkillConstants.AbilityEnum modifier;
-
-
-        static {
-            RANGE.modifier = AbilitySkillConstants.AbilityEnum.DEXTERITY;
-            FINESSE.modifier = AbilitySkillConstants.AbilityEnum.DEXTERITY;
-            MELEE.modifier = AbilitySkillConstants.AbilityEnum.STRENGTH;
-        }
-
-
-        public AbilitySkillConstants.AbilityEnum getModifier() {
-            return modifier;
-        }
+        RANGE, MELEE, FINESSE
     }
 
 
 
-    public enum WeaponTypeEnum {
-        BOW, SWORD, RAPIER;
-
-        private AttackTypeEnum attackType;
-
-
-        static {
-            BOW.attackType = AttackTypeEnum.RANGE;
-            SWORD.attackType = AttackTypeEnum.MELEE;
-            RAPIER.attackType = AttackTypeEnum.FINESSE;
-        }
-
-
-        public AttackTypeEnum getAttackType() {
-            return attackType;
-        }
-    }
+    public enum DamageType {BLUDGEONING, PIERCING, SLASHING}
 
 
 
@@ -76,9 +47,12 @@ public class Weapons {
             final JsonObject object = (JsonObject) element;
             final WeaponsEnum weapon = WeaponsEnum
                     .valueOf(object.get("name").getAsString().replace(" ", "").toUpperCase());
+            final JsonObject damage = object.getAsJsonObject("damage");
 
             weapons.put(weapon, new Weapon(
-                    WeaponTypeEnum.valueOf(object.get("weaponType").getAsString().toUpperCase()),
+                    AttackTypeEnum.valueOf(object.get("attackType").getAsString().toUpperCase()),
+                    damage.get("quantity").getAsInt(),
+                    damage.get("die").getAsInt(),
                     getStringArrayFromJsonArray(object.getAsJsonArray("attackLines")),
                     getStringArrayFromJsonArray(object.getAsJsonArray("hitLines")),
                     getStringArrayFromJsonArray(object.getAsJsonArray("missLines"))

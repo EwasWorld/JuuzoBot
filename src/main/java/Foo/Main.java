@@ -1,6 +1,8 @@
 package main.java.Foo;
 
 
+import main.java.CharacterBox.ClassBox.Classes;
+import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.UsersCharacters;
 import main.java.Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
@@ -55,6 +57,12 @@ public class Main {
                     UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
                                                         message.substring(8)
                     );
+                }
+                else if (message.equals("races")) {
+                    event.getChannel().sendMessage(Races.getRacesList()).queue();
+                }
+                else if (message.equals("classes")) {
+                    event.getChannel().sendMessage(Classes.getClassesList()).queue();
                 }
                 else if (message.startsWith("potion")) {
                     GrogList.drinkGrog(event);

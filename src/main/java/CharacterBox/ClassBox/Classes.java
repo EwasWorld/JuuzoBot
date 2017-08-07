@@ -111,6 +111,22 @@ public class Classes {
     }
 
 
+    public static String getClassesList() {
+        String classes = "Available classes: ";
+        ClassEnum[] classEnums = ClassEnum.values();
+
+        for (int i = 0; i < classEnums.length; i++) {
+            classes += classEnums[i].toString();
+
+            if (i < classEnums.length - 1) {
+                classes += ", ";
+            }
+        }
+
+        return classes;
+    }
+
+
     private static class ClassSetUpDeserializer implements JsonDeserializer<Classes> {
         public Classes deserialize(JsonElement json, Type typeOfT,
                                    JsonDeserializationContext context) throws JsonParseException

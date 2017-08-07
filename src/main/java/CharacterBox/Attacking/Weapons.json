@@ -1,10 +1,33 @@
 {
   "weapons": [
     {
-      "name": "short sword",
-      "weaponType": "sword",
+      "name": "shortsword",
+      "attackType": "finesse",
+      "damage": {
+        "quantity": 1,
+        "die": 6
+      },
+      "damageType": "piercing",
       "attackLines": [
-        "PC slashed at VIC with their short sword."
+        "PC stabbed at VIC with their short sword."
+      ],
+      "hitLines": [
+        "VIC didn't even see it coming, this new hole makes a wonderful addition to the look they were going for."
+      ],
+      "missLines": [
+        "VIC did a perfectly timed back-flip just as PC stabbed their own foot."
+      ]
+    },
+    {
+      "name": "longsword",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 8
+      },
+      "damageType": "slashing",
+      "attackLines": [
+        "PC slashed at VIC with their longsword."
       ],
       "hitLines": [
         "VIC didn't even see it coming, but can see their intestines coming out of their belly."
@@ -14,8 +37,13 @@
       ]
     },
     {
-      "name": "short bow",
-      "weaponType": "bow",
+      "name": "shortbow",
+      "attackType": "range",
+      "damage": {
+        "quantity": 1,
+        "die": 6
+      },
+      "damageType": "piercing",
       "attackLines": [
         "PC takes a shot at VIC with their short bow."
       ],
@@ -27,16 +55,129 @@
       ]
     },
     {
-      "name": "rapier",
-      "weaponType": "rapier",
+      "name": "longbow",
+      "attackType": "range",
+      "damage": {
+        "quantity": 1,
+        "die": 8
+      },
+      "damageType": "piercing",
       "attackLines": [
-        "PC stabbed at VIC with their short sword."
+        "PC takes a shot at VIC with their longbow."
+      ],
+      "hitLines": [
+        "Their aim was true, VIC took an arrow to the knee."
+      ],
+      "missLines": [
+        "The arrow went wild, does PC even have eyes?"
+      ]
+    },
+    {
+      "name": "rapier",
+      "attackType": "finesse",
+      "damage": {
+        "quantity": 1,
+        "die": 8
+      },
+      "damageType": "piercing",
+      "attackLines": [
+        "PC stabbed at VIC with their rapier."
       ],
       "hitLines": [
         "VIC didn't even see it coming, this new hole makes a wonderful addition to the look they were going for."
       ],
       "missLines": [
         "VIC did a perfectly timed back-flip just as PC stabbed their own foot."
+      ]
+    },
+    {
+      "name": "GreatAxe",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 12
+      },
+      "damageType": "slashing",
+      "attackLines": [
+        "PC slashed at VIC with their great axe."
+      ],
+      "hitLines": [
+        "VIC didn't even see it coming, but they can see their intestines coming out of their belly."
+      ],
+      "missLines": [
+        "VIC did a perfectly timed back-flip just as PC stabbed their own foot."
+      ]
+    },
+    {
+      "name": "Mace",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 6
+      },
+      "damageType": "bludgeoning",
+      "attackLines": [
+        "PC swung at VIC with their mace."
+      ],
+      "hitLines": [
+        "It smashes onto VIC's head causing a satisfying crunch"
+      ],
+      "missLines": [
+        "It smashes into the floor with a thud, barely missing PC's boot."
+      ]
+    },
+    {
+      "name": "Crossbow",
+      "attackType": "range",
+      "damage": {
+        "quantity": 1,
+        "die": 10
+      },
+      "damageType": "piercing",
+      "attackLines": [
+        "PC takes a shot at VIC with their crossbow."
+      ],
+      "hitLines": [
+        "Their aim was true, VIC took an arrow to the knee."
+      ],
+      "missLines": [
+        "The arrow went wild, does PC even have eyes?"
+      ]
+    },
+    {
+      "name": "LightCrossbow",
+      "attackType": "range",
+      "damage": {
+        "quantity": 1,
+        "die": 8
+      },
+      "damageType": "piercing",
+      "attackLines": [
+        "PC takes a shot at VIC with their light crossbow."
+      ],
+      "hitLines": [
+        "Their aim was true, VIC took an arrow to the knee."
+      ],
+      "missLines": [
+        "The arrow went wild, does PC even have eyes?"
+      ]
+    },
+    {
+      "name": "Improvised",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 4
+      },
+      "damageType": "bludgeoning",
+      "attackLines": [
+        "PC swung at VIC with a nearby chair."
+      ],
+      "hitLines": [
+        "It smashes onto VIC's head causing a satisfying crunch"
+      ],
+      "missLines": [
+        "It smashes into the floor with a thud, barely missing PC's boot."
       ]
     }
   ]
