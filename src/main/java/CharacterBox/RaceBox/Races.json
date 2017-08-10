@@ -1,280 +1,288 @@
 {
-  "races": [
-    {
-      "name": "Dwarf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 2,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
+  "races": {
+    "mainraces": [
+      {
+        "name": "Dwarf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 2,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        },
+        "ageLowerBound": 50,
+        "ageUpperBound": 350,
+        "size": "Medium",
+        "speed": 25,
+        "languages": [
+          "Common",
+          "Dwarvish"
+        ]
       },
-      "ageLowerBound": 50,
-      "ageUpperBound": 350,
-      "size": "Medium",
-      "speed": 25,
-      "languages": [
-        "Common", "Dwarvish"
-      ]
-    },
-    {
-      "name": "Elf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 2,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
+      {
+        "name": "Elf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 2,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        },
+        "ageLowerBound": 100,
+        "ageUpperBound": 750,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "Elvish"
+        ]
       },
-      "ageLowerBound": 100,
-      "ageUpperBound": 750,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common", "Elvish"
-      ]
-    },
-    {
-      "name": "Halfling",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 2,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
+      {
+        "name": "Halfling",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 2,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        },
+        "ageLowerBound": 20,
+        "ageUpperBound": 250,
+        "size": "Small",
+        "speed": 25,
+        "languages": [
+          "Common",
+          "Halfling"
+        ]
       },
-      "ageLowerBound": 20,
-      "ageUpperBound": 250,
-      "size": "Small",
-      "speed": 25,
-      "languages": [
-        "Common", "Halfling"
-      ]
-    },
-    {
-      "name": "Human",
-      "abilityIncreases": {
-        "str": 1,
-        "dex": 1,
-        "con": 1,
-        "int": 1,
-        "wis": 1,
-        "cha": 1
+      {
+        "name": "Human",
+        "abilityIncreases": {
+          "str": 1,
+          "dex": 1,
+          "con": 1,
+          "int": 1,
+          "wis": 1,
+          "cha": 1
+        },
+        "ageLowerBound": 18,
+        "ageUpperBound": 100,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "WILDCARD"
+        ]
       },
-      "ageLowerBound": 18,
-      "ageUpperBound": 100,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common",
-        "WILDCARD"
-      ]
-    },
-    {
-      "name": "Dragonborn",
-      "abilityIncreases": {
-        "str": 2,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 1
+      {
+        "name": "Dragonborn",
+        "abilityIncreases": {
+          "str": 2,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 1
+        },
+        "ageLowerBound": 15,
+        "ageUpperBound": 80,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "Draconic"
+        ]
       },
-      "ageLowerBound": 15,
-      "ageUpperBound": 80,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common", "Draconic"
-      ]
-    },
-    {
-      "name": "Gnome",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 2,
-        "wis": 0,
-        "cha": 0
+      {
+        "name": "Gnome",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 2,
+          "wis": 0,
+          "cha": 0
+        },
+        "ageLowerBound": 40,
+        "ageUpperBound": 450,
+        "size": "Small",
+        "speed": 25,
+        "languages": [
+          "Common",
+          "Gnomish"
+        ]
       },
-      "ageLowerBound": 40,
-      "ageUpperBound": 450,
-      "size": "Small",
-      "speed": 25,
-      "languages": [
-        "Common", "Gnomish"
-      ]
-    },
-    {
-      "name": "HalfElf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 2
+      {
+        "name": "HalfElf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 2
+        },
+        "ageLowerBound": 20,
+        "ageUpperBound": 180,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "Elvish",
+          "Wildcard"
+        ]
       },
-      "ageLowerBound": 20,
-      "ageUpperBound": 180,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common", "Elvish", "Wildcard"
-      ]
-    },
-    {
-      "name": "HalfOrc",
-      "abilityIncreases": {
-        "str": 2,
-        "dex": 0,
-        "con": 1,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
+      {
+        "name": "HalfOrc",
+        "abilityIncreases": {
+          "str": 2,
+          "dex": 0,
+          "con": 1,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        },
+        "ageLowerBound": 14,
+        "ageUpperBound": 75,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "Orc"
+        ]
       },
-      "ageLowerBound": 14,
-      "ageUpperBound": 75,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common", "Orc"
-      ]
-    },
-    {
-      "name": "Tiefling",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 1,
-        "wis": 0,
-        "cha": 2
+      {
+        "name": "Tiefling",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 1,
+          "wis": 0,
+          "cha": 2
+        },
+        "ageLowerBound": 18,
+        "ageUpperBound": 120,
+        "size": "Medium",
+        "speed": 30,
+        "languages": [
+          "Common",
+          "Infernal"
+        ]
+      }
+    ],
+    "subraces": [
+      {
+        "name": "Hill",
+        "mainRace": "Dwarf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 1,
+          "cha": 0
+        }
       },
-      "ageLowerBound": 18,
-      "ageUpperBound": 120,
-      "size": "Medium",
-      "speed": 30,
-      "languages": [
-        "Common", "Infernal"
-      ]
-    }
-  ],
-
-
-
-  "subraces": [
-    {
-      "name": "Hill",
-      "mainRace": "Dwarf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 1,
-        "cha": 0
+      {
+        "name": "Mountain",
+        "mainRace": "Dwarf",
+        "abilityIncreases": {
+          "str": 2,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        }
+      },
+      {
+        "name": "Lightfoot",
+        "mainRace": "Halfling",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 1
+        }
+      },
+      {
+        "name": "Stout",
+        "mainRace": "Halfling",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 1,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        }
+      },
+      {
+        "name": "Forest",
+        "mainRace": "Gnome",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 1,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        }
+      },
+      {
+        "name": "Rock",
+        "mainRace": "Gnome",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 1,
+          "int": 0,
+          "wis": 0,
+          "cha": 0
+        }
+      },
+      {
+        "name": "High",
+        "mainRace": "Elf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 1,
+          "wis": 0,
+          "cha": 0
+        }
+      },
+      {
+        "name": "Wood",
+        "mainRace": "Elf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 1,
+          "cha": 0
+        }
+      },
+      {
+        "name": "Dark",
+        "mainRace": "Elf",
+        "abilityIncreases": {
+          "str": 0,
+          "dex": 0,
+          "con": 0,
+          "int": 0,
+          "wis": 0,
+          "cha": 1
+        }
       }
-    },
-    {
-      "name": "Mountain",
-      "mainRace": "Dwarf",
-      "abilityIncreases": {
-        "str": 2,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
-      }
-    },
-    {
-      "name": "Forest",
-      "mainRace": "Gnome",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 1,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
-      }
-    },
-    {
-      "name": "Stout",
-      "mainRace": "Halfling",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 1,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
-      }
-    },
-    {
-      "name": "Rock",
-      "mainRace": "Gnome",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 1,
-        "int": 0,
-        "wis": 0,
-        "cha": 0
-      }
-    },
-    {
-      "name": "High",
-      "mainRace": "Elf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 1,
-        "wis": 0,
-        "cha": 0
-      }
-    },
-    {
-      "name": "Wood",
-      "mainRace": "Elf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 1,
-        "cha": 0
-      }
-    },
-    {
-      "name": "Dark",
-      "mainRace": "Elf",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 1
-      }
-    },
-    {
-      "name": "Lightfoot",
-      "mainRace": "Halfling",
-      "abilityIncreases": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "wis": 0,
-        "cha": 1
-      }
-    }
-  ]
+    ]
+  }
 }

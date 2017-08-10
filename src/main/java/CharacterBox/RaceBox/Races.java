@@ -1,8 +1,8 @@
 package main.java.CharacterBox.RaceBox;
 
 import com.google.gson.*;
-import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.CharacterAbilities;
 import main.java.CharacterBox.CharacterConstants;
 
 import java.io.IOException;
@@ -20,6 +20,7 @@ import static java.nio.file.Files.readAllBytes;
 public class Races {
     private static final String fileLocation = "src/main/java/CharacterBox/RaceBox/Races.json";
     private static Map<RaceEnum, Race> races;
+    private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
 
 
 
@@ -33,21 +34,12 @@ public class Races {
 
 
     public Races(Object rawObj) {
+        JsonObject mainObject = (JsonObject) rawObj;
         races = new HashMap<>();
-
-        for (JsonElement element : (JsonArray) rawObj) {
+        for (JsonElement element : mainObject.getAsJsonArray("mainraces")) {
             final JsonObject object = (JsonObject) element;
             final RaceEnum raceEnum = RaceEnum.valueOf(object.get("name").getAsString().toUpperCase());
-
-            String subrace = null;
-            try {
-                subrace = object.get("subrace").getAsString();
-            } catch (NullPointerException e) {
-                // Some classes don't have a subrace
-            }
-
             races.put(raceEnum, new Race(
-                    subrace,
                     createAbilityIncreases(object.getAsJsonObject("abilityIncreases")),
                     object.get("ageLowerBound").getAsInt(),
                     object.get("ageUpperBound").getAsInt(),
@@ -56,10 +48,21 @@ public class Races {
                     createLanguages(object.getAsJsonArray("languages"))
             ));
         }
+
+        subRaces = new HashMap<>();
+        for (JsonElement element : mainObject.getAsJsonArray("subraces")) {
+            final JsonObject object = (JsonObject) element;
+            final SubRace.SubRaceEnum subRaceEnum = SubRace.SubRaceEnum
+                    .valueOf(object.get("name").getAsString().toUpperCase());
+            subRaces.put(subRaceEnum, new SubRace(
+                    RaceEnum.valueOf(object.get("mainRace").getAsString().toUpperCase()),
+                    createAbilityIncreases(object.getAsJsonObject("abilityIncreases"))
+            ));
+        }
     }
 
 
-    private static Map<AbilitySkillConstants.AbilityEnum, Integer> createAbilityIncreases(JsonObject abilityIncreases) {
+    private static CharacterAbilities createAbilityIncreases(JsonObject abilityIncreases) {
         Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
@@ -67,7 +70,7 @@ public class Races {
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.INTELLIGENCE, abilityIncreases.get("int").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.WISDOM, abilityIncreases.get("wis").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.CHARISMA, abilityIncreases.get("cha").getAsInt());
-        return abilityIncreasesMap;
+        return new CharacterAbilities(abilityIncreasesMap);
     }
 
 
@@ -88,6 +91,14 @@ public class Races {
             getRacesFromFile();
         }
         return races.get(raceEnum);
+    }
+
+
+    public static SubRace getRaceInfo(SubRace.SubRaceEnum subRaceEnum) {
+        if (subRaces == null) {
+            getRacesFromFile();
+        }
+        return subRaces.get(subRaceEnum);
     }
 
 
@@ -124,7 +135,7 @@ public class Races {
         public Races deserialize(JsonElement json, Type typeOfT,
                                  JsonDeserializationContext context) throws JsonParseException
         {
-            return new Races(json.getAsJsonObject().get("races").getAsJsonArray());
+            return new Races(json.getAsJsonObject().get("races"));
         }
     }
 }

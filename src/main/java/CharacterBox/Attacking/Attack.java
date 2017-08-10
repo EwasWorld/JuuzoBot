@@ -16,10 +16,11 @@ public class Attack {
     public static void attack(MessageReceivedEvent event) {
         String attacker = event.getAuthor().getName();
         String victim = event.getMessage().getContent().substring(8);
+        victim = victim.replace("@", "");
 
         Optional<Character> character = UsersCharacters.getCharacter(event.getAuthor().getIdLong());
         if (character.isPresent()) {
-            Weapon weapon = character.get().getWeapon();
+            Weapon weapon = character.get().getWeaponInfo();
             String message = weapon.getAttackLine();
 
             Roll.RollResult attackRoll = character.get().attackRoll();

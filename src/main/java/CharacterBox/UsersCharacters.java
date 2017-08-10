@@ -2,8 +2,10 @@ package main.java.CharacterBox;
 
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
+import main.java.CharacterBox.RaceBox.SubRace;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +20,13 @@ public class UsersCharacters {
         if (userCharacters == null) {
             userCharacters = new HashMap<>();
         }
-        return Optional.of(userCharacters.get(id));
+
+        if (userCharacters.keySet().contains(id)) {
+            return Optional.of(userCharacters.get(id));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
 
@@ -28,33 +36,53 @@ public class UsersCharacters {
         }
 
         final String[] creationParts = creationString.split(" ");
-        if (creationParts.length != 3) {
-            sendInvalidFormatMessage(channel);
-        }
-
+        SubRace.SubRaceEnum subRace;
         final Races.RaceEnum race;
         final Classes.ClassEnum class_;
-        try {
-            race = Races.RaceEnum.valueOf(creationParts[1].toUpperCase());
-        } catch (IllegalArgumentException e) {
-            channel.sendMessage("Invalid race").queue();
-            return;
+
+        if (creationParts[creationParts.length - 3].equalsIgnoreCase("drow")) {
+            subRace = SubRace.SubRaceEnum.DARK;
         }
+        else {
+            try {
+                subRace = SubRace.SubRaceEnum.valueOf(creationParts[creationParts.length - 3].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Not everyone wants a subrace
+                subRace = null;
+            }
+        }
+
+        if (creationParts[creationParts.length - 2].equalsIgnoreCase("drow")) {
+            race = Races.RaceEnum.ELF;
+            subRace = SubRace.SubRaceEnum.DARK;
+        }
+        else {
+            try {
+                race = Races.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                channel.sendMessage("Invalid race").queue();
+                return;
+            }
+        }
+
         try {
-            class_ = Classes.ClassEnum.valueOf(creationParts[2].toUpperCase());
+            class_ = Classes.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
         } catch (IllegalArgumentException e) {
             channel.sendMessage("Invalid class").queue();
             return;
         }
 
-        Character character = new Character(creationParts[0], race, class_);
+        String name = "";
+        for (int i = 0; i < creationParts.length - 2; i++) {
+            if (i < creationParts.length - 3 || subRace == null || creationParts[creationParts.length - 2]
+                    .equalsIgnoreCase("drow"))
+            {
+                name += creationParts[i] + " ";
+            }
+        }
+
+        Character character = new Character(name.trim(), race, subRace, class_);
         userCharacters.put(id, character);
-        channel.sendMessage("Character successfully created").queue();
-        channel.sendMessage(character.getDescription()).queue();
-    }
-
-
-    private static void sendInvalidFormatMessage(MessageChannel channel) {
-        channel.sendMessage("Invalid input. Use '!newChar {name} {race} {class}").queue();
+        channel.sendMessage("Character successfully created.\n" + character.getDescription()).queue();
     }
 }

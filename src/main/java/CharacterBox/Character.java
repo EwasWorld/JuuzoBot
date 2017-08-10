@@ -7,6 +7,7 @@ import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
+import main.java.CharacterBox.RaceBox.SubRace;
 import main.java.Foo.Roll;
 
 import java.util.*;
@@ -18,8 +19,11 @@ public class Character {
     private int age;
     private Classes.ClassEnum class_;
     private Races.RaceEnum race;
+    private SubRace.SubRaceEnum subRace;
     private int level;
-    private Map<AbilitySkillConstants.AbilityEnum, Integer> abilities;
+    private int hp;
+    private int speed;
+    private CharacterAbilities abilities;
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Set<CharacterConstants.Language> languages;
@@ -27,36 +31,60 @@ public class Character {
     private Weapons.WeaponsEnum weapon;
 
 
-    public Character(String name, Races.RaceEnum race, Classes.ClassEnum class_) {
+    public Character(String name, Races.RaceEnum race, SubRace.SubRaceEnum subRace, Classes.ClassEnum class_) {
         this.name = name;
         this.class_ = class_;
         this.race = race;
+        this.subRace = subRace;
         level = 1;
 
         final Class_ classInfo = Classes.getClassInfo(class_);
         final Race raceInfo = Races.getRaceInfo(race);
+        final SubRace subRaceInfo = getSubraceInfo(subRace);
 
-        abilities = new HashMap<>();
+        Map<AbilitySkillConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
         for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
             AbilitySkillConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
-            int score = AbilitySkillConstants.startingAbilityScores[i] + raceInfo.getAbilityIncreases().get(ability);
-
-            abilities.put(ability, score);
+            int score = AbilitySkillConstants.startingAbilityScores[i]
+                    + raceInfo.getAbilityIncreases(ability)
+                    + subRaceInfo.getExtraAbilityIncreases(ability);
+            abilitiesMap.put(ability, score);
         }
+        abilities = new CharacterAbilities(abilitiesMap);
 
         savingThrows = classInfo.getSavingThrows();
         addSkillProficiencies(classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());
         weapon = classInfo.getStartWeapon();
         funds = classInfo.getFunds().rollFunds();
+        hp = classInfo.getHitDie() + abilities.getModifier(AbilitySkillConstants.AbilityEnum.CONSTITUTION);
 
         age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo
                 .getAgeLowerBound();
-        languages = raceInfo.getLanguages();
+        speed = raceInfo.getSpeed();
 
-        // TODO Accommodate multiple wildcards
+        languages = raceInfo.getLanguages();
         if (languages.contains(CharacterConstants.Language.WILDCARD)) {
             languages.remove(CharacterConstants.Language.WILDCARD);
             languages.add(CharacterConstants.getRandomLanguage(languages));
+        }
+
+        addSubraceSubtleties(subRace);
+    }
+
+
+    private SubRace getSubraceInfo(SubRace.SubRaceEnum subRaceEnum) {
+        if (subRaceEnum != null) {
+            SubRace subRace = Races.getRaceInfo(subRaceEnum);
+            if (race != subRace.getMainRace()) {
+                // TODO: Handle
+                throw new IllegalArgumentException("Invalid subrace");
+            }
+            else {
+                return subRace;
+            }
+        }
+        else {
+            return new SubRace();
         }
     }
 
@@ -74,19 +102,41 @@ public class Character {
     }
 
 
+    private void addSubraceSubtleties(SubRace.SubRaceEnum subRace) {
+        if (subRace != null) {
+            switch (subRace) {
+                case HIGH:
+                    languages.add(CharacterConstants.getRandomLanguage(languages));
+                    break;
+                case HILL:
+                    hp++;
+                    break;
+                case WOOD:
+                    speed = 35;
+                    break;
+            }
+        }
+    }
+
+
     public String getDescription() {
+        String subraceString = "";
+        if (subRace != null) {
+            subraceString = subRace.toString() + " ";
+        }
+
         String string = "";
         string += String.format("Name: %s\n", name);
-        string += String.format("Race/Class: %s %s\n", race.toString(), class_.toString());
+        string += String.format("Race/Class: %s%s %s\n", subraceString, race.toString(), class_.toString());
         string += String.format("Age: %s\n", age);
         string += String.format(
                 "Stats: Str %d, Dex %d, Con %d, Int %d, Wis %d, Cha %d\n",
-                abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH),
-                abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY),
-                abilities.get(AbilitySkillConstants.AbilityEnum.CONSTITUTION),
-                abilities.get(AbilitySkillConstants.AbilityEnum.INTELLIGENCE),
-                abilities.get(AbilitySkillConstants.AbilityEnum.WISDOM),
-                abilities.get(AbilitySkillConstants.AbilityEnum.CHARISMA)
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.STRENGTH),
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.DEXTERITY),
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.CONSTITUTION),
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.INTELLIGENCE),
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.WISDOM),
+                abilities.getStat(AbilitySkillConstants.AbilityEnum.CHARISMA)
         );
         string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
@@ -102,31 +152,6 @@ public class Character {
     }
 
 
-    public int getAge() {
-        return age;
-    }
-
-
-    public Classes.ClassEnum getClass_() {
-        return class_;
-    }
-
-
-    public Races.RaceEnum getRace() {
-        return race;
-    }
-
-
-    public Map<AbilitySkillConstants.AbilityEnum, Integer> getAbilities() {
-        return abilities;
-    }
-
-
-    public Set<AbilitySkillConstants.AbilityEnum> getSavingThrows() {
-        return savingThrows;
-    }
-
-
     private String getSavingThrowsAsString() {
         String string = "";
         for (AbilitySkillConstants.AbilityEnum ability : savingThrows) {
@@ -136,11 +161,6 @@ public class Character {
         string = string.substring(0, string.length() - 1);
 
         return string;
-    }
-
-
-    public Set<AbilitySkillConstants.SkillEnum> getSkillProficiencies() {
-        return skillProficiencies;
     }
 
 
@@ -156,11 +176,6 @@ public class Character {
     }
 
 
-    public Set<CharacterConstants.Language> getLanguages() {
-        return languages;
-    }
-
-
     private String getLanguagesAsString() {
         String string = "";
         for (CharacterConstants.Language language : languages) {
@@ -173,12 +188,7 @@ public class Character {
     }
 
 
-    public int getFunds() {
-        return funds;
-    }
-
-
-    public Weapon getWeapon() {
+    public Weapon getWeaponInfo() {
         return Weapons.getWeaponInfo(weapon);
     }
 
@@ -197,12 +207,14 @@ public class Character {
     private int getAbilityAttackModifier(Weapons.AttackTypeEnum attackType) {
         switch (attackType) {
             case MELEE:
-                return AbilitySkillConstants.getModifier(abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH));
+                return abilities.getModifier(AbilitySkillConstants.AbilityEnum.STRENGTH);
             case RANGE:
-                return AbilitySkillConstants.getModifier(abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY));
+                return abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
             case FINESSE:
             default:
-                if (abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH) > abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY)) {
+                if (abilities.getStat(AbilitySkillConstants.AbilityEnum.STRENGTH) > abilities
+                        .getStat(AbilitySkillConstants.AbilityEnum.DEXTERITY))
+                {
                     return getAbilityAttackModifier(Weapons.AttackTypeEnum.MELEE);
                 }
                 else {

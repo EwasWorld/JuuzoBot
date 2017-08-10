@@ -1,6 +1,7 @@
 package main.java.CharacterBox.RaceBox;
 
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.CharacterAbilities;
 import main.java.CharacterBox.CharacterConstants;
 
 import java.util.*;
@@ -11,9 +12,7 @@ import java.util.*;
  * Class information used for setting up a character
  */
 public class Race {
-
-    private String secondary;
-    private Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreases;
+    private CharacterAbilities abilityIncreases;
     private int ageLowerBound;
     private int ageUpperBound;
     private CharacterConstants.Size size;
@@ -21,14 +20,17 @@ public class Race {
     private Set<CharacterConstants.Language> languages;
 
 
-    public Race(String secondary, Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreases, int ageLowerBound,
+    protected Race() {
+    }
+
+
+    public Race(CharacterAbilities abilityIncreases, int ageLowerBound,
                 int ageUpperBound, CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
     {
         if (ageLowerBound >= ageUpperBound) {
             throw new IllegalArgumentException("Lower bound age must be larger than upper bound");
         }
 
-        this.secondary = secondary;
         this.abilityIncreases = abilityIncreases;
         this.ageLowerBound = ageLowerBound;
         this.ageUpperBound = ageUpperBound;
@@ -38,13 +40,8 @@ public class Race {
     }
 
 
-    public Optional<String> getSecondary() {
-        return Optional.of(secondary);
-    }
-
-
-    public Map<AbilitySkillConstants.AbilityEnum, Integer> getAbilityIncreases() {
-        return abilityIncreases;
+    public int getAbilityIncreases(AbilitySkillConstants.AbilityEnum ability) {
+        return abilityIncreases.getStat(ability);
     }
 
 
