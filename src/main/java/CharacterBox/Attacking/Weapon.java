@@ -2,6 +2,8 @@ package main.java.CharacterBox.Attacking;
 
 import main.java.Foo.Roll;
 
+import java.util.Random;
+
 
 
 public class Weapon {
@@ -25,32 +27,32 @@ public class Weapon {
     }
 
 
-    public Weapons.AttackTypeEnum getWeaponTypeEnum() {
+    public Weapons.AttackTypeEnum getWeaponAttackTypeEnum() {
         return weaponTypeEnum;
     }
 
 
-    public Roll.RollResult rollDamage() {
-        return new Roll(damageQuantity, damageDie, 0).roll();
+    public int rollDamage() {
+        return new Roll(damageQuantity, damageDie, 0).roll().getResult();
     }
 
 
-    public Roll.RollResult rollCriticalDamage() {
-        return new Roll(damageQuantity + 1, damageDie, 0).roll();
+    public int rollCriticalDamage() {
+        return new Roll(damageQuantity + 1, damageDie, 0).roll().getResult();
     }
 
 
-    public String[] getAttackLines() {
-        return attackLines;
+    public String getAttackLine() {
+        return attackLines[new Random().nextInt(attackLines.length)];
     }
 
 
-    public String[] getHitLines() {
-        return hitLines;
+    public String getHitLine() {
+        return hitLines[new Random().nextInt(hitLines.length)];
     }
 
 
-    public String[] getMissLines() {
-        return missLines;
+    public String getMissLine() {
+        return missLines[new Random().nextInt(missLines.length)];
     }
 }

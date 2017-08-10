@@ -14,7 +14,7 @@ public class UsersCharacters {
     private static Map<Long, Character> userCharacters;
 
 
-    private static Optional<Character> getCharacter(long id) {
+    public static Optional<Character> getCharacter(long id) {
         if (userCharacters == null) {
             userCharacters = new HashMap<>();
         }

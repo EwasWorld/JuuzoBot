@@ -1,6 +1,7 @@
 package main.java.Foo;
 
 
+import main.java.CharacterBox.Attacking.Attack;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.UsersCharacters;
@@ -43,9 +44,15 @@ public class Main {
             if (!event.getAuthor().isBot() && message.startsWith("!")) {
                 message = message.substring(1);
                 if (message.equals("help")) {
-                    event.getChannel().sendMessage("Working commands: \n" +
-                                                           "!ping - test bot is working\n" +
-                                                           "!potion - drink a potion").queue();
+                    String help = "Working commands {required} [optional]: \n"
+                            + "!ping - test bot is working\n"
+                            + "!roll [quantity] d {die size} [modifier] - roll a die\n"
+                            + "!potion - drink a potion\n"
+                            + "!newChar {name} {race} {class} - create a character\n"
+                            + "!races - list of possible races\n"
+                            + "!classes - list of possible classes\n"
+                            + "!attack {victim} - have your character (must be created) attack your chosen victim >:]";
+                    event.getChannel().sendMessage(help).queue();
                 }
                 else if (message.equals("ping")) {
                     event.getChannel().sendMessage("Pong").queue();
@@ -68,7 +75,7 @@ public class Main {
                     GrogList.drinkGrog(event);
                 }
                 else if (message.startsWith("attack")) {
-
+                    Attack.attack(event);
                 }
             }
         }

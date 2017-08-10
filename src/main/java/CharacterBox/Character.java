@@ -1,10 +1,10 @@
 package main.java.CharacterBox;
 
 
+import main.java.CharacterBox.Attacking.Weapon;
 import main.java.CharacterBox.Attacking.Weapons;
 import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
-import main.java.CharacterBox.ClassBox.Funds;
 import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.Foo.Roll;
@@ -18,6 +18,7 @@ public class Character {
     private int age;
     private Classes.ClassEnum class_;
     private Races.RaceEnum race;
+    private int level;
     private Map<AbilitySkillConstants.AbilityEnum, Integer> abilities;
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
@@ -30,6 +31,7 @@ public class Character {
         this.name = name;
         this.class_ = class_;
         this.race = race;
+        level = 1;
 
         final Class_ classInfo = Classes.getClassInfo(class_);
         final Race raceInfo = Races.getRaceInfo(race);
@@ -176,7 +178,36 @@ public class Character {
     }
 
 
-    public Weapons.WeaponsEnum getWeapon() {
-        return weapon;
+    public Weapon getWeapon() {
+        return Weapons.getWeaponInfo(weapon);
+    }
+
+
+    public Roll.RollResult attackRoll() {
+        return new Roll(1, 20, getAttackModifier()).roll();
+    }
+
+
+    public int getAttackModifier() {
+        int modifier = AbilitySkillConstants.getProficiencyBonus(level);
+        return modifier + getAbilityAttackModifier(Weapons.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
+    }
+
+
+    private int getAbilityAttackModifier(Weapons.AttackTypeEnum attackType) {
+        switch (attackType) {
+            case MELEE:
+                return AbilitySkillConstants.getModifier(abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH));
+            case RANGE:
+                return AbilitySkillConstants.getModifier(abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY));
+            case FINESSE:
+            default:
+                if (abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH) > abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY)) {
+                    return getAbilityAttackModifier(Weapons.AttackTypeEnum.MELEE);
+                }
+                else {
+                    return getAbilityAttackModifier(Weapons.AttackTypeEnum.RANGE);
+                }
+        }
     }
 }

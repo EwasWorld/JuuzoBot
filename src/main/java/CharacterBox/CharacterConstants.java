@@ -54,4 +54,12 @@ public class CharacterConstants {
         languages.remove(Language.WILDCARD);
         return (Language) languages.toArray()[new Random().nextInt(languages.size())];
     }
+
+
+    public static int getProficiencyBonus(int level) {
+        switch (level) {
+            default:
+                return 2;
+        }
+    }
 }
