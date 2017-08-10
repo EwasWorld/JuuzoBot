@@ -1,5 +1,9 @@
 package main.java.CharacterBox.Attacking;
 
+import main.java.Foo.Roll;
+
+
+
 public class Weapon {
     private Weapons.AttackTypeEnum weaponTypeEnum;
     private int damageQuantity;
@@ -26,13 +30,13 @@ public class Weapon {
     }
 
 
-    public int getDamageQuantity() {
-        return damageQuantity;
+    public Roll.RollResult rollDamage() {
+        return new Roll(damageQuantity, damageDie, 0).roll();
     }
 
 
-    public int getDamageDie() {
-        return damageDie;
+    public Roll.RollResult rollCriticalDamage() {
+        return new Roll(damageQuantity + 1, damageDie, 0).roll();
     }
 
 

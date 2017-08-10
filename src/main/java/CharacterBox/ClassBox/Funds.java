@@ -1,10 +1,14 @@
 package main.java.CharacterBox.ClassBox;
 
+import main.java.Foo.Roll;
+
+
+
 /*
  * Starting funds for a character
  */
 public class Funds {
-    // number of d4 to getStringForRoll
+    // number of d4 to rollDieFromChatEvent
     private int quantity;
     // true: multiply by 10
     private boolean multiply;
@@ -14,11 +18,13 @@ public class Funds {
         this.multiply = multiply;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
+    public int rollFunds() {
+        int roll = new Roll(quantity, 4, 0).roll().getResult();
 
-    public boolean isMultiply() {
-        return multiply;
+        if (multiply) {
+            roll *= 10;
+        }
+
+        return roll;
     }
 }

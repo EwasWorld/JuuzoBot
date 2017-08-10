@@ -7,7 +7,7 @@ import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.ClassBox.Funds;
 import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
-import main.java.Foo.DiceRoller;
+import main.java.Foo.Roll;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +46,7 @@ public class Character {
         savingThrows = classInfo.getSavingThrows();
         skillProficiencies = classInfo.getSkillProficiencies();
         weapon = classInfo.getStartWeapon();
-
-        Funds fundsSetUp = classInfo.getFunds();
-        funds = DiceRoller.roll(fundsSetUp.getQuantity(), 4, 0);
-        if (fundsSetUp.isMultiply()) {
-            funds *= 10;
-        }
+        funds = classInfo.getFunds().rollFunds();
 
         age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo.getAgeLowerBound();
         languages = raceInfo.getLanguages();
@@ -61,5 +56,55 @@ public class Character {
             languages.remove(CharacterConstants.Language.WILDCARD);
             languages.add(CharacterConstants.getRandomLanguage(languages));
         }
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+
+    public int getAge() {
+        return age;
+    }
+
+
+    public Classes.ClassEnum getClass_() {
+        return class_;
+    }
+
+
+    public Races.RaceEnum getRace() {
+        return race;
+    }
+
+
+    public Map<AbilitySkillConstants.AbilityEnum, Integer> getAbilities() {
+        return abilities;
+    }
+
+
+    public Set<AbilitySkillConstants.AbilityEnum> getSavingThrows() {
+        return savingThrows;
+    }
+
+
+    public Set<AbilitySkillConstants.SkillEnum> getSkillProficiencies() {
+        return skillProficiencies;
+    }
+
+
+    public Set<CharacterConstants.Language> getLanguages() {
+        return languages;
+    }
+
+
+    public int getFunds() {
+        return funds;
+    }
+
+
+    public Weapons.WeaponsEnum getWeapon() {
+        return weapon;
     }
 }

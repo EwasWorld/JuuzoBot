@@ -51,7 +51,7 @@ public class Main {
                     event.getChannel().sendMessage("Pong").queue();
                 }
                 else if (message.startsWith("roll")) {
-                    DiceRoller.getStringForRoll(event);
+                    Roll.rollDieFromChatEvent(event);
                 }
                 else if (message.startsWith("newChar")) {
                     UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
