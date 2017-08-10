@@ -9,10 +9,9 @@ import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.Foo.Roll;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+
+
 
 public class Character {
     private String name;
@@ -44,11 +43,12 @@ public class Character {
         }
 
         savingThrows = classInfo.getSavingThrows();
-        skillProficiencies = classInfo.getSkillProficiencies();
+        addSkillProficiencies(classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());
         weapon = classInfo.getStartWeapon();
         funds = classInfo.getFunds().rollFunds();
 
-        age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo.getAgeLowerBound();
+        age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo
+                .getAgeLowerBound();
         languages = raceInfo.getLanguages();
 
         // TODO Accommodate multiple wildcards
@@ -56,6 +56,42 @@ public class Character {
             languages.remove(CharacterConstants.Language.WILDCARD);
             languages.add(CharacterConstants.getRandomLanguage(languages));
         }
+    }
+
+
+    private void addSkillProficiencies(Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+        Set<AbilitySkillConstants.SkillEnum> skillProficiencies = new HashSet<>();
+        for (int i = 0; i < quantity; i++) {
+            int size = possibleProficiencies.size();
+            AbilitySkillConstants.SkillEnum chosenSkill = possibleProficiencies
+                    .toArray(new AbilitySkillConstants.SkillEnum[size])[new Random().nextInt(size)];
+            skillProficiencies.add(chosenSkill);
+            possibleProficiencies.remove(chosenSkill);
+        }
+        this.skillProficiencies = skillProficiencies;
+    }
+
+
+    public String getDescription() {
+        String string = "";
+        string += String.format("Name: %s\n", name);
+        string += String.format("Age: %s\n", age);
+        string += String.format("Race/Class: %s %s\n", race.toString(), class_.toString());
+        string += String.format(
+                "Stats: Str %d, Dex %d, Con %d, Int %d, Wis %d, Cha %d\n",
+                abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH),
+                abilities.get(AbilitySkillConstants.AbilityEnum.DEXTERITY),
+                abilities.get(AbilitySkillConstants.AbilityEnum.CONSTITUTION),
+                abilities.get(AbilitySkillConstants.AbilityEnum.INTELLIGENCE),
+                abilities.get(AbilitySkillConstants.AbilityEnum.WISDOM),
+                abilities.get(AbilitySkillConstants.AbilityEnum.CHARISMA)
+        );
+        string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
+        string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
+        string += String.format("Languages: %s\n", getLanguagesAsString());
+        string += String.format("Funds: %d\n", funds);
+        string += String.format("Weapon: %s\n", weapon.toString());
+        return string;
     }
 
 
@@ -89,13 +125,49 @@ public class Character {
     }
 
 
+    private String getSavingThrowsAsString() {
+        String string = "";
+        for (AbilitySkillConstants.AbilityEnum ability : savingThrows) {
+            string += ability.toString() + ", ";
+        }
+        string = string.trim();
+        string = string.substring(0, string.length() - 2);
+
+        return string;
+    }
+
+
     public Set<AbilitySkillConstants.SkillEnum> getSkillProficiencies() {
         return skillProficiencies;
     }
 
 
+    private String getSkillProficienciesAsString() {
+        String string = "";
+        for (AbilitySkillConstants.SkillEnum skill : skillProficiencies) {
+            string += skill.toString() + ", ";
+        }
+        string = string.trim();
+        string = string.substring(0, string.length() - 2);
+
+        return string;
+    }
+
+
     public Set<CharacterConstants.Language> getLanguages() {
         return languages;
+    }
+
+
+    private String getLanguagesAsString() {
+        String string = "";
+        for (CharacterConstants.Language language : languages) {
+            string += language.toString() + ", ";
+        }
+        string = string.trim();
+        string = string.substring(0, string.length() - 2);
+
+        return string;
     }
 
 

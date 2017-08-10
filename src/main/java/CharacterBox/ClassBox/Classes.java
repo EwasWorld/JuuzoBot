@@ -42,6 +42,7 @@ public class Classes {
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
+                    object.get("skillProficienciesQuantity").getAsInt(),
                     createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
                     new Funds(
                             funds.get("quantity").getAsInt(),

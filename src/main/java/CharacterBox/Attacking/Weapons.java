@@ -61,12 +61,13 @@ public class Weapons {
     }
 
 
-    private String[] getStringArrayFromJsonArray(JsonArray array) {
+    private String[] getStringArrayFromJsonArray(JsonArray jsonArray) {
         List<String> stringsArrayList = new ArrayList<>();
-        for (JsonElement element : array) {
+        for (JsonElement element : jsonArray) {
             stringsArrayList.add(element.getAsString());
         }
-        return (String[]) stringsArrayList.toArray();
+
+        return stringsArrayList.toArray(new String[stringsArrayList.size()]);
     }
 
 

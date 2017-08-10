@@ -12,19 +12,21 @@ public class Class_ {
     private int hitDie;
     private AbilitySkillConstants.AbilityEnum[] abilityOrder;
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
+    private int skillProficienciesQuantity;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Funds funds;
     private Weapons.WeaponsEnum startWeapon;
 
 
     public Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
-                  Set<AbilitySkillConstants.AbilityEnum> savingThrows,
+                  Set<AbilitySkillConstants.AbilityEnum> savingThrows, int skillProficienciesQuantity,
                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds,
                   Weapons.WeaponsEnum startWeapon)
     {
         this.hitDie = hitDie;
         this.abilityOrder = abilityOrder;
         this.savingThrows = savingThrows;
+        this.skillProficienciesQuantity = skillProficienciesQuantity;
         this.skillProficiencies = skillProficiencies;
         this.funds = funds;
         this.startWeapon = startWeapon;
@@ -43,6 +45,11 @@ public class Class_ {
 
     public Set<AbilitySkillConstants.AbilityEnum> getSavingThrows() {
         return savingThrows;
+    }
+
+
+    public int getSkillProficienciesQuantity() {
+        return skillProficienciesQuantity;
     }
 
 
