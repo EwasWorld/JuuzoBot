@@ -75,8 +75,8 @@ public class Character {
     public String getDescription() {
         String string = "";
         string += String.format("Name: %s\n", name);
-        string += String.format("Age: %s\n", age);
         string += String.format("Race/Class: %s %s\n", race.toString(), class_.toString());
+        string += String.format("Age: %s\n", age);
         string += String.format(
                 "Stats: Str %d, Dex %d, Con %d, Int %d, Wis %d, Cha %d\n",
                 abilities.get(AbilitySkillConstants.AbilityEnum.STRENGTH),
@@ -131,7 +131,7 @@ public class Character {
             string += ability.toString() + ", ";
         }
         string = string.trim();
-        string = string.substring(0, string.length() - 2);
+        string = string.substring(0, string.length() - 1);
 
         return string;
     }
@@ -148,7 +148,7 @@ public class Character {
             string += skill.toString() + ", ";
         }
         string = string.trim();
-        string = string.substring(0, string.length() - 2);
+        string = string.substring(0, string.length() - 1);
 
         return string;
     }
@@ -165,7 +165,7 @@ public class Character {
             string += language.toString() + ", ";
         }
         string = string.trim();
-        string = string.substring(0, string.length() - 2);
+        string = string.substring(0, string.length() - 1);
 
         return string;
     }

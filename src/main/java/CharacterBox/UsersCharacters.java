@@ -47,8 +47,10 @@ public class UsersCharacters {
             return;
         }
 
-        userCharacters.put(id, new Character(creationParts[0], race, class_));
+        Character character = new Character(creationParts[0], race, class_);
+        userCharacters.put(id, character);
         channel.sendMessage("Character successfully created").queue();
+        channel.sendMessage(character.getDescription()).queue();
     }
 
 
