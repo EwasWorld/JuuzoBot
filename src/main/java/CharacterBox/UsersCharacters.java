@@ -4,6 +4,7 @@ import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.RaceBox.SubRace;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.util.HashMap;
@@ -84,5 +85,24 @@ public class UsersCharacters {
         Character character = new Character(name.trim(), race, subRace, class_);
         userCharacters.put(id, character);
         channel.sendMessage("Character successfully created.\n" + character.getDescription()).queue();
+    }
+
+
+    public static void changeCharacterWeapon(MessageChannel channel, User author, String newWeapon) {
+        long authorID = author.getIdLong();
+        if (getCharacter(authorID).isPresent()) {
+            if (userCharacters.get(authorID).changeWeapons(newWeapon)) {
+                channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+            }
+            else {
+                channel.sendMessage("Weapon not recognised, you can see a list of weapons using !weapons").queue();
+            }
+        }
+        else {
+            channel.sendMessage(
+                    "If you don't have a character yet you can't change their weapon. Use !newChar to make a new "
+                            + "character (!charHelp if you get stuck)")
+                    .queue();
+        }
     }
 }

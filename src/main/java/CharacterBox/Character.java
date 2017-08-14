@@ -10,12 +10,14 @@ import main.java.CharacterBox.RaceBox.Race;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.RaceBox.SubRace;
 import main.java.Foo.Roll;
+import net.dv8tion.jda.core.entities.MessageChannel;
 
+import java.io.Serializable;
 import java.util.*;
 
 
 
-public class Character {
+public class Character implements Serializable {
     private String name;
     private int age;
     private Classes.ClassEnum class_;
@@ -178,6 +180,7 @@ public class Character {
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
         string += String.format("Languages: %s\n", getLanguagesAsString());
         string += String.format("Funds: %d\n", funds);
+        string += String.format("Weapon Proficiencies: %s\n", weaponProficiencies.toString());
         string += String.format("Weapon: %s\n", weapon.toString());
         return string;
     }
@@ -282,5 +285,18 @@ public class Character {
             damage += getWeaponInfo().rollOneDamageDie();
         }
         return damage;
+    }
+
+    /*
+     * Returns true if successful
+     */
+    public boolean changeWeapons(String newWeapon) {
+        try {
+            weapon = Weapons.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
+            return true;
+        }
+        catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

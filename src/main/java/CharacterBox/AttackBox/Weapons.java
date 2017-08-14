@@ -50,6 +50,10 @@ public class Weapons {
             LONGBOW.weaponProficiency = WeaponProficiency.MARTIALRANGE;
             CROSSBOW.weaponProficiency = WeaponProficiency.MARTIALRANGE;
         }
+
+        public WeaponProficiency getWeaponProficiency() {
+            return weaponProficiency;
+        }
     }
 
 

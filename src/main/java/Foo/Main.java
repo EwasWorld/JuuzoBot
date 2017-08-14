@@ -3,6 +3,7 @@ package main.java.Foo;
 
 import main.java.CharacterBox.AttackBox.Attack;
 import main.java.CharacterBox.AttackBox.Weapons;
+import main.java.CharacterBox.Character;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.UsersCharacters;
@@ -84,6 +85,7 @@ public class Main {
                                 + " - !races - list of possible races\n"
                                 + " - !classes - list of possible classes\n"
                                 + " - !weapons - list of possible weapons\n"
+                                + " - !changeWeapons - change your character's weapon\n"
                                 + " - !attack {victim} - have your character (must be created) attack your chosen victim"
                                 + " >:]";
                         event.getChannel().sendMessage(help).queue();
@@ -114,17 +116,22 @@ public class Main {
                     else if (message.startsWith("attack")) {
                         Attack.attack(event.getAuthor(), message.substring(7), event.getChannel());
                     }
-                    else if (message.equals("changeWeapons")) {
-                        // TODO
-                        event.getChannel().sendMessage("TBC").queue();
+                    else if (message.startsWith("changeWeapon")) {
+                        UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));
                     }
 
                     if (user.getId().equals(IDs.eywaID)) {
                         if (message.equals("lock")) {
                             isLocked = true;
                         }
-                        if (message.equals("unlock")) {
+                        else if (message.equals("unlock")) {
                             isLocked = false;
+                        }
+                        else if (message.equals("save")) {
+                            // TODO
+                        }
+                        else if (message.equals("exit")) {
+                            // TODO
                         }
                     }
                 }
