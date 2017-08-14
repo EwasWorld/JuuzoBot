@@ -13,6 +13,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
@@ -72,7 +73,7 @@ public class Main {
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
 
-            // TODO: Next session time, note to self
+            // TODO: Note to self
 
             User user = event.getAuthor();
             if (user.isBot()) {
@@ -85,10 +86,14 @@ public class Main {
             }
             message = message.substring(1);
 
-
             if (!isLocked || user.getId().equals(IDs.eywaID)) {
                 generalCommandsHandler(event, message);
-                dmCommandsHandler(event, message);
+
+                for (Role role : event.getMember().getRoles()) {
+                    if (role.getName().equals("dm")) {
+                        dmCommandsHandler(event, message);
+                    }
+                }
 
                 if (user.getId().equals(IDs.eywaID)) {
                     adminCommandsHandler(event, message);
