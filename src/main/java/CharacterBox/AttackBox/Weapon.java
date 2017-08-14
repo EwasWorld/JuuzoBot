@@ -1,4 +1,4 @@
-package main.java.CharacterBox.Attacking;
+package main.java.CharacterBox.AttackBox;
 
 import main.java.Foo.Roll;
 

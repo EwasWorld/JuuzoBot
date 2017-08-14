@@ -1,14 +1,14 @@
 package main.java.CharacterBox;
 
 import junit.framework.TestCase;
-import main.java.CharacterBox.Attacking.Weapons;
+import main.java.CharacterBox.AttackBox.Weapons;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.RaceBox.SubRace;
 
 
 
-public class CharacterCreationTests extends TestCase {
+public class CharTests extends TestCase {
     public void testClassInfoRetrieval() {
         Classes.getClassInfo(Classes.ClassEnum.FIGHTER);
     }

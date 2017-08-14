@@ -1,7 +1,7 @@
-package main.java.CharacterBox.Attacking;
+package main.java.CharacterBox.AttackBox;
 
 import com.google.gson.*;
-import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.Foo.IDs;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -16,7 +16,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class Weapons {
-    private static final String fileLocation = "src/main/java/CharacterBox/Attacking/Weapons.json";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/AttackBox/Weapons.json";
 
 
 

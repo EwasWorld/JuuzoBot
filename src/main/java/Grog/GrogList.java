@@ -2,13 +2,13 @@ package main.java.Grog;
 
 import com.google.gson.*;
 import main.java.CharacterBox.ClassBox.Classes;
+import main.java.Foo.IDs;
 import main.java.Foo.Roll;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class GrogList {
-    private static final String fileLocation = "src/main/java/Grog/GrogEffects.json";
+    private static final String fileLocation = IDs.mainFilePath + "Grog/GrogEffects.json";
     private static List<String> effects;
 
 

@@ -1,9 +1,8 @@
 package main.java.CharacterBox.ClassBox;
 
 import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.Attacking.Weapons;
+import main.java.CharacterBox.AttackBox.Weapons;
 
-import java.util.Optional;
 import java.util.Set;
 
 

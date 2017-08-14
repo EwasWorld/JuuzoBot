@@ -1,7 +1,7 @@
 package main.java.CharacterBox.RaceBox;
 
 import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.CharacterAbilities;
+import main.java.CharacterBox.Abilities;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class SubRace extends Race {
     }
 
     private Races.RaceEnum mainRace;
-    private CharacterAbilities extraAbilityIncreases;
+    private Abilities extraAbilityIncreases;
 
 
     public SubRace() {
@@ -22,11 +22,11 @@ public class SubRace extends Race {
         for (AbilitySkillConstants.AbilityEnum abilityEnum : AbilitySkillConstants.AbilityEnum.values()) {
             abilities.put(abilityEnum, 0);
         }
-        extraAbilityIncreases = new CharacterAbilities(abilities);
+        extraAbilityIncreases = new Abilities(abilities);
     }
 
 
-    public SubRace(Races.RaceEnum mainRace, CharacterAbilities extraAbilityIncreases)
+    public SubRace(Races.RaceEnum mainRace, Abilities extraAbilityIncreases)
     {
         this.mainRace = mainRace;
         this.extraAbilityIncreases = extraAbilityIncreases;

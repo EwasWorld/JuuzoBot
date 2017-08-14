@@ -1,8 +1,8 @@
 package main.java.CharacterBox;
 
 
-import main.java.CharacterBox.Attacking.Weapon;
-import main.java.CharacterBox.Attacking.Weapons;
+import main.java.CharacterBox.AttackBox.Weapon;
+import main.java.CharacterBox.AttackBox.Weapons;
 import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Race;
@@ -23,7 +23,7 @@ public class Character {
     private int level;
     private int hp;
     private int speed;
-    private CharacterAbilities abilities;
+    private Abilities abilities;
     private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Set<CharacterConstants.Language> languages;
@@ -50,7 +50,7 @@ public class Character {
                     + subRaceInfo.getExtraAbilityIncreases(ability);
             abilitiesMap.put(ability, score);
         }
-        abilities = new CharacterAbilities(abilitiesMap);
+        abilities = new Abilities(abilitiesMap);
 
         savingThrows = classInfo.getSavingThrows();
         addSkillProficiencies(classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());

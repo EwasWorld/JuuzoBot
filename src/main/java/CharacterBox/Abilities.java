@@ -4,11 +4,11 @@ import java.util.Map;
 
 
 
-public class CharacterAbilities {
+public class Abilities {
     Map<AbilitySkillConstants.AbilityEnum, Integer> abilities;
 
 
-    public CharacterAbilities(Map<AbilitySkillConstants.AbilityEnum, Integer> abilities) {
+    public Abilities(Map<AbilitySkillConstants.AbilityEnum, Integer> abilities) {
         this.abilities = abilities;
     }
 

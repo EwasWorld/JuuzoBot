@@ -1,11 +1,10 @@
 package main.java.Foo;
 
 
-import main.java.CharacterBox.Attacking.Attack;
+import main.java.CharacterBox.AttackBox.Attack;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.UsersCharacters;
-import main.java.Const.IDs;
 import main.java.Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;

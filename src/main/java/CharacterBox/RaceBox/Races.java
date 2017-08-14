@@ -2,8 +2,9 @@ package main.java.CharacterBox.RaceBox;
 
 import com.google.gson.*;
 import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.CharacterAbilities;
+import main.java.CharacterBox.Abilities;
 import main.java.CharacterBox.CharacterConstants;
+import main.java.Foo.IDs;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -18,7 +19,7 @@ import static java.nio.file.Files.readAllBytes;
  * Used to import races from JSON file
  */
 public class Races {
-    private static final String fileLocation = "src/main/java/CharacterBox/RaceBox/Races.json";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/RaceBox/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
 
@@ -62,7 +63,7 @@ public class Races {
     }
 
 
-    private static CharacterAbilities createAbilityIncreases(JsonObject abilityIncreases) {
+    private static Abilities createAbilityIncreases(JsonObject abilityIncreases) {
         Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
@@ -70,7 +71,7 @@ public class Races {
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.INTELLIGENCE, abilityIncreases.get("int").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.WISDOM, abilityIncreases.get("wis").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.CHARISMA, abilityIncreases.get("cha").getAsInt());
-        return new CharacterAbilities(abilityIncreasesMap);
+        return new Abilities(abilityIncreasesMap);
     }
 
 

@@ -1,7 +1,5 @@
 package main.java.Grog;
 
-import main.java.Const.Tools;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -26,16 +24,12 @@ public class GrogTxtToJSON {
         printStream.println("\"effects\": [");
         if (scanner != null && scanner.hasNext()) {
             line = scanner.nextLine();
-            if (line.contains("\"")) {
-                line = Tools.replaceStringWithAnother(line, "\"", "'");
-            }
+            line = line.replaceAll("\"", "'");
             printToStream(printStream, line);
         }
         while (scanner != null && scanner.hasNext()) {
             line = scanner.nextLine();
-            if (line.contains("\"")) {
-                line = Tools.replaceStringWithAnother(line, "\"", "'");
-            }
+            line = line.replaceAll("\"", "'");
             printToStreamWithComma(printStream, line);
         }
         printStream.println("]");

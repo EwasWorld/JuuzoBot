@@ -3,7 +3,8 @@ package main.java.CharacterBox.ClassBox;
 
 import com.google.gson.*;
 import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.Attacking.Weapons;
+import main.java.CharacterBox.AttackBox.Weapons;
+import main.java.Foo.IDs;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -18,7 +19,7 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Classes {
-    private static final String fileLocation = "src/main/java/CharacterBox/ClassBox/Classes.json";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/ClassBox/Classes.json";
     private static Map<ClassEnum, Class_> classes;
 
 
