@@ -28,7 +28,7 @@ import java.util.List;
 
 public class Main {
     public static JDA jda;
-    private static boolean isLocked = false;
+    private static boolean isLocked = true;
 
 
     public static void main(String[] args) {
@@ -37,12 +37,19 @@ public class Main {
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
 
+
         try {
             jda = builder.buildBlocking();
-            jda.addEventListener(new CommandListener());
         } catch (LoginException | InterruptedException | RateLimitedException e) {
             System.err.println(e);
         }
+
+        jda.addEventListener(new CommandListener());
+
+        // Load saved characters
+        MessageChannel junkYardGeneral = jda.getGuildById(IDs.junkYardID).getTextChannelsByName("general", false)
+                .get(0);
+        UsersCharacters.load(junkYardGeneral);
     }
 
 
@@ -65,80 +72,131 @@ public class Main {
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
 
+            // TODO: Next session time, note to self
+
             User user = event.getAuthor();
+            if (user.isBot()) {
+                return;
+            }
+
             String message = event.getMessage().getContent();
-            if (!user.isBot() && message.startsWith("!")) {
-                message = message.substring(1);
+            if (!message.startsWith("!")) {
+                return;
+            }
+            message = message.substring(1);
 
-                if (!isLocked || user.getId().equals(IDs.eywaID) || event.getGuild().getId().equals(IDs.junkYardID)) {
-                    if (message.equalsIgnoreCase("help")) {
-                        String help = "Working commands {required} [optional]: \n"
-                                + " - !ping - test bot is working\n"
-                                + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
-                                + " - !potion - drink a potion\n"
-                                + " - !charHelp - lists working commands related to characters";
-                        event.getChannel().sendMessage(help).queue();
-                    }
-                    else if (message.equalsIgnoreCase("charHelp")) {
-                        String help = "Working character related commands {required} [optional]: \n"
-                                + " - !newChar {name} [subrace] {race} {class} - create a character\n"
-                                + " - !races - list of possible races\n"
-                                + " - !classes - list of possible classes\n"
-                                + " - !weapons - list of possible weapons\n"
-                                + " - !changeWeapons - change your character's weapon\n"
-                                + " - !attack {victim} - have your character (must be created) attack your chosen victim"
-                                + " >:]";
-                        event.getChannel().sendMessage(help).queue();
-                    }
-                    else if (message.equals("ping")) {
-                        event.getChannel().sendMessage("Pong").queue();
-                    }
-                    else if (message.startsWith("roll")) {
-                        Roll.rollDieFromChatEvent(message.substring(4), event.getAuthor().getName(), event.getChannel());
-                    }
-                    else if (message.startsWith("potion")) {
-                        GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
-                    }
-                    else if (message.startsWith("newChar")) {
-                        UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
-                                                            message.substring(8)
-                        );
-                    }
-                    else if (message.equals("races")) {
-                        event.getChannel().sendMessage(Races.getRacesList()).queue();
-                    }
-                    else if (message.equals("classes")) {
-                        event.getChannel().sendMessage(Classes.getClassesList()).queue();
-                    }
-                    else if (message.equals("weapons")) {
-                        event.getChannel().sendMessage(Weapons.getWeaponsList()).queue();
-                    }
-                    else if (message.startsWith("attack")) {
-                        Attack.attack(event.getAuthor(), message.substring(7), event.getChannel());
-                    }
-                    else if (message.startsWith("changeWeapon")) {
-                        UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));
-                    }
 
-                    if (user.getId().equals(IDs.eywaID)) {
-                        if (message.equals("lock")) {
-                            isLocked = true;
-                        }
-                        else if (message.equals("unlock")) {
-                            isLocked = false;
-                        }
-                        else if (message.equals("save")) {
-                            // TODO
-                        }
-                        else if (message.equals("exit")) {
-                            // TODO
-                        }
-                    }
-                }
-                else if (isLocked) {
-                    event.getChannel().sendMessage("Functions are temporarily disabled for now :c Try again later").queue();
+            if (!isLocked || user.getId().equals(IDs.eywaID)) {
+                generalCommandsHandler(event, message);
+                dmCommandsHandler(event, message);
+
+                if (user.getId().equals(IDs.eywaID)) {
+                    adminCommandsHandler(event, message);
                 }
             }
+            else {
+                event.getChannel().sendMessage("Functions are temporarily disabled for now :c Try again later").queue();
+            }
         }
+    }
+
+
+    /*
+     * Returns true if a command was completed
+     */
+    private static boolean generalCommandsHandler(MessageReceivedEvent event, String message) {
+        if (message.equalsIgnoreCase("help")) {
+            String help = "Working commands {required} [optional]: \n"
+                    + " - !ping - test bot is working\n"
+                    + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
+                    + " - !potion - drink a potion\n"
+                    + " - !charHelp - lists working commands related to characters";
+            event.getChannel().sendMessage(help).queue();
+        }
+        else if (message.equalsIgnoreCase("charHelp")) {
+            String help = "Working character related commands {required} [optional]: \n"
+                    + " - !newChar {name} [subrace] {race} {class} - create a character\n"
+                    + " - !races - list of possible races\n"
+                    + " - !classes - list of possible classes\n"
+                    + " - !weapons - list of possible weapons\n"
+                    + " - !changeWeapons - change your character's weapon\n"
+                    + " - !attack {victim} - have your character (must be created) attack your chosen victim"
+                    + " >:]";
+            event.getChannel().sendMessage(help).queue();
+        }
+        else if (message.equals("ping")) {
+            event.getChannel().sendMessage("Pong").queue();
+        }
+        else if (message.startsWith("roll")) {
+            Roll.rollDieFromChatEvent(message.substring(4), event.getAuthor().getName(), event.getChannel());
+        }
+        else if (message.startsWith("potion")) {
+            GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
+        }
+        else if (message.startsWith("newChar")) {
+            UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
+                                                message.substring(8)
+            );
+        }
+        else if (message.equals("races")) {
+            event.getChannel().sendMessage(Races.getRacesList()).queue();
+        }
+        else if (message.equals("classes")) {
+            event.getChannel().sendMessage(Classes.getClassesList()).queue();
+        }
+        else if (message.equals("weapons")) {
+            event.getChannel().sendMessage(Weapons.getWeaponsList()).queue();
+        }
+        else if (message.startsWith("attack")) {
+            Attack.attack(event.getAuthor(), message.substring(7), event.getChannel());
+        }
+        else if (message.startsWith("changeWeapon")) {
+            UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));
+        }
+        else {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /*
+     * Returns true if a command was completed
+     */
+    private static boolean dmCommandsHandler(MessageReceivedEvent event, String message) {
+        return false;
+    }
+
+
+    /*
+     * Returns true if a command was completed
+     */
+    private static boolean adminCommandsHandler(MessageReceivedEvent event, String message) {
+        switch (message) {
+            case "adminHelp":
+                event.getChannel().sendMessage(
+                        " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
+                                + " - !unlock - Lets anyone use commands freely\n"
+                                + " - !save - saves character info\n"
+                                + " - !exit - runs !save then puts Juuzo to bed"
+                ).queue();
+            case "lock":
+                isLocked = true;
+                break;
+            case "unlock":
+                isLocked = false;
+                break;
+            case "save":
+                UsersCharacters.save(event.getChannel());
+                break;
+            case "exit":
+                UsersCharacters.save(event.getChannel());
+                System.exit(0);
+                break;
+            default:
+                return false;
+        }
+        return true;
     }
 }

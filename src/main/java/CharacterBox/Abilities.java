@@ -1,10 +1,11 @@
 package main.java.CharacterBox;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
 
-public class Abilities {
+public class Abilities implements Serializable {
     Map<AbilitySkillConstants.AbilityEnum, Integer> abilities;
 
 

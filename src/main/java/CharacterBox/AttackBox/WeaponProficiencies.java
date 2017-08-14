@@ -1,11 +1,12 @@
 package main.java.CharacterBox.AttackBox;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 
 
-public class WeaponProficiencies {
+public class WeaponProficiencies implements Serializable {
     private Set<Weapons.WeaponProficiency> typeProficiencies = new HashSet<>();
     private Set<Weapons.WeaponsEnum> specificProficiencies = new HashSet<>();
 

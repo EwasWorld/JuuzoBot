@@ -3,25 +3,24 @@ package main.java.CharacterBox;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.RaceBox.SubRace;
+import main.java.Foo.IDs;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 
 
-public class UsersCharacters {
-    private static Map<Long, Character> userCharacters;
+public class UsersCharacters implements Serializable {
+    public static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
+    private static Map<Long, Character> userCharacters = new HashMap<>();
 
 
     public static Optional<Character> getCharacter(long id) {
-        if (userCharacters == null) {
-            userCharacters = new HashMap<>();
-        }
-
         if (userCharacters.keySet().contains(id)) {
             return Optional.of(userCharacters.get(id));
         }
@@ -103,6 +102,45 @@ public class UsersCharacters {
                     "If you don't have a character yet you can't change their weapon. Use !newChar to make a new "
                             + "character (!charHelp if you get stuck)")
                     .queue();
+        }
+    }
+
+
+    public static void save(MessageChannel channel) {
+        try {
+            File saveFile = new File(fileLocation);
+            saveFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(saveFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(userCharacters);
+
+            oos.close();
+            fos.close();
+
+            channel.sendMessage("Save successful").queue();
+        } catch (IOException e) {
+            channel.sendMessage("Save failed").queue();
+        }
+    }
+
+
+    public static void load(MessageChannel channel) {
+        try {
+            File saveFile = new File(fileLocation);
+            saveFile.createNewFile();
+
+            FileInputStream fis = new FileInputStream(saveFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            userCharacters = (Map<Long, Character>) ois.readObject();
+
+            ois.close();
+            fis.close();
+
+            channel.sendMessage("Load successful").queue();
+        } catch (IOException | ClassNotFoundException e) {
+            channel.sendMessage("Load failed").queue();
         }
     }
 }
