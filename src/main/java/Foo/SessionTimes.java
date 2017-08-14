@@ -15,27 +15,28 @@ import java.util.concurrent.TimeUnit;
 
 public class SessionTimes implements Serializable {
     private static final String fileLocation = IDs.mainFilePath + "Foo/SessionTimes.txt";
-    private static Map<Long, Date> gameTimes = new HashMap<>();
+    private static Map<String, Date> gameTimes = new HashMap<>();
     private static Set<String> games = new HashSet<>();
     private static DateFormat setDateFormat = new SimpleDateFormat("HH:mm dd/M/yy z");
     private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM '-' HH:mm z");
 
 
     public static void addSessionTime(Member author, MessageChannel channel, String date) {
-        long sessionID = 0;
+        String gameName = "";
         for (Role role : author.getRoles()) {
             if (games.contains(role.getName().toUpperCase())) {
-                sessionID = role.getIdLong();
+                gameName = role.getName().toUpperCase();
+                break;
             }
         }
-        if (sessionID == 0) {
+        if (gameName.equals("")) {
             channel.sendMessage("You do not have a session role, pm a mod for one").queue();
             return;
         }
 
         try {
-            gameTimes.put(sessionID, setDateFormat.parse(date));
-            channel.sendMessage("New session time added " + printDateFormat.format(gameTimes.get(sessionID))).queue();
+            gameTimes.put(gameName, setDateFormat.parse(date));
+            channel.sendMessage("New session time added " + printDateFormat.format(gameTimes.get(gameName))).queue();
         } catch (ParseException e) {
             channel.sendMessage("Bad date format, please use 'HH:mm dd/M/yy z'\n"
                                         + "e.g. '16:00 21/8/17 BST'\n"
@@ -53,21 +54,20 @@ public class SessionTimes implements Serializable {
 
 
     public static void getSessionTime(Member author, MessageChannel channel) {
-        long sessionID = 0;
         String sessionName = "";
         for (Role role : author.getRoles()) {
             sessionName = role.getName().toUpperCase();
-
             if (games.contains(sessionName)) {
-                sessionID = role.getIdLong();
+                break;
             }
+            sessionName = "";
         }
-        if (sessionID == 0) {
+        if (sessionName.equals("")) {
             channel.sendMessage("You do not have a session role, pm a mod for one").queue();
             return;
         }
-        if (gameTimes.containsKey(sessionID)) {
-            Date sessionTime = gameTimes.get(sessionID);
+        if (gameTimes.containsKey(sessionName)) {
+            Date sessionTime = gameTimes.get(sessionName);
 
             if (sessionTime.getTime() > System.currentTimeMillis()) {
                 String messageString = String.format(
@@ -114,7 +114,7 @@ public class SessionTimes implements Serializable {
     public static void load(MessageChannel channel) {
         try {
             List<Object> objects = LoadSaveConstants.load(fileLocation);
-            gameTimes = (Map<Long, Date>) objects.get(0);
+            gameTimes = (Map<String, Date>) objects.get(0);
             games = (Set<String>) objects.get(1);
         } catch (IllegalStateException e) {
             channel.sendMessage("Session times load failed").queue();
