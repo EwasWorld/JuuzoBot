@@ -2,6 +2,7 @@ package main.java.CharacterBox;
 
 
 import main.java.CharacterBox.AttackBox.Weapon;
+import main.java.CharacterBox.AttackBox.WeaponProficiencies;
 import main.java.CharacterBox.AttackBox.Weapons;
 import main.java.CharacterBox.ClassBox.Class_;
 import main.java.CharacterBox.ClassBox.Classes;
@@ -28,6 +29,7 @@ public class Character {
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Set<CharacterConstants.Language> languages;
     private int funds;
+    private WeaponProficiencies weaponProficiencies;
     private Weapons.WeaponsEnum weapon;
 
 
@@ -53,7 +55,8 @@ public class Character {
         abilities = new Abilities(abilitiesMap);
 
         savingThrows = classInfo.getSavingThrows();
-        addSkillProficiencies(classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());
+        addSkillProficiencies(race, classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());
+        weaponProficiencies = classInfo.getWeaponProficiencies();
         weapon = classInfo.getStartWeapon();
         funds = classInfo.getFunds().rollFunds();
         hp = classInfo.getHitDie() + abilities.getModifier(AbilitySkillConstants.AbilityEnum.CONSTITUTION);
@@ -89,8 +92,30 @@ public class Character {
     }
 
 
+    /*
+     * Half elves get 2 extra random proficiencies
+     */
+    private void addSkillProficiencies(Races.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+        addSkillProficiencies(possibleProficiencies, quantity);
+
+        if (race == Races.RaceEnum.HALFELF) {
+            AbilitySkillConstants.SkillEnum[] skillEnums = AbilitySkillConstants.SkillEnum.values();
+            for (int i = 0; i < 2; i++) {
+                AbilitySkillConstants.SkillEnum skill;
+                do {
+                    skill = skillEnums[new Random().nextInt(skillEnums.length)];
+                } while (skillProficiencies.contains(skill));
+                skillProficiencies.add(skill);
+            }
+        }
+        else if (race == Races.RaceEnum.HALFORC) {
+            skillProficiencies.add(AbilitySkillConstants.SkillEnum.INTIMIDATION);
+        }
+    }
+
+
     private void addSkillProficiencies(Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
-        Set<AbilitySkillConstants.SkillEnum> skillProficiencies = new HashSet<>();
+        skillProficiencies = new HashSet<>();
         for (int i = 0; i < quantity; i++) {
             int size = possibleProficiencies.size();
             AbilitySkillConstants.SkillEnum chosenSkill = possibleProficiencies
@@ -98,7 +123,6 @@ public class Character {
             skillProficiencies.add(chosenSkill);
             possibleProficiencies.remove(chosenSkill);
         }
-        this.skillProficiencies = skillProficiencies;
     }
 
 
@@ -108,12 +132,24 @@ public class Character {
                 case HIGH:
                     languages.add(CharacterConstants.getRandomLanguage(languages));
                     break;
+                case DARK:
+                    weaponProficiencies.add(Weapons.WeaponsEnum.RAPIER);
+                    weaponProficiencies.add(Weapons.WeaponsEnum.SHORTSWORD);
+                    weaponProficiencies.add(Weapons.WeaponsEnum.CROSSBOW);
+                    break;
                 case HILL:
                     hp++;
                     break;
                 case WOOD:
                     speed = 35;
                     break;
+            }
+
+            if (subRace == SubRace.SubRaceEnum.HIGH || subRace == SubRace.SubRaceEnum.WOOD) {
+                weaponProficiencies.add(Weapons.WeaponsEnum.SHORTSWORD);
+                weaponProficiencies.add(Weapons.WeaponsEnum.LONGSWORD);
+                weaponProficiencies.add(Weapons.WeaponsEnum.SHORTBOW);
+                weaponProficiencies.add(Weapons.WeaponsEnum.LONGBOW);
             }
         }
     }
@@ -199,12 +235,17 @@ public class Character {
 
 
     public int getAttackModifier() {
-        int modifier = AbilitySkillConstants.getProficiencyBonus(level);
+        int modifier = 0;
+
+        if (weaponProficiencies.contains(weapon)) {
+            modifier = AbilitySkillConstants.getProficiencyBonus(level);
+        }
+
         return modifier + getAbilityAttackModifier(Weapons.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
     }
 
 
-    private int getAbilityAttackModifier(Weapons.AttackTypeEnum attackType) {
+    private int getAbilityAttackModifier(Weapon.AttackTypeEnum attackType) {
         switch (attackType) {
             case MELEE:
                 return abilities.getModifier(AbilitySkillConstants.AbilityEnum.STRENGTH);
@@ -215,11 +256,31 @@ public class Character {
                 if (abilities.getStat(AbilitySkillConstants.AbilityEnum.STRENGTH) > abilities
                         .getStat(AbilitySkillConstants.AbilityEnum.DEXTERITY))
                 {
-                    return getAbilityAttackModifier(Weapons.AttackTypeEnum.MELEE);
+                    return getAbilityAttackModifier(Weapon.AttackTypeEnum.MELEE);
                 }
                 else {
-                    return getAbilityAttackModifier(Weapons.AttackTypeEnum.RANGE);
+                    return getAbilityAttackModifier(Weapon.AttackTypeEnum.RANGE);
                 }
         }
+    }
+
+
+    public int rollDamage() {
+        int damage = getAttackModifier() + getWeaponInfo().rollDamage();
+
+        if (race == Races.RaceEnum.HALFORC) {
+            damage += getWeaponInfo().rollOneDamageDie();
+        }
+        return damage;
+    }
+
+
+    public int rollCriticalDamage() {
+        int damage = getAttackModifier() + getWeaponInfo().rollCriticalDamage();
+
+        if (race == Races.RaceEnum.HALFORC) {
+            damage += getWeaponInfo().rollOneDamageDie();
+        }
+        return damage;
     }
 }

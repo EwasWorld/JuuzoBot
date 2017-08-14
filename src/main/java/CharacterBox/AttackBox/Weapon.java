@@ -7,7 +7,7 @@ import java.util.Random;
 
 
 public class Weapon {
-    private Weapons.AttackTypeEnum weaponTypeEnum;
+    private AttackTypeEnum weaponTypeEnum;
     private int damageQuantity;
     private int damageDie;
     private String[] attackLines;
@@ -15,7 +15,12 @@ public class Weapon {
     private String[] missLines;
 
 
-    public Weapon(Weapons.AttackTypeEnum weaponTypeEnum, int damageQuantity, int damageDie, String[] attackLines,
+    public enum AttackTypeEnum {
+        RANGE, MELEE, FINESSE
+    }
+
+
+    public Weapon(AttackTypeEnum weaponTypeEnum, int damageQuantity, int damageDie, String[] attackLines,
                   String[] hitLines, String[] missLines)
     {
         this.weaponTypeEnum = weaponTypeEnum;
@@ -27,7 +32,7 @@ public class Weapon {
     }
 
 
-    public Weapons.AttackTypeEnum getWeaponAttackTypeEnum() {
+    public AttackTypeEnum getWeaponAttackTypeEnum() {
         return weaponTypeEnum;
     }
 
@@ -54,5 +59,9 @@ public class Weapon {
 
     public String getMissLine() {
         return missLines[new Random().nextInt(missLines.length)];
+    }
+
+    public int rollOneDamageDie() {
+        return Roll.quickRoll(damageDie);
     }
 }

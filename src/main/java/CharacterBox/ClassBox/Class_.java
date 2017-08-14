@@ -1,6 +1,7 @@
 package main.java.CharacterBox.ClassBox;
 
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.AttackBox.WeaponProficiencies;
 import main.java.CharacterBox.AttackBox.Weapons;
 
 import java.util.Set;
@@ -14,13 +15,14 @@ public class Class_ {
     private int skillProficienciesQuantity;
     private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
     private Funds funds;
+    private WeaponProficiencies weaponProficiencies;
     private Weapons.WeaponsEnum startWeapon;
 
 
     public Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
                   Set<AbilitySkillConstants.AbilityEnum> savingThrows, int skillProficienciesQuantity,
                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds,
-                  Weapons.WeaponsEnum startWeapon)
+                  WeaponProficiencies weaponProficiencies, Weapons.WeaponsEnum startWeapon)
     {
         this.hitDie = hitDie;
         this.abilityOrder = abilityOrder;
@@ -28,6 +30,7 @@ public class Class_ {
         this.skillProficienciesQuantity = skillProficienciesQuantity;
         this.skillProficiencies = skillProficiencies;
         this.funds = funds;
+        this.weaponProficiencies = weaponProficiencies;
         this.startWeapon = startWeapon;
     }
 
@@ -59,6 +62,11 @@ public class Class_ {
 
     public Funds getFunds() {
         return funds;
+    }
+
+
+    public WeaponProficiencies getWeaponProficiencies() {
+        return weaponProficiencies;
     }
 
 

@@ -3,6 +3,7 @@ package main.java.CharacterBox.ClassBox;
 
 import com.google.gson.*;
 import main.java.CharacterBox.AbilitySkillConstants;
+import main.java.CharacterBox.AttackBox.WeaponProficiencies;
 import main.java.CharacterBox.AttackBox.Weapons;
 import main.java.Foo.IDs;
 
@@ -49,6 +50,7 @@ public class Classes {
                             funds.get("quantity").getAsInt(),
                             funds.get("multiply").getAsBoolean()
                     ),
+                    createWeaponProficiencies(object.getAsJsonArray("weaponProficiencies")),
                     Weapons.WeaponsEnum.valueOf(object.get("startWeapon").getAsString().toUpperCase())
             ));
         }
@@ -89,6 +91,25 @@ public class Classes {
                     .add(AbilitySkillConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
         }
         return skillProficiencies;
+    }
+
+
+    private static WeaponProficiencies createWeaponProficiencies(JsonArray weaponProficienciesArray) {
+        WeaponProficiencies weaponProficiencies = new WeaponProficiencies();
+        for (JsonElement weaponProficiency : weaponProficienciesArray) {
+            try {
+                weaponProficiencies.add(Weapons.WeaponsEnum.valueOf(weaponProficiency.getAsString().toUpperCase()));
+            }
+            catch (IllegalArgumentException e) {
+                // Ignore - proficiency may be in proficiencyEnum or may not be in the bot yet
+            }
+            try {
+                weaponProficiencies.add(Weapons.WeaponProficiency.valueOf(weaponProficiency.getAsString().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Ignore - proficiency may not be in the bot yet
+            }
+        }
+        return weaponProficiencies;
     }
 
 

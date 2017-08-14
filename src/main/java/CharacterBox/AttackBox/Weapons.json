@@ -179,6 +179,43 @@
       "missLines": [
         "It smashes into the floor with a thud, barely missing PC's boot."
       ]
+    },
+    {
+      "name": "Unarmed",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 1
+      },
+      "damageType": "bludgeoning",
+      "attackLines": [
+        "PC swung at VIC with their fist.",
+        "PC sends a kick towards VIC."
+      ],
+      "hitLines": [
+        "It hits VIC square in the face."
+      ],
+      "missLines": [
+        "It misses, PC is thrown off balance and falls over."
+      ]
+    },
+    {
+      "name": "LightHammer",
+      "attackType": "melee",
+      "damage": {
+        "quantity": 1,
+        "die": 4
+      },
+      "damageType": "bludgeoning",
+      "attackLines": [
+        "PC swung at VIC with their hammer."
+      ],
+      "hitLines": [
+        "It smashes onto VIC's head causing a satisfying crunch."
+      ],
+      "missLines": [
+        "It smashes into the floor with a thud, barely missing PC's boot."
+      ]
     }
   ]
 }

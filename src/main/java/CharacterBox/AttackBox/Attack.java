@@ -30,10 +30,10 @@ public class Attack {
 
                 int damage;
                 if (attackRoll.isNaddy20()) {
-                    damage = weapon.rollCriticalDamage();
+                    damage = character.get().rollCriticalDamage();
                 }
                 else {
-                    damage = weapon.rollDamage();
+                    damage = character.get().rollDamage();
                 }
                 message += String.format(" VIC took %d damage", damage);
             }

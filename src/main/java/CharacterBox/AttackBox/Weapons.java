@@ -17,18 +17,39 @@ import static java.nio.file.Files.readAllBytes;
 
 public class Weapons {
     private static final String fileLocation = IDs.mainFilePath + "CharacterBox/AttackBox/Weapons.json";
+    private static Map<WeaponsEnum, Weapon> weapons;
 
 
+    // TODO: Breath Weapons
 
-    public enum WeaponsEnum {
-        IMPROVISED, SHORTSWORD, LONGSWORD, SHORTBOW, LONGBOW, RAPIER, GREATAXE, MACE, CROSSBOW, LIGHTCROSSBOW
+    public enum WeaponProficiency {
+        SIMPLEMELEE, SIMPLERANGE, MARTIALMELEE, MARTIALRANGE
     }
 
 
+    public enum WeaponsEnum {
+        IMPROVISED, SHORTSWORD, LONGSWORD, SHORTBOW, LONGBOW, RAPIER, GREATAXE, MACE, CROSSBOW, LIGHTCROSSBOW, UNARMED,
+        LIGHTHAMMER;
 
-    // TODO: Finesse - use highest of str or dex
-    public enum AttackTypeEnum {
-        RANGE, MELEE, FINESSE
+        private WeaponProficiency weaponProficiency;
+
+        static {
+            IMPROVISED.weaponProficiency = WeaponProficiency.SIMPLEMELEE;
+            MACE.weaponProficiency = WeaponProficiency.SIMPLEMELEE;
+            LIGHTHAMMER.weaponProficiency = WeaponProficiency.SIMPLEMELEE;
+            UNARMED.weaponProficiency = WeaponProficiency.SIMPLEMELEE;
+
+            SHORTSWORD.weaponProficiency = WeaponProficiency.MARTIALMELEE;
+            RAPIER.weaponProficiency = WeaponProficiency.MARTIALMELEE;
+            GREATAXE.weaponProficiency = WeaponProficiency.MARTIALMELEE;
+            LONGSWORD.weaponProficiency = WeaponProficiency.MARTIALMELEE;
+
+            SHORTBOW.weaponProficiency = WeaponProficiency.SIMPLERANGE;
+            LIGHTCROSSBOW.weaponProficiency = WeaponProficiency.SIMPLERANGE;
+
+            LONGBOW.weaponProficiency = WeaponProficiency.MARTIALRANGE;
+            CROSSBOW.weaponProficiency = WeaponProficiency.MARTIALRANGE;
+        }
     }
 
 
@@ -37,7 +58,6 @@ public class Weapons {
 
 
 
-    private static Map<WeaponsEnum, Weapon> weapons;
 
 
     private Weapons(Object rawObj) {
@@ -50,7 +70,7 @@ public class Weapons {
             final JsonObject damage = object.getAsJsonObject("damage");
 
             weapons.put(weapon, new Weapon(
-                    AttackTypeEnum.valueOf(object.get("attackType").getAsString().toUpperCase()),
+                    Weapon.AttackTypeEnum.valueOf(object.get("attackType").getAsString().toUpperCase()),
                     damage.get("quantity").getAsInt(),
                     damage.get("die").getAsInt(),
                     getStringArrayFromJsonArray(object.getAsJsonArray("attackLines")),
@@ -89,6 +109,22 @@ public class Weapons {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static String getWeaponsList() {
+        String weapons = "Available weapons: ";
+        WeaponsEnum[] weaponsEnums = WeaponsEnum.values();
+
+        for (int i = 0; i < weaponsEnums.length; i++) {
+            weapons += weaponsEnums[i].toString();
+
+            if (i < weaponsEnums.length - 1) {
+                weapons += ", ";
+            }
+        }
+
+        return weapons;
     }
 
 

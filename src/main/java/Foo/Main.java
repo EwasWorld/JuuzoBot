@@ -2,6 +2,7 @@ package main.java.Foo;
 
 
 import main.java.CharacterBox.AttackBox.Attack;
+import main.java.CharacterBox.AttackBox.Weapons;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.UsersCharacters;
@@ -71,18 +72,19 @@ public class Main {
                 if (!isLocked || user.getId().equals(IDs.eywaID) || event.getGuild().getId().equals(IDs.junkYardID)) {
                     if (message.equalsIgnoreCase("help")) {
                         String help = "Working commands {required} [optional]: \n"
-                                + "  !ping - test bot is working\n"
-                                + "  !roll [quantity] d {die size} [modifier] - roll a die\n"
-                                + "  !potion - drink a potion\n"
-                                + "  !charHelp - lists working commands related to characters";
+                                + " - !ping - test bot is working\n"
+                                + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
+                                + " - !potion - drink a potion\n"
+                                + " - !charHelp - lists working commands related to characters";
                         event.getChannel().sendMessage(help).queue();
                     }
                     else if (message.equalsIgnoreCase("charHelp")) {
                         String help = "Working character related commands {required} [optional]: \n"
-                                + "  !newChar {name} [subrace] {race} {class} - create a character\n"
-                                + "  !races - list of possible races\n"
-                                + "  !classes - list of possible classes\n"
-                                + "  !attack {victim} - have your character (must be created) attack your chosen victim"
+                                + " - !newChar {name} [subrace] {race} {class} - create a character\n"
+                                + " - !races - list of possible races\n"
+                                + " - !classes - list of possible classes\n"
+                                + " - !weapons - list of possible weapons\n"
+                                + " - !attack {victim} - have your character (must be created) attack your chosen victim"
                                 + " >:]";
                         event.getChannel().sendMessage(help).queue();
                     }
@@ -91,6 +93,9 @@ public class Main {
                     }
                     else if (message.startsWith("roll")) {
                         Roll.rollDieFromChatEvent(message.substring(4), event.getAuthor().getName(), event.getChannel());
+                    }
+                    else if (message.startsWith("potion")) {
+                        GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
                     }
                     else if (message.startsWith("newChar")) {
                         UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
@@ -103,11 +108,15 @@ public class Main {
                     else if (message.equals("classes")) {
                         event.getChannel().sendMessage(Classes.getClassesList()).queue();
                     }
-                    else if (message.startsWith("potion")) {
-                        GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
+                    else if (message.equals("weapons")) {
+                        event.getChannel().sendMessage(Weapons.getWeaponsList()).queue();
                     }
                     else if (message.startsWith("attack")) {
                         Attack.attack(event.getAuthor(), message.substring(7), event.getChannel());
+                    }
+                    else if (message.equals("changeWeapons")) {
+                        // TODO
+                        event.getChannel().sendMessage("TBC").queue();
                     }
 
                     if (user.getId().equals(IDs.eywaID)) {

@@ -28,6 +28,12 @@
         "quantity": 2,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "MartialMelee",
+        "MartialRange"
+      ],
       "startWeapon": "greataxe"
     },
     {
@@ -70,6 +76,14 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "Crossbow",
+        "Longsword",
+        "Rapier",
+        "Shortsword"
+      ],
       "startWeapon": "rapier"
     },
     {
@@ -99,6 +113,10 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange"
+      ],
       "startWeapon": "Mace"
     },
     {
@@ -131,6 +149,18 @@
         "quantity": 2,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "Club",
+        "Dagger",
+        "Dart",
+        "Javelin",
+        "Mace",
+        "Quaterstaff",
+        "Scimitar",
+        "Sickle",
+        "Sling",
+        "Spear"
+      ],
       "startWeapon": "Improvised"
     },
     {
@@ -163,6 +193,12 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "MartialMelee",
+        "MartialRange"
+      ],
       "startWeapon": "longsword"
     },
     {
@@ -195,6 +231,12 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "MartialMelee",
+        "MartialRange"
+      ],
       "startWeapon": "rapier"
     },
     {
@@ -225,6 +267,11 @@
         "quantity": 5,
         "multiply": false
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "Shortsword"
+      ],
       "startWeapon": "Shortsword"
     },
     {
@@ -255,6 +302,12 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "MartialMelee",
+        "MartialRange"
+      ],
       "startWeapon": "longsword"
     },
     {
@@ -287,6 +340,12 @@
         "quantity": 5,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "MartialMelee",
+        "MartialRange"
+      ],
       "startWeapon": "longbow"
     },
     {
@@ -322,6 +381,14 @@
         "quantity": 4,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange",
+        "Crossbow",
+        "longsword",
+        "rapier",
+        "shortsword"
+      ],
       "startWeapon": "shortsword"
     },
     {
@@ -352,6 +419,13 @@
         "quantity": 3,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "Dagger",
+        "Dart",
+        "Sling",
+        "Quaterstaff",
+        "LightCrossbow"
+      ],
       "startWeapon": "crossbow"
     },
     {
@@ -383,6 +457,10 @@
         "quantity": 4,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "SimpleMelee",
+        "SimpleRange"
+      ],
       "startWeapon": "LightCrossbow"
     },
     {
@@ -413,6 +491,13 @@
         "quantity": 4,
         "multiply": true
       },
+      "weaponProficiencies": [
+        "Dagger",
+        "Dart",
+        "Sling",
+        "Quaterstaff",
+        "LightCrossbow"
+      ],
       "startWeapon": "Improvised"
     }
   ]
