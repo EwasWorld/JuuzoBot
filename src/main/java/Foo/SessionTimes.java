@@ -8,6 +8,9 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -67,8 +70,10 @@ public class SessionTimes implements Serializable {
         }
         if (gameTimes.containsKey(sessionID)) {
             Date sessionTime = gameTimes.get(sessionID);
-            channel.sendMessage("Next session for " + sessionName + " is " + printDateFormat.format(sessionTime))
-                    .queue();
+            String messageString = String.format(
+                    "Next session for %s is %s\n", sessionName, printDateFormat.format(sessionTime));
+            messageString += "That's in " + getStringOfTimeToNow(sessionTime);
+            channel.sendMessage(messageString).queue();
         }
         else {
             channel.sendMessage("There seems to be no session time for " + sessionName).queue();
@@ -93,5 +98,18 @@ public class SessionTimes implements Serializable {
         } catch (IllegalStateException e) {
             channel.sendMessage("Session times load failed").queue();
         }
+    }
+
+    private static String getStringOfTimeToNow(Date date1) {
+        long dateDifSec = Math.abs(date1.getTime() - System.currentTimeMillis());
+        long dateDifMin = Math.floorDiv(dateDifSec, 60);
+        long dateDifHr = Math.floorDiv(dateDifMin, 60);
+        long dateDifDay = Math.floorDiv(dateDifHr, 24);
+
+        dateDifSec -= dateDifMin * 60;
+        dateDifMin -= dateDifHr * 60;
+        dateDifHr -= dateDifDay * 24;
+
+        return dateDifDay + " day(s) " + dateDifHr + " hr(s) " + dateDifMin + " min(s) " + dateDifSec + "sec(s)";
     }
 }
