@@ -4,6 +4,7 @@ import com.google.gson.*;
 import main.java.CharacterBox.ClassBox.Classes;
 import main.java.Foo.IDs;
 import main.java.Foo.Roll;
+import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.FileNotFoundException;
@@ -46,15 +47,14 @@ public class GrogList {
     }
 
 
-    public static void drinkGrog(MessageReceivedEvent event) {
+    public static void drinkGrog(String author, MessageChannel channel) {
         try {
-            String author = event.getAuthor().getName();
             int roll = Roll.quickRoll(1000) - 1;
             String effect = GrogList.getEffects().get(roll);
             effect = effect.replaceAll("PC", author);
             effect = author + " drinks an Essence of Balthazar potion. " + effect;
 
-            event.getChannel().sendMessage(effect).queue();
+            channel.sendMessage(effect).queue();
         } catch (NullPointerException | FileNotFoundException e) {
             e.printStackTrace();
         }

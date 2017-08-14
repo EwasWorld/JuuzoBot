@@ -31,15 +31,15 @@ public class Roll {
     }
 
 
-    public static void rollDieFromChatEvent(MessageReceivedEvent event) {
+    public static void rollDieFromChatEvent(String message, String author, MessageChannel channel) {
         int quantity;
         int dieSize;
         int modifier;
         String[] messageParts;
 
-        String message = event.getMessage().getContent().substring(6).replace(" ", "");
+        message = message.replace(" ", "");
         if (!message.contains("d")) {
-            sendInvalidFormatMessage(event.getChannel());
+            sendInvalidFormatMessage(channel);
             return;
         }
 
@@ -67,12 +67,12 @@ public class Roll {
                 modifier = 0;
             }
 
-            message = event.getAuthor().getName() + " "
+            message = author + " "
                     + new Roll(quantity, dieSize, modifier).getStringForRoll(rollType);
-            event.getChannel().sendMessage(message).queue();
+            channel.sendMessage(message).queue();
 
         } catch (IllegalArgumentException e) {
-            sendInvalidFormatMessage(event.getChannel());
+            sendInvalidFormatMessage(channel);
         }
     }
     
