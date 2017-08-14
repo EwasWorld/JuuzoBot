@@ -4,10 +4,10 @@ import main.java.CharacterBox.ClassBox.Classes;
 import main.java.CharacterBox.RaceBox.Races;
 import main.java.CharacterBox.RaceBox.SubRace;
 import main.java.Foo.IDs;
+import main.java.Foo.LoadSaveConstants;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 
-import javax.naming.directory.InvalidAttributesException;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 
 public class UsersCharacters implements Serializable {
-    public static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
     private static Map<Long, Character> userCharacters = new HashMap<>();
 
 
@@ -108,39 +108,20 @@ public class UsersCharacters implements Serializable {
 
     public static void save(MessageChannel channel) {
         try {
-            File saveFile = new File(fileLocation);
-            saveFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(saveFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeObject(userCharacters);
-
-            oos.close();
-            fos.close();
-
-            channel.sendMessage("Save successful").queue();
-        } catch (IOException e) {
-            channel.sendMessage("Save failed").queue();
+            LoadSaveConstants.save(fileLocation, userCharacters);
+        }
+        catch (IllegalStateException e) {
+            channel.sendMessage("Session times save failed").queue();
         }
     }
 
 
     public static void load(MessageChannel channel) {
         try {
-            File saveFile = new File(fileLocation);
-            saveFile.createNewFile();
-
-            FileInputStream fis = new FileInputStream(saveFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-
-            userCharacters = (Map<Long, Character>) ois.readObject();
-
-            ois.close();
-            fis.close();
-
-            channel.sendMessage("Load successful").queue();
-        } catch (IOException | ClassNotFoundException e) {
-            channel.sendMessage("Load failed").queue();
+            userCharacters = (Map<Long, Character>) LoadSaveConstants.loadFirstObject(fileLocation);
+        }
+        catch (IllegalStateException e) {
+            channel.sendMessage("Session times load failed").queue();
         }
     }
 }

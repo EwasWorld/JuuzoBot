@@ -49,7 +49,7 @@ public class Main {
         // Load saved characters
         MessageChannel junkYardGeneral = jda.getGuildById(IDs.junkYardID).getTextChannelsByName("general", false)
                 .get(0);
-        UsersCharacters.load(junkYardGeneral);
+        load(junkYardGeneral);
     }
 
 
@@ -108,6 +108,7 @@ public class Main {
         if (message.equalsIgnoreCase("help")) {
             String help = "Working commands {required} [optional]: \n"
                     + " - !ping - test bot is working\n"
+                    + " - !gameTime - prints time of your next game session\n"
                     + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
                     + " - !potion - drink a potion\n"
                     + " - !charHelp - lists working commands related to characters";
@@ -126,6 +127,9 @@ public class Main {
         }
         else if (message.equals("ping")) {
             event.getChannel().sendMessage("Pong").queue();
+        }
+        else if (message.equals("gameTime")) {
+            SessionTimes.getSessionTime(event.getMember(), event.getChannel());
         }
         else if (message.startsWith("roll")) {
             Roll.rollDieFromChatEvent(message.substring(4), event.getAuthor().getName(), event.getChannel());
@@ -165,7 +169,25 @@ public class Main {
      * Returns true if a command was completed
      */
     private static boolean dmCommandsHandler(MessageReceivedEvent event, String message) {
-        return false;
+        if (message.equalsIgnoreCase("dmHelp")) {
+            event.getChannel().sendMessage(
+                    " - !addSessionTime {time/date} - updates the next session time (see !dateFormat for help)\n"
+            ).queue();
+        }
+        if (message.equalsIgnoreCase("dateFormat")) {
+            event.getChannel().sendMessage(
+                    "Dates should be in the form 'HH:mm dd/M/yy z'\n"
+                            + "e.g. '16:00 21/8/17 BST'\n"
+                            + "  or '16:00 21/8/17 GMT + 1' (spaces around '+' are important)"
+            ).queue();
+        }
+        else if (message.startsWith("addSessionTime")) {
+            SessionTimes.addSessionTime(event.getMember(), event.getChannel(), message.substring(15));
+        }
+        else {
+            return false;
+        }
+        return true;
     }
 
 
@@ -173,30 +195,49 @@ public class Main {
      * Returns true if a command was completed
      */
     private static boolean adminCommandsHandler(MessageReceivedEvent event, String message) {
-        switch (message) {
-            case "adminHelp":
-                event.getChannel().sendMessage(
-                        " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
-                                + " - !unlock - Lets anyone use commands freely\n"
-                                + " - !save - saves character info\n"
-                                + " - !exit - runs !save then puts Juuzo to bed"
-                ).queue();
-            case "lock":
-                isLocked = true;
-                break;
-            case "unlock":
-                isLocked = false;
-                break;
-            case "save":
-                UsersCharacters.save(event.getChannel());
-                break;
-            case "exit":
-                UsersCharacters.save(event.getChannel());
-                System.exit(0);
-                break;
-            default:
-                return false;
+        if (message.equals("adminHelp")) {
+            event.getChannel().sendMessage(
+                    " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
+                            + " - !unlock - Lets anyone use commands freely\n"
+                            + " - !save - saves character info\n"
+                            + " - !exit - runs !save then puts Juuzo to bed"
+            ).queue();
+        }
+        else if (message.equals("lock")) {
+            isLocked = true;
+        }
+        else if (message.equals("unlock")) {
+            isLocked = false;
+        }
+        else if (message.equals("save")) {
+            save(event.getChannel());
+        }
+        else if (message.equals("exit")) {
+            save(event.getChannel());
+            System.exit(0);
+        }
+        else if (message.startsWith("addGame")) {
+            SessionTimes.addGame(event.getChannel(), message.substring(8));
+        }
+        else {
+            return false;
         }
         return true;
+    }
+
+
+    private static void save(MessageChannel channel) {
+        UsersCharacters.save(channel);
+        SessionTimes.save(channel);
+
+        channel.sendMessage("Saves Complete").queue();
+    }
+
+
+    private static void load(MessageChannel channel) {
+        UsersCharacters.load(channel);
+        SessionTimes.load(channel);
+
+        channel.sendMessage("Load Complete").queue();
     }
 }
