@@ -87,6 +87,17 @@ public class UsersCharacters implements Serializable {
     }
 
 
+    public static void deleteCharacter(MessageChannel channel, long id) {
+        if (userCharacters.containsKey(id)) {
+            userCharacters.remove(id);
+            channel.sendMessage("Character removed").queue();
+        }
+        else {
+            channel.sendMessage("You don't have a character to delete").queue();
+        }
+    }
+
+
     public static void changeCharacterWeapon(MessageChannel channel, User author, String newWeapon) {
         long authorID = author.getIdLong();
         if (getCharacter(authorID).isPresent()) {

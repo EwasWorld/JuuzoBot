@@ -44,7 +44,15 @@ public class SessionTimes implements Serializable {
         }
     }
 
-    // TODO: Remove game
+    public static void removeGame(MessageChannel channel, String game) {
+        if (game.contains(game.toUpperCase())) {
+            games.remove(game.toUpperCase());
+            channel.sendMessage("Game removed").queue();
+        }
+        else {
+            channel.sendMessage("Game doesn't exist therefore wasn't removed").queue();
+        }
+    }
 
 
     public static void addGame(MessageChannel channel, String game) {

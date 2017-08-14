@@ -46,11 +46,7 @@ public class Main {
         }
 
         jda.addEventListener(new CommandListener());
-
-        // Load saved characters
-        MessageChannel junkYardGeneral = jda.getGuildById(IDs.junkYardID).getTextChannelsByName("general", false)
-                .get(0);
-        load(junkYardGeneral);
+        load(jda.getGuildById(IDs.junkYardID).getTextChannelsByName("general", false).get(0));
     }
 
 
@@ -125,9 +121,10 @@ public class Main {
                     + " - !races - list of possible races\n"
                     + " - !classes - list of possible classes\n"
                     + " - !weapons - list of possible weapons\n"
-                    + " - !changeWeapons - change your character's weapon\n"
+                    + " - !changeWeapons {weapon} - change your character's weapon\n"
                     + " - !attack {victim} - have your character (must be created) attack your chosen victim"
-                    + " >:]";
+                    + " >:]\n"
+                    + " - !deleteChar - deletes your character";
             event.getChannel().sendMessage(help).queue();
         }
         else if (message.equals("ping")) {
@@ -162,6 +159,9 @@ public class Main {
         else if (message.startsWith("changeWeapon")) {
             UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));
         }
+        else if (message.equals("deleteChar")) {
+            UsersCharacters.deleteCharacter(event.getChannel(), event.getAuthor().getIdLong());
+        }
         else {
             return false;
         }
@@ -176,7 +176,8 @@ public class Main {
     private static boolean dmCommandsHandler(MessageReceivedEvent event, String message) {
         if (message.equalsIgnoreCase("dmHelp")) {
             event.getChannel().sendMessage(
-                    " - !addSessionTime {time/date} - updates the next session time (see !dateFormat for help)\n"
+                    " - !addSessionTime {HH:mm dd/M/yy z} - updates the next session time (see !dateFormat for help)\n"
+                    + " - !dateFormat - shows what the above moon runes for date/time format mean"
             ).queue();
         }
         if (message.equalsIgnoreCase("dateFormat")) {
@@ -202,11 +203,19 @@ public class Main {
     private static boolean adminCommandsHandler(MessageReceivedEvent event, String message) {
         if (message.equals("adminHelp")) {
             event.getChannel().sendMessage(
-                    " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
+                    " - !addGame {game} - allows time sessions for a game to be added\n"
+                            + " - !removeGame {game} - prevents time sessions for a game from being added\n"
+                            + " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
                             + " - !unlock - Lets anyone use commands freely\n"
                             + " - !save - saves character info\n"
                             + " - !exit - runs !save then puts Juuzo to bed"
             ).queue();
+        }
+        else if (message.startsWith("addGame")) {
+            SessionTimes.addGame(event.getChannel(), message.substring(8));
+        }
+        else if (message.startsWith("removeGame")) {
+            SessionTimes.removeGame(event.getChannel(), message.substring(8));
         }
         else if (message.equals("lock")) {
             isLocked = true;
@@ -220,9 +229,6 @@ public class Main {
         else if (message.equals("exit")) {
             save(event.getChannel());
             System.exit(0);
-        }
-        else if (message.startsWith("addGame")) {
-            SessionTimes.addGame(event.getChannel(), message.substring(8));
         }
         else {
             return false;
