@@ -135,6 +135,9 @@ public class Main {
             case "newChar":
                 UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(), message);
                 return true;
+            case "description":
+                UsersCharacters.printDescription(event.getAuthor().getIdLong(), event.getChannel());
+                return true;
             case "races":
                 event.getChannel().sendMessage(Race.getRacesList()).queue();
                 return true;
@@ -152,6 +155,15 @@ public class Main {
                 return true;
             case "deleteChar":
                 UsersCharacters.deleteCharacter(event.getChannel(), event.getAuthor().getIdLong());
+                return true;
+            case "confetti":
+                event.getChannel().sendMessage(
+                        " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
+                                + " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
+                ).queue();
+                return true;
+            case "fancify":
+                event.getChannel().sendMessage("But... but... I'm already fancy af").queue();
                 return true;
             default:
                 return false;

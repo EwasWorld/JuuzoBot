@@ -158,6 +158,16 @@ public class UsersCharacters implements Serializable {
     }
 
 
+    public static void printDescription(long id, MessageChannel channel) {
+        if (userCharacters.containsKey(id)) {
+            channel.sendMessage(userCharacters.get(id).getDescription()).queue();
+        }
+        else {
+            channel.sendMessage("You don't seem to have a character yet. Make one using !newChar").queue();
+        }
+    }
+
+
     public static void save() {
         try {
             LoadSaveConstants.save(fileLocation, userCharacters);

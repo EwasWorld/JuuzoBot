@@ -144,6 +144,10 @@ public class Race {
 
 
     public static String getRacesList() {
+        if (races == null) {
+            getRacesFromFile();
+        }
+
         String races = "Available races: ";
         RaceEnum[] raceEnums = RaceEnum.values();
 
@@ -151,6 +155,17 @@ public class Race {
             races += raceEnums[i].toString();
 
             if (i < raceEnums.length - 1) {
+                races += ", ";
+            }
+        }
+
+        races += "\n\nSubraces: ";
+        Iterator<SubRace.SubRaceEnum> subRaceIterator = subRaces.keySet().iterator();
+        while (subRaceIterator.hasNext()) {
+            SubRace.SubRaceEnum subRaceEnum = subRaceIterator.next();
+            races+= subRaceEnum.toString() + " " + subRaces.get(subRaceEnum).getMainRace();
+
+            if (subRaceIterator.hasNext()) {
                 races += ", ";
             }
         }

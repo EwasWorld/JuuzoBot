@@ -135,6 +135,10 @@ public class Weapon {
 
 
     public static String getWeaponsList() {
+        if (weapons == null) {
+            getWeaponsFromFile();
+        }
+
         String weapons = "Available weapons: ";
         WeaponsEnum[] weaponsEnums = WeaponsEnum.values();
 

@@ -159,6 +159,10 @@ public class Class_ {
 
 
     public static String getClassesList() {
+        if (classes == null) {
+            getClassesFromFile();
+        }
+
         String classes = "Available classes: ";
         ClassEnum[] classEnums = ClassEnum.values();
 
