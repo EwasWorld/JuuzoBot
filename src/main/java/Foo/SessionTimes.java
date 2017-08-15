@@ -46,7 +46,9 @@ public class SessionTimes implements Serializable {
 
         try {
             gameTimes.get(gameName).gameTime = setDateFormat.parse(date);
-            channel.sendMessage("New session time added " + printDateFormat.format(gameTimes.get(gameName))).queue();
+            channel.sendMessage(
+                    "New session time added " + printDateFormat.format(gameTimes.get(gameName).gameTime)
+            ).queue();
         } catch (ParseException e) {
             channel.sendMessage("Bad date format, please use 'HH:mm dd/M/yy z'\n"
                                         + "e.g. '16:00 21/8/17 BST'\n"

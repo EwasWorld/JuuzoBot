@@ -63,7 +63,6 @@ public class Main {
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
-
             // TODO: Note to self
 
             User user = event.getAuthor();
@@ -75,19 +74,21 @@ public class Main {
             if (!message.startsWith("!")) {
                 return;
             }
-            message = message.substring(1);
+            String command = message.substring(1).split(" ")[0];
+            message = getRemainingMessage(command, message);
+
 
             if (!isLocked || user.getId().equals(IDs.eywaID)) {
-                generalCommandsHandler(event, message);
+                generalCommandsHandler(event, command, message);
 
                 for (Role role : event.getMember().getRoles()) {
                     if (role.getName().equals("dm")) {
-                        dmCommandsHandler(event, message);
+                        dmCommandsHandler(event, command, message);
                     }
                 }
 
                 if (user.getId().equals(IDs.eywaID)) {
-                    adminCommandsHandler(event, message);
+                    adminCommandsHandler(event, command, message);
                 }
             }
             else {
@@ -97,138 +98,117 @@ public class Main {
     }
 
 
-    /*
-     * Returns true if a command was completed
-     */
-    private static boolean generalCommandsHandler(MessageReceivedEvent event, String message) {
-        if (message.equalsIgnoreCase("help")) {
-            String help = "Working commands {required} [optional]: \n"
-                    + " - !ping - test bot is working\n"
-                    + " - !gameTime - prints time of your next game session\n"
-                    + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
-                    + " - !potion - drink a potion\n"
-                    + " - !charHelp - lists working commands related to characters";
-            event.getChannel().sendMessage(help).queue();
-        }
-        else if (message.equalsIgnoreCase("charHelp")) {
-            String help = "Working character related commands {required} [optional]: \n"
-                    + " - !newChar {name} [subrace] {race} {class} - create a character\n"
-                    + " - !races - list of possible races\n"
-                    + " - !classes - list of possible classes\n"
-                    + " - !weapons - list of possible weapons\n"
-                    + " - !changeWeapons {weapon} - change your character's weapon\n"
-                    + " - !attack {victim} - have your character (must be created) attack your chosen victim"
-                    + " >:]\n"
-                    + " - !deleteChar - deletes your character";
-            event.getChannel().sendMessage(help).queue();
-        }
-        else if (message.equals("ping")) {
-            event.getChannel().sendMessage("Pong").queue();
-        }
-        else if (message.equals("gameTime")) {
-            SessionTimes.getSessionTime(event.getMember(), event.getChannel());
-        }
-        else if (message.startsWith("roll")) {
-            Roll.rollDieFromChatEvent(message.substring(4), event.getAuthor().getName(), event.getChannel());
-        }
-        else if (message.startsWith("potion")) {
-            GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
-        }
-        else if (message.startsWith("newChar")) {
-            UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(),
-                                                message.substring(8)
-            );
-        }
-        else if (message.equals("races")) {
-            event.getChannel().sendMessage(Race.getRacesList()).queue();
-        }
-        else if (message.equals("classes")) {
-            event.getChannel().sendMessage(Class_.getClassesList()).queue();
-        }
-        else if (message.equals("weapons")) {
-            event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
-        }
-        else if (message.startsWith("attack")) {
-            UsersCharacters.attack(event.getAuthor(), message.substring(7), event.getChannel());
-        }
-        else if (message.startsWith("changeWeapon")) {
-            UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));
-        }
-        else if (message.equals("deleteChar")) {
-            UsersCharacters.deleteCharacter(event.getChannel(), event.getAuthor().getIdLong());
+    private static String getRemainingMessage(String command, String message) {
+        message = message.substring(1);
+        if (!message.equals(command)) {
+            return message.substring(command.length() + 1);
         }
         else {
-            return false;
+            return "";
         }
-
-        return true;
     }
 
 
     /*
      * Returns true if a command was completed
      */
-    private static boolean dmCommandsHandler(MessageReceivedEvent event, String message) {
-        if (message.equalsIgnoreCase("dmHelp")) {
-            event.getChannel().sendMessage(
-                    " - !addSessionTime {HH:mm dd/M/yy z} - updates the next session time (see !dateFormat for help)\n"
-                    + " - !dateFormat - shows what the above moon runes for date/time format mean"
-            ).queue();
+    private static boolean generalCommandsHandler(MessageReceivedEvent event, String command, String message) {
+        switch (command) {
+            case "help":
+                event.getChannel().sendMessage(Help.help).queue();
+                return true;
+            case "charHelp":
+                event.getChannel().sendMessage(Help.charHelp).queue();
+                return true;
+            case "ping":
+                event.getChannel().sendMessage("Pong").queue();
+                return true;
+            case "gameTime":
+                SessionTimes.getSessionTime(event.getMember(), event.getChannel());
+                return true;
+            case "roll":
+                Roll.rollDieFromChatEvent(message, event.getAuthor().getName(), event.getChannel());
+                return true;
+            case "potion":
+                GrogList.drinkGrog(event.getAuthor().getName(), event.getChannel());
+                return true;
+            case "newChar":
+                UsersCharacters.createUserCharacter(event.getChannel(), event.getAuthor().getIdLong(), message);
+                return true;
+            case "races":
+                event.getChannel().sendMessage(Race.getRacesList()).queue();
+                return true;
+            case "classes":
+                event.getChannel().sendMessage(Class_.getClassesList()).queue();
+                return true;
+            case "weapons":
+                event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
+                return true;
+            case "attack":
+                UsersCharacters.attack(event.getAuthor(), message, event.getChannel());
+                return true;
+            case "changeWeapon":
+                UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message);
+                return true;
+            case "deleteChar":
+                UsersCharacters.deleteCharacter(event.getChannel(), event.getAuthor().getIdLong());
+                return true;
+            default:
+                return false;
         }
-        if (message.equalsIgnoreCase("dateFormat")) {
-            event.getChannel().sendMessage(
-                    "Dates should be in the form 'HH:mm dd/M/yy z'\n"
-                            + "e.g. '16:00 21/8/17 BST'\n"
-                            + "  or '16:00 21/8/17 GMT + 1' (spaces around '+' are important)"
-            ).queue();
-        }
-        else if (message.startsWith("addSessionTime")) {
-            SessionTimes.addSessionTime(event.getMember(), event.getChannel(), message.substring(15));
-        }
-        else {
-            return false;
-        }
-        return true;
     }
 
 
     /*
      * Returns true if a command was completed
      */
-    private static boolean adminCommandsHandler(MessageReceivedEvent event, String message) {
-        if (message.equals("adminHelp")) {
-            event.getChannel().sendMessage(
-                    " - !addGame {game} - allows time sessions for a game to be added\n"
-                            + " - !removeGame {game} - prevents time sessions for a game from being added\n"
-                            + " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
-                            + " - !unlock - Lets anyone use commands freely\n"
-                            + " - !save - saves character info\n"
-                            + " - !exit - runs !save then puts Juuzo to bed"
-            ).queue();
+    private static boolean dmCommandsHandler(MessageReceivedEvent event, String command, String message) {
+        switch (command) {
+            case "dmHelp":
+                event.getChannel().sendMessage(Help.help + "\n" + Help.dmHelp).queue();
+                return true;
+            case "dateFormat":
+                event.getChannel().sendMessage(Help.dateFormatHelp).queue();
+                return true;
+            case "addSessionTime":
+                SessionTimes.addSessionTime(event.getMember(), event.getChannel(), message);
+                return true;
+            default:
+                return false;
         }
-        else if (message.startsWith("addGame")) {
-            SessionTimes.addGame(event.getChannel(), message.substring(8));
+    }
+
+
+    /*
+     * Returns true if a command was completed
+     */
+    private static boolean adminCommandsHandler(MessageReceivedEvent event, String command, String message) {
+        switch (command) {
+            case "adminHelp":
+                event.getChannel().sendMessage(Help.help + "\n" + Help.dmHelp + "\n" + Help.adminHelp).queue();
+                return true;
+            case "addGame":
+                SessionTimes.addGame(event.getChannel(), message);
+                return true;
+            case "removeGame":
+                SessionTimes.removeGame(event.getChannel(), message);
+                return true;
+            case "lock":
+                isLocked = true;
+                return true;
+            case "unlock":
+                isLocked = false;
+                return true;
+            case "save":
+                save();
+                return true;
+            case "exit":
+                save();
+                System.exit(0);
+                return true;
+            default:
+                return false;
         }
-        else if (message.startsWith("removeGame")) {
-            SessionTimes.removeGame(event.getChannel(), message.substring(8));
-        }
-        else if (message.equals("lock")) {
-            isLocked = true;
-        }
-        else if (message.equals("unlock")) {
-            isLocked = false;
-        }
-        else if (message.equals("save")) {
-            save();
-        }
-        else if (message.equals("exit")) {
-            save();
-            System.exit(0);
-        }
-        else {
-            return false;
-        }
-        return true;
     }
 
 
