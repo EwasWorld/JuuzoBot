@@ -1,4 +1,4 @@
-package main.java.Grog;
+package Grog;
 
 import java.io.File;
 import java.io.IOException;

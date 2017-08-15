@@ -1,4 +1,4 @@
-package main.java.CharacterBox;
+package CharacterBox;
 
 import java.io.Serializable;
 import java.util.Map;

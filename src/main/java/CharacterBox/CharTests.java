@@ -1,10 +1,10 @@
-package main.java.CharacterBox;
+package CharacterBox;
 
 import junit.framework.TestCase;
-import main.java.CharacterBox.AttackBox.Weapons;
-import main.java.CharacterBox.ClassBox.Classes;
-import main.java.CharacterBox.RaceBox.Races;
-import main.java.CharacterBox.RaceBox.SubRace;
+import CharacterBox.AttackBox.Weapons;
+import CharacterBox.ClassBox.Classes;
+import CharacterBox.RaceBox.Races;
+import CharacterBox.RaceBox.SubRace;
 
 
 

@@ -1,11 +1,11 @@
-package main.java.CharacterBox.ClassBox;
+package CharacterBox.ClassBox;
 
 
 import com.google.gson.*;
-import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.AttackBox.WeaponProficiencies;
-import main.java.CharacterBox.AttackBox.Weapons;
-import main.java.Foo.IDs;
+import CharacterBox.AbilitySkillConstants;
+import CharacterBox.AttackBox.WeaponProficiencies;
+import CharacterBox.AttackBox.Weapons;
+import Foo.IDs;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

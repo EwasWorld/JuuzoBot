@@ -1,4 +1,4 @@
-package main.java.Foo;
+package Foo;
 
 import java.io.*;
 import java.util.ArrayList;

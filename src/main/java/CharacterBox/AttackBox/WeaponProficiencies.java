@@ -1,4 +1,4 @@
-package main.java.CharacterBox.AttackBox;
+package CharacterBox.AttackBox;
 
 import java.io.Serializable;
 import java.util.HashSet;

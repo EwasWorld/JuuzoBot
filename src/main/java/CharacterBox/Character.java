@@ -1,16 +1,15 @@
-package main.java.CharacterBox;
+package CharacterBox;
 
 
-import main.java.CharacterBox.AttackBox.Weapon;
-import main.java.CharacterBox.AttackBox.WeaponProficiencies;
-import main.java.CharacterBox.AttackBox.Weapons;
-import main.java.CharacterBox.ClassBox.Class_;
-import main.java.CharacterBox.ClassBox.Classes;
-import main.java.CharacterBox.RaceBox.Race;
-import main.java.CharacterBox.RaceBox.Races;
-import main.java.CharacterBox.RaceBox.SubRace;
-import main.java.Foo.Roll;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import CharacterBox.AttackBox.Weapon;
+import CharacterBox.AttackBox.WeaponProficiencies;
+import CharacterBox.AttackBox.Weapons;
+import CharacterBox.ClassBox.Class_;
+import CharacterBox.ClassBox.Classes;
+import CharacterBox.RaceBox.Race;
+import CharacterBox.RaceBox.Races;
+import CharacterBox.RaceBox.SubRace;
+import Foo.Roll;
 
 import java.io.Serializable;
 import java.util.*;

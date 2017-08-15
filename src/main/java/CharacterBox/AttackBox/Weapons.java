@@ -1,7 +1,7 @@
-package main.java.CharacterBox.AttackBox;
+package CharacterBox.AttackBox;
 
 import com.google.gson.*;
-import main.java.Foo.IDs;
+import Foo.IDs;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

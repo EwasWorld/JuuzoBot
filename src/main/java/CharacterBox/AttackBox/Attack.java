@@ -1,11 +1,10 @@
-package main.java.CharacterBox.AttackBox;
+package CharacterBox.AttackBox;
 
-import main.java.CharacterBox.Character;
-import main.java.CharacterBox.UsersCharacters;
-import main.java.Foo.Roll;
+import CharacterBox.Character;
+import CharacterBox.UsersCharacters;
+import Foo.Roll;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.Optional;
 

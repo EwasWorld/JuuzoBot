@@ -1,4 +1,4 @@
-package main.java.Foo;
+package Foo;
 
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;

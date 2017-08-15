@@ -1,6 +1,6 @@
-package main.java.CharacterBox.AttackBox;
+package CharacterBox.AttackBox;
 
-import main.java.Foo.Roll;
+import Foo.Roll;
 
 import java.util.Random;
 

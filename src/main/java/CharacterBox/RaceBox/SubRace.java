@@ -1,7 +1,7 @@
-package main.java.CharacterBox.RaceBox;
+package CharacterBox.RaceBox;
 
-import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.Abilities;
+import CharacterBox.AbilitySkillConstants;
+import CharacterBox.Abilities;
 
 import java.util.HashMap;
 import java.util.Map;

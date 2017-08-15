@@ -1,8 +1,8 @@
-package main.java.CharacterBox.RaceBox;
+package CharacterBox.RaceBox;
 
-import main.java.CharacterBox.AbilitySkillConstants;
-import main.java.CharacterBox.Abilities;
-import main.java.CharacterBox.CharacterConstants;
+import CharacterBox.AbilitySkillConstants;
+import CharacterBox.Abilities;
+import CharacterBox.CharacterConstants;
 
 import java.util.*;
 

@@ -1,9 +1,9 @@
-package main.java.Grog;
+package Grog;
 
 import com.google.gson.*;
-import main.java.CharacterBox.ClassBox.Classes;
-import main.java.Foo.IDs;
-import main.java.Foo.Roll;
+import CharacterBox.ClassBox.Classes;
+import Foo.IDs;
+import Foo.Roll;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 

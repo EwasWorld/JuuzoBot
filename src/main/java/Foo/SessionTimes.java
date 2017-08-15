@@ -1,4 +1,4 @@
-package main.java.Foo;
+package Foo;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -110,22 +110,22 @@ public class SessionTimes implements Serializable {
     }
 
 
-    public static void save(MessageChannel channel) {
+    public static void save() {
         try {
             LoadSaveConstants.save(fileLocation, new Object[]{gameTimes, games});
         } catch (IllegalStateException e) {
-            channel.sendMessage("Session times save failed").queue();
+            System.out.println("Session times save failed");
         }
     }
 
 
-    public static void load(MessageChannel channel) {
+    public static void load() {
         try {
             List<Object> objects = LoadSaveConstants.load(fileLocation);
             gameTimes = (Map<String, Date>) objects.get(0);
             games = (Set<String>) objects.get(1);
         } catch (IllegalStateException e) {
-            channel.sendMessage("Session times load failed").queue();
+            System.out.println("Session times load failed");
         }
     }
 }

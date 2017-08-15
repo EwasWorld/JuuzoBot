@@ -1,13 +1,12 @@
-package main.java.Foo;
+package Foo;
 
 
-import main.java.CharacterBox.AttackBox.Attack;
-import main.java.CharacterBox.AttackBox.Weapons;
-import main.java.CharacterBox.Character;
-import main.java.CharacterBox.ClassBox.Classes;
-import main.java.CharacterBox.RaceBox.Races;
-import main.java.CharacterBox.UsersCharacters;
-import main.java.Grog.GrogList;
+import CharacterBox.AttackBox.Attack;
+import CharacterBox.AttackBox.Weapons;
+import CharacterBox.ClassBox.Classes;
+import CharacterBox.RaceBox.Races;
+import CharacterBox.UsersCharacters;
+import Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -16,7 +15,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
@@ -46,7 +44,7 @@ public class Main {
         }
 
         jda.addEventListener(new CommandListener());
-        load(jda.getGuildById(IDs.junkYardID).getTextChannelsByName("general", false).get(0));
+        load();
     }
 
 
@@ -224,10 +222,10 @@ public class Main {
             isLocked = false;
         }
         else if (message.equals("save")) {
-            save(event.getChannel());
+            save();
         }
         else if (message.equals("exit")) {
-            save(event.getChannel());
+            save();
             System.exit(0);
         }
         else {
@@ -237,18 +235,18 @@ public class Main {
     }
 
 
-    private static void save(MessageChannel channel) {
-        UsersCharacters.save(channel);
-        SessionTimes.save(channel);
+    private static void save() {
+        UsersCharacters.save();
+        SessionTimes.save();
 
-        channel.sendMessage("Saves Complete").queue();
+        System.out.println("Saves complete");
     }
 
 
-    private static void load(MessageChannel channel) {
-        UsersCharacters.load(channel);
-        SessionTimes.load(channel);
+    private static void load() {
+        UsersCharacters.load();
+        SessionTimes.load();
 
-        channel.sendMessage("Load Complete").queue();
+        System.out.println("Load complete");
     }
 }

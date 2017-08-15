@@ -1,6 +1,6 @@
-package main.java.CharacterBox.ClassBox;
+package CharacterBox.ClassBox;
 
-import main.java.Foo.Roll;
+import Foo.Roll;
 
 
 

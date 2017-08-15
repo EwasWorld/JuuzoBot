@@ -1,10 +1,10 @@
-package main.java.CharacterBox;
+package CharacterBox;
 
-import main.java.CharacterBox.ClassBox.Classes;
-import main.java.CharacterBox.RaceBox.Races;
-import main.java.CharacterBox.RaceBox.SubRace;
-import main.java.Foo.IDs;
-import main.java.Foo.LoadSaveConstants;
+import CharacterBox.ClassBox.Classes;
+import CharacterBox.RaceBox.Races;
+import CharacterBox.RaceBox.SubRace;
+import Foo.IDs;
+import Foo.LoadSaveConstants;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 
@@ -117,22 +117,22 @@ public class UsersCharacters implements Serializable {
     }
 
 
-    public static void save(MessageChannel channel) {
+    public static void save() {
         try {
             LoadSaveConstants.save(fileLocation, userCharacters);
         }
         catch (IllegalStateException e) {
-            channel.sendMessage("Session times save failed").queue();
+            System.out.println("Session times save failed");
         }
     }
 
 
-    public static void load(MessageChannel channel) {
+    public static void load() {
         try {
             userCharacters = (Map<Long, Character>) LoadSaveConstants.loadFirstObject(fileLocation);
         }
         catch (IllegalStateException e) {
-            channel.sendMessage("Session times load failed").queue();
+            System.out.println("Session times load failed");
         }
     }
 }
