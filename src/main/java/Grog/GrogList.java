@@ -1,11 +1,9 @@
 package Grog;
 
 import com.google.gson.*;
-import CharacterBox.ClassBox.Classes;
 import Foo.IDs;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

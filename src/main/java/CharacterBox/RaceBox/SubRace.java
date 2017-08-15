@@ -13,7 +13,7 @@ public class SubRace extends Race {
         HILL, MOUNTAIN, FOREST, STOUT, ROCK, HIGH, WOOD, DARK, LIGHTFOOT;
     }
 
-    private Races.RaceEnum mainRace;
+    private RaceEnum mainRace;
     private Abilities extraAbilityIncreases;
 
 
@@ -26,14 +26,14 @@ public class SubRace extends Race {
     }
 
 
-    public SubRace(Races.RaceEnum mainRace, Abilities extraAbilityIncreases)
+    public SubRace(RaceEnum mainRace, Abilities extraAbilityIncreases)
     {
         this.mainRace = mainRace;
         this.extraAbilityIncreases = extraAbilityIncreases;
     }
 
 
-    public Races.RaceEnum getMainRace() {
+    public RaceEnum getMainRace() {
         return mainRace;
     }
 

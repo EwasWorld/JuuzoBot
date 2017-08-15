@@ -7,28 +7,28 @@ import java.util.Set;
 
 
 public class WeaponProficiencies implements Serializable {
-    private Set<Weapons.WeaponProficiency> typeProficiencies = new HashSet<>();
-    private Set<Weapons.WeaponsEnum> specificProficiencies = new HashSet<>();
+    private Set<Weapon.WeaponProficiencyEnum> typeProficiencies = new HashSet<>();
+    private Set<Weapon.WeaponsEnum> specificProficiencies = new HashSet<>();
 
-    public void add(Weapons.WeaponProficiency proficiency) {
+    public void add(Weapon.WeaponProficiencyEnum proficiency) {
         typeProficiencies.add(proficiency);
     }
 
-    public void add(Weapons.WeaponsEnum proficiency) {
+    public void add(Weapon.WeaponsEnum proficiency) {
         specificProficiencies.add(proficiency);
     }
 
-    public boolean contains(Weapons.WeaponsEnum proficiency) {
+    public boolean contains(Weapon.WeaponsEnum proficiency) {
         return specificProficiencies.contains(proficiency)
                 || typeProficiencies.contains(proficiency.getWeaponProficiency());
     }
 
     public String toString() {
         String string = "";
-        for (Weapons.WeaponProficiency weaponProficiency : typeProficiencies) {
+        for (Weapon.WeaponProficiencyEnum weaponProficiency : typeProficiencies) {
             string += weaponProficiency.toString() + ", ";
         }
-        for (Weapons.WeaponsEnum weapon : specificProficiencies) {
+        for (Weapon.WeaponsEnum weapon : specificProficiencies) {
             string += weapon.toString() + ", ";
         }
 

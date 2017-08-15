@@ -15,27 +15,37 @@ import java.util.concurrent.TimeUnit;
 
 public class SessionTimes implements Serializable {
     private static final String fileLocation = IDs.mainFilePath + "Foo/SessionTimes.txt";
-    private static Map<String, Date> gameTimes = new HashMap<>();
-    private static Set<String> games = new HashSet<>();
+    private static Map<String, SessionTimes> gameTimes = new HashMap<>();
     private static DateFormat setDateFormat = new SimpleDateFormat("HH:mm dd/M/yy z");
     private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM '-' HH:mm z");
+
+
+    private String fullName;
+    private Date gameTime;
+
+
+    private SessionTimes(String fullName) {
+        this.fullName = fullName;
+    }
 
 
     public static void addSessionTime(Member author, MessageChannel channel, String date) {
         String gameName = "";
         for (Role role : author.getRoles()) {
-            if (games.contains(role.getName().toUpperCase())) {
+            if (gameTimes.containsKey(role.getName().toUpperCase())) {
                 gameName = role.getName().toUpperCase();
                 break;
             }
         }
         if (gameName.equals("")) {
-            channel.sendMessage("You do not have a session role, pm a mod for one").queue();
+            channel.sendMessage(
+                    "You do not have a session role or your session is not in the database, pm a mod for help"
+            ).queue();
             return;
         }
 
         try {
-            gameTimes.put(gameName, setDateFormat.parse(date));
+            gameTimes.get(gameName).gameTime = setDateFormat.parse(date);
             channel.sendMessage("New session time added " + printDateFormat.format(gameTimes.get(gameName))).queue();
         } catch (ParseException e) {
             channel.sendMessage("Bad date format, please use 'HH:mm dd/M/yy z'\n"
@@ -46,7 +56,7 @@ public class SessionTimes implements Serializable {
 
     public static void removeGame(MessageChannel channel, String game) {
         if (game.contains(game.toUpperCase())) {
-            games.remove(game.toUpperCase());
+            gameTimes.remove(game.toUpperCase());
             channel.sendMessage("Game removed").queue();
         }
         else {
@@ -55,8 +65,11 @@ public class SessionTimes implements Serializable {
     }
 
 
-    public static void addGame(MessageChannel channel, String game) {
-        games.add(game.toUpperCase());
+    public static void addGame(MessageChannel channel, String message) {
+        String roleName = message.split(" ")[0];
+        String fullName = message.substring(roleName.length() + 1);
+
+        gameTimes.put(roleName.toUpperCase(), new SessionTimes(fullName));
         channel.sendMessage("Game added").queue();
     }
 
@@ -64,39 +77,34 @@ public class SessionTimes implements Serializable {
     public static void getSessionTime(Member author, MessageChannel channel) {
         String sessionName = "";
         for (Role role : author.getRoles()) {
-            sessionName = role.getName().toUpperCase();
-            if (games.contains(sessionName)) {
+            if (gameTimes.containsKey(role.getName().toUpperCase())) {
+                sessionName = role.getName().toUpperCase();
                 break;
             }
-            sessionName = "";
         }
         if (sessionName.equals("")) {
-            channel.sendMessage("You do not have a session role, pm a mod for one").queue();
+            channel.sendMessage(
+                    "You do not have a session role or your session is not in the database, pm a mod for help"
+            ).queue();
             return;
         }
-        if (gameTimes.containsKey(sessionName)) {
-            Date sessionTime = gameTimes.get(sessionName);
-
-            if (sessionTime.getTime() > System.currentTimeMillis()) {
-                String messageString = String.format(
-                        "Next session for %s is %s\n", sessionName, printDateFormat.format(sessionTime));
-                messageString += "That's in " + getStringOfTimeToNow(sessionTime);
-                channel.sendMessage(messageString).queue();
-            }
-            else {
-                channel.sendMessage(
-                        "There appears to be no new session time for " + sessionName + ". Ask your dm to update it")
-                        .queue();
-            }
+        Date gameTime = gameTimes.get(sessionName).gameTime;
+        if (gameTime != null && gameTime.getTime() > System.currentTimeMillis()) {
+            channel.sendMessage(
+                        "Next session for %s is %s\n That's in %s",
+                        gameTimes.get(sessionName).fullName, printDateFormat.format(gameTime),
+                        getStringTimeUntil(gameTime)
+            ).queue();
         }
         else {
-            channel.sendMessage("There seems to be no session time for " + sessionName).queue();
+            channel.sendMessage(String.format("There seems to be no session time for %s. Ask your dm to update it",
+                                              gameTimes.get(sessionName).fullName)).queue();
         }
     }
 
 
-    private static String getStringOfTimeToNow(Date date1) {
-        final long millis = date1.getTime() - System.currentTimeMillis();
+    private static String getStringTimeUntil(Date date) {
+        final long millis = date.getTime() - System.currentTimeMillis();
         return String.format(
                 "%d days, %d hrs %d mins %d secs",
                 TimeUnit.MILLISECONDS.toDays(millis),
@@ -112,7 +120,7 @@ public class SessionTimes implements Serializable {
 
     public static void save() {
         try {
-            LoadSaveConstants.save(fileLocation, new Object[]{gameTimes, games});
+            LoadSaveConstants.save(fileLocation, gameTimes);
         } catch (IllegalStateException e) {
             System.out.println("Session times save failed");
         }
@@ -121,9 +129,7 @@ public class SessionTimes implements Serializable {
 
     public static void load() {
         try {
-            List<Object> objects = LoadSaveConstants.load(fileLocation);
-            gameTimes = (Map<String, Date>) objects.get(0);
-            games = (Set<String>) objects.get(1);
+            gameTimes = (Map<String, SessionTimes>) LoadSaveConstants.loadFirstObject(fileLocation);
         } catch (IllegalStateException e) {
             System.out.println("Session times load failed");
         }

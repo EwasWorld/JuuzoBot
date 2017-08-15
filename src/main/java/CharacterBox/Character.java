@@ -3,11 +3,8 @@ package CharacterBox;
 
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
-import CharacterBox.AttackBox.Weapons;
 import CharacterBox.ClassBox.Class_;
-import CharacterBox.ClassBox.Classes;
 import CharacterBox.RaceBox.Race;
-import CharacterBox.RaceBox.Races;
 import CharacterBox.RaceBox.SubRace;
 import Foo.Roll;
 
@@ -19,8 +16,8 @@ import java.util.*;
 public class Character implements Serializable {
     private String name;
     private int age;
-    private Classes.ClassEnum class_;
-    private Races.RaceEnum race;
+    private Class_.ClassEnum class_;
+    private Race.RaceEnum race;
     private SubRace.SubRaceEnum subRace;
     private int level;
     private int hp;
@@ -31,18 +28,18 @@ public class Character implements Serializable {
     private Set<CharacterConstants.Language> languages;
     private int funds;
     private WeaponProficiencies weaponProficiencies;
-    private Weapons.WeaponsEnum weapon;
+    private Weapon.WeaponsEnum weapon;
 
 
-    public Character(String name, Races.RaceEnum race, SubRace.SubRaceEnum subRace, Classes.ClassEnum class_) {
+    public Character(String name, Race.RaceEnum race, SubRace.SubRaceEnum subRace, Class_.ClassEnum class_) {
         this.name = name;
         this.class_ = class_;
         this.race = race;
         this.subRace = subRace;
         level = 1;
 
-        final Class_ classInfo = Classes.getClassInfo(class_);
-        final Race raceInfo = Races.getRaceInfo(race);
+        final Class_ classInfo = Class_.getClassInfo(class_);
+        final Race raceInfo = Race.getRaceInfo(race);
         final SubRace subRaceInfo = getSubraceInfo(subRace);
 
         Map<AbilitySkillConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
@@ -78,7 +75,7 @@ public class Character implements Serializable {
 
     private SubRace getSubraceInfo(SubRace.SubRaceEnum subRaceEnum) {
         if (subRaceEnum != null) {
-            SubRace subRace = Races.getRaceInfo(subRaceEnum);
+            SubRace subRace = Race.getRaceInfo(subRaceEnum);
             if (race != subRace.getMainRace()) {
                 // TODO: Handle
                 throw new IllegalArgumentException("Invalid subrace");
@@ -96,10 +93,10 @@ public class Character implements Serializable {
     /*
      * Half elves get 2 extra random proficiencies
      */
-    private void addSkillProficiencies(Races.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+    private void addSkillProficiencies(Race.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
         addSkillProficiencies(possibleProficiencies, quantity);
 
-        if (race == Races.RaceEnum.HALFELF) {
+        if (race == Race.RaceEnum.HALFELF) {
             AbilitySkillConstants.SkillEnum[] skillEnums = AbilitySkillConstants.SkillEnum.values();
             for (int i = 0; i < 2; i++) {
                 AbilitySkillConstants.SkillEnum skill;
@@ -109,7 +106,7 @@ public class Character implements Serializable {
                 skillProficiencies.add(skill);
             }
         }
-        else if (race == Races.RaceEnum.HALFORC) {
+        else if (race == Race.RaceEnum.HALFORC) {
             skillProficiencies.add(AbilitySkillConstants.SkillEnum.INTIMIDATION);
         }
     }
@@ -134,9 +131,9 @@ public class Character implements Serializable {
                     languages.add(CharacterConstants.getRandomLanguage(languages));
                     break;
                 case DARK:
-                    weaponProficiencies.add(Weapons.WeaponsEnum.RAPIER);
-                    weaponProficiencies.add(Weapons.WeaponsEnum.SHORTSWORD);
-                    weaponProficiencies.add(Weapons.WeaponsEnum.CROSSBOW);
+                    weaponProficiencies.add(Weapon.WeaponsEnum.RAPIER);
+                    weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
+                    weaponProficiencies.add(Weapon.WeaponsEnum.CROSSBOW);
                     break;
                 case HILL:
                     hp++;
@@ -147,10 +144,10 @@ public class Character implements Serializable {
             }
 
             if (subRace == SubRace.SubRaceEnum.HIGH || subRace == SubRace.SubRaceEnum.WOOD) {
-                weaponProficiencies.add(Weapons.WeaponsEnum.SHORTSWORD);
-                weaponProficiencies.add(Weapons.WeaponsEnum.LONGSWORD);
-                weaponProficiencies.add(Weapons.WeaponsEnum.SHORTBOW);
-                weaponProficiencies.add(Weapons.WeaponsEnum.LONGBOW);
+                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
+                weaponProficiencies.add(Weapon.WeaponsEnum.LONGSWORD);
+                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTBOW);
+                weaponProficiencies.add(Weapon.WeaponsEnum.LONGBOW);
             }
         }
     }
@@ -227,7 +224,7 @@ public class Character implements Serializable {
 
 
     public Weapon getWeaponInfo() {
-        return Weapons.getWeaponInfo(weapon);
+        return Weapon.getWeaponInfo(weapon);
     }
 
 
@@ -243,7 +240,7 @@ public class Character implements Serializable {
             modifier = AbilitySkillConstants.getProficiencyBonus(level);
         }
 
-        return modifier + getAbilityAttackModifier(Weapons.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
+        return modifier + getAbilityAttackModifier(Weapon.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
     }
 
 
@@ -270,7 +267,7 @@ public class Character implements Serializable {
     public int rollDamage() {
         int damage = getAttackModifier() + getWeaponInfo().rollDamage();
 
-        if (race == Races.RaceEnum.HALFORC) {
+        if (race == Race.RaceEnum.HALFORC) {
             damage += getWeaponInfo().rollOneDamageDie();
         }
         return damage;
@@ -280,7 +277,7 @@ public class Character implements Serializable {
     public int rollCriticalDamage() {
         int damage = getAttackModifier() + getWeaponInfo().rollCriticalDamage();
 
-        if (race == Races.RaceEnum.HALFORC) {
+        if (race == Race.RaceEnum.HALFORC) {
             damage += getWeaponInfo().rollOneDamageDie();
         }
         return damage;
@@ -291,7 +288,7 @@ public class Character implements Serializable {
      */
     public boolean changeWeapons(String newWeapon) {
         try {
-            weapon = Weapons.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
+            weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
             return true;
         }
         catch (IllegalArgumentException e) {

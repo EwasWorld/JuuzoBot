@@ -1,10 +1,9 @@
 package Foo;
 
 
-import CharacterBox.AttackBox.Attack;
-import CharacterBox.AttackBox.Weapons;
-import CharacterBox.ClassBox.Classes;
-import CharacterBox.RaceBox.Races;
+import CharacterBox.AttackBox.Weapon;
+import CharacterBox.ClassBox.Class_;
+import CharacterBox.RaceBox.Race;
 import CharacterBox.UsersCharacters;
 import Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
@@ -27,11 +26,11 @@ import java.util.List;
 
 public class Main {
     public static JDA jda;
-    private static boolean isLocked = true;
+    private static boolean isLocked = false;
 
 
     public static void main(String[] args) {
-        JDABuilder builder = new JDABuilder(AccountType.BOT);
+        final JDABuilder builder = new JDABuilder(AccountType.BOT);
         builder.setToken(IDs.botToken);
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
@@ -53,12 +52,10 @@ public class Main {
         public void onGuildMemberJoin(GuildMemberJoinEvent event) {
             super.onGuildMemberJoin(event);
 
-            List<TextChannel> channels = event.getGuild().getTextChannelsByName("general", false);
+            final List<TextChannel> channels = event.getGuild().getTextChannelsByName("general", false);
             if (channels.size() == 1) {
-                MessageChannel channel = channels.get(0);
-                String user = event.getMember().getUser().getName();
-
-                channel.sendMessage(String.format("Welcome @%s", user));
+                final MessageChannel channel = channels.get(0);
+                channel.sendMessage(String.format("Welcome @%s", event.getMember().getUser().getId()));
             }
         }
 
@@ -143,16 +140,16 @@ public class Main {
             );
         }
         else if (message.equals("races")) {
-            event.getChannel().sendMessage(Races.getRacesList()).queue();
+            event.getChannel().sendMessage(Race.getRacesList()).queue();
         }
         else if (message.equals("classes")) {
-            event.getChannel().sendMessage(Classes.getClassesList()).queue();
+            event.getChannel().sendMessage(Class_.getClassesList()).queue();
         }
         else if (message.equals("weapons")) {
-            event.getChannel().sendMessage(Weapons.getWeaponsList()).queue();
+            event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
         }
         else if (message.startsWith("attack")) {
-            Attack.attack(event.getAuthor(), message.substring(7), event.getChannel());
+            UsersCharacters.attack(event.getAuthor(), message.substring(7), event.getChannel());
         }
         else if (message.startsWith("changeWeapon")) {
             UsersCharacters.changeCharacterWeapon(event.getChannel(), event.getAuthor(), message.substring(14));

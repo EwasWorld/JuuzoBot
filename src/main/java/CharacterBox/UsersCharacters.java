@@ -1,10 +1,12 @@
 package CharacterBox;
 
-import CharacterBox.ClassBox.Classes;
-import CharacterBox.RaceBox.Races;
+import CharacterBox.AttackBox.Weapon;
+import CharacterBox.ClassBox.Class_;
+import CharacterBox.RaceBox.Race;
 import CharacterBox.RaceBox.SubRace;
 import Foo.IDs;
 import Foo.LoadSaveConstants;
+import Foo.Roll;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class UsersCharacters implements Serializable {
     private static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
     private static Map<Long, Character> userCharacters = new HashMap<>();
+    private static final int defenderAC = 13;
 
 
     public static Optional<Character> getCharacter(long id) {
@@ -37,8 +40,8 @@ public class UsersCharacters implements Serializable {
 
         final String[] creationParts = creationString.split(" ");
         SubRace.SubRaceEnum subRace;
-        final Races.RaceEnum race;
-        final Classes.ClassEnum class_;
+        final Race.RaceEnum race;
+        final Class_.ClassEnum class_;
 
         if (creationParts[creationParts.length - 3].equalsIgnoreCase("drow")) {
             subRace = SubRace.SubRaceEnum.DARK;
@@ -53,12 +56,12 @@ public class UsersCharacters implements Serializable {
         }
 
         if (creationParts[creationParts.length - 2].equalsIgnoreCase("drow")) {
-            race = Races.RaceEnum.ELF;
+            race = Race.RaceEnum.ELF;
             subRace = SubRace.SubRaceEnum.DARK;
         }
         else {
             try {
-                race = Races.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
+                race = Race.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
             } catch (IllegalArgumentException e) {
                 channel.sendMessage("Invalid race").queue();
                 return;
@@ -66,7 +69,7 @@ public class UsersCharacters implements Serializable {
         }
 
         try {
-            class_ = Classes.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
+            class_ = Class_.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
         } catch (IllegalArgumentException e) {
             channel.sendMessage("Invalid class").queue();
             return;
@@ -113,6 +116,44 @@ public class UsersCharacters implements Serializable {
                     "If you don't have a character yet you can't change their weapon. Use !newChar to make a new "
                             + "character (!charHelp if you get stuck)")
                     .queue();
+        }
+    }
+
+
+    public static void attack(User author, String victim, MessageChannel channel) {
+        final String attacker = author.getName();
+        victim = victim.trim().replace("@", "");
+
+        if (userCharacters.containsKey(author.getIdLong())) {
+            Character character = userCharacters.get(author.getIdLong());
+            Weapon weapon = character.getWeaponInfo();
+            String message = weapon.getAttackLine();
+
+            Roll.RollResult attackRoll = character.attackRoll();
+            if (attackRoll.getResult() >= defenderAC && !attackRoll.isCritFail()) {
+                message += " " + weapon.getHitLine();
+
+                int damage;
+                if (attackRoll.isNaddy20()) {
+                    damage = character.rollCriticalDamage();
+                }
+                else {
+                    damage = character.rollDamage();
+                }
+                message += String.format(" VIC took %d damage", damage);
+            }
+            else {
+                message += " " + weapon.getMissLine();
+            }
+
+            message = message.replaceAll("PC", character.getName());
+            message = message.replaceAll("VIC", victim);
+            channel.sendMessage(message).queue();
+        }
+        else {
+            channel.sendMessage(attacker
+                                        + ", I see you're eager to get to the violence but you'll need to make a character first using "
+                                        + "!newChar").queue();
         }
     }
 

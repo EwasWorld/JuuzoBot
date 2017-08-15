@@ -29,10 +29,8 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
-        "MartialMelee",
-        "MartialRange"
+        "Simple",
+        "Martial",
       ],
       "startWeapon": "greataxe"
     },
@@ -77,8 +75,7 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
+        "Simple",
         "Crossbow",
         "Longsword",
         "Rapier",
@@ -114,8 +111,7 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange"
+        "Simple"
       ],
       "startWeapon": "Mace"
     },
@@ -194,10 +190,8 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
-        "MartialMelee",
-        "MartialRange"
+        "Simple",
+        "Martial"
       ],
       "startWeapon": "longsword"
     },
@@ -232,10 +226,8 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
-        "MartialMelee",
-        "MartialRange"
+        "Simple",
+        "Martial"
       ],
       "startWeapon": "rapier"
     },
@@ -268,8 +260,7 @@
         "multiply": false
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
+        "Simple",
         "Shortsword"
       ],
       "startWeapon": "Shortsword"
@@ -303,10 +294,8 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
-        "MartialMelee",
-        "MartialRange"
+        "Simple",
+        "Martial"
       ],
       "startWeapon": "longsword"
     },
@@ -341,10 +330,8 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
-        "MartialMelee",
-        "MartialRange"
+        "Simple",
+        "Martial"
       ],
       "startWeapon": "longbow"
     },
@@ -382,8 +369,7 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange",
+        "Simple",
         "Crossbow",
         "longsword",
         "rapier",
@@ -458,8 +444,7 @@
         "multiply": true
       },
       "weaponProficiencies": [
-        "SimpleMelee",
-        "SimpleRange"
+        "Simple"
       ],
       "startWeapon": "LightCrossbow"
     },

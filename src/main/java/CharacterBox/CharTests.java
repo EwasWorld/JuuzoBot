@@ -1,28 +1,28 @@
 package CharacterBox;
 
+import CharacterBox.AttackBox.Weapon;
+import CharacterBox.ClassBox.Class_;
 import junit.framework.TestCase;
-import CharacterBox.AttackBox.Weapons;
-import CharacterBox.ClassBox.Classes;
-import CharacterBox.RaceBox.Races;
+import CharacterBox.RaceBox.Race;
 import CharacterBox.RaceBox.SubRace;
 
 
 
 public class CharTests extends TestCase {
     public void testClassInfoRetrieval() {
-        Classes.getClassInfo(Classes.ClassEnum.FIGHTER);
+        Class_.getClassInfo(Class_.ClassEnum.FIGHTER);
     }
 
     public void testRaceInfoRetrieval() {
-        Races.getRaceInfo(Races.RaceEnum.HUMAN);
+        Race.getRaceInfo(Race.RaceEnum.HUMAN);
     }
 
     public void testWeaponInfoRetrieval() {
-        Weapons.getWeaponInfo(Weapons.WeaponsEnum.LONGBOW);
+        Weapon.getWeaponInfo(Weapon.WeaponsEnum.LONGBOW);
     }
 
     public void testCharacterDescription() {
-        System.out.println(new Character("Akatsuki", Races.RaceEnum.ELF, null, Classes.ClassEnum.ROGUE).getDescription());
-        System.out.println(new Character("Akatsuki", Races.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Classes.ClassEnum.ROGUE).getDescription());
+        System.out.println(new Character("Akatsuki", Race.RaceEnum.ELF, null, Class_.ClassEnum.ROGUE).getDescription());
+        System.out.println(new Character("Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Class_.ClassEnum.ROGUE).getDescription());
     }
 }
