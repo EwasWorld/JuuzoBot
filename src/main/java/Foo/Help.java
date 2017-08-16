@@ -3,11 +3,14 @@ package Foo;
 public class Help {
     public static final String help =
             "Working commands {required} [optional]: \n"
+                    + " - !charHelp - lists working commands related to characters\n"
                     + " - !ping - test bot is working\n"
                     + " - !gameTime - prints time of your next game session\n"
                     + " - !roll [quantity] d {die size} [modifier] - roll a die\n"
                     + " - !potion - drink a potion\n"
-                    + " - !charHelp - lists working commands related to characters";
+                    + " - !addQuote {start of message} - adds a quote to the bot to be preserved forever ｡◕‿◕｡✿ "
+                    + "(NB: Juuzo has the memory of a goldfish and thus can only quote from the last 20 messages)\n"
+                    + " - !getQuote [quote number] - retrieves the desired quote (or a random one if no number is given)";
 
     public static final String charHelp =
             "Working character related commands {required} [optional]: \n"
@@ -24,7 +27,8 @@ public class Help {
 
     public static final String dmHelp =
             " - !addSessionTime {HH:mm dd/M/yy z} - updates the next session time (see !dateFormat for help)\n"
-                    + " - !dateFormat - shows what the above moon runes for date/time format mean";
+                    + " - !dateFormat - shows what the above moon runes for date/time format mean\n"
+                    + " - !gameReminder - @ mentions the game role and displays the countdown";
 
     public static final String dateFormatHelp =
             "Dates should be in the form 'HH:mm dd/M/yy z'\n"
@@ -34,6 +38,7 @@ public class Help {
     public static final String adminHelp =
             " - !addGame {role} {full name} - allows time sessions for a game to be added\n"
                     + " - !removeGame {game} - prevents time sessions for a game from being added\n"
+                    + " - !removeQuote {quote number} - removes a quote from the bot\n"
                     + " - !lock - blocks commands from people other than Eywa (not in Junk Yard)\n"
                     + " - !unlock - Lets anyone use commands freely\n"
                     + " - !save - saves character info\n"

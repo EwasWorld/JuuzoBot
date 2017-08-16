@@ -20,6 +20,7 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
+import java.text.ParseException;
 import java.util.List;
 
 
@@ -65,17 +66,19 @@ public class Main {
             super.onMessageReceived(event);
             // TODO: Note to self
 
-            User user = event.getAuthor();
-            if (user.isBot()) {
-                return;
-            }
-
             String message = event.getMessage().getContent();
             if (!message.startsWith("!")) {
+                Quotes.addMessage(event.getAuthor().getName(), message);
                 return;
             }
             String command = message.substring(1).split(" ")[0];
             message = getRemainingMessage(command, message);
+
+
+            User user = event.getAuthor();
+            if (user.isBot()) {
+                return;
+            }
 
 
             if (!isLocked || user.getId().equals(IDs.eywaID)) {
@@ -156,6 +159,22 @@ public class Main {
             case "deleteChar":
                 UsersCharacters.deleteCharacter(event.getChannel(), event.getAuthor().getIdLong());
                 return true;
+            case "addQuote":
+                Quotes.addQuote(event.getChannel(), message);
+                return true;
+            case "getQuote":
+                if (message.equals("")) {
+                    Quotes.getQuote(event.getChannel());
+                }
+                else {
+                    try {
+                        Quotes.getQuote(event.getChannel(), Integer.parseInt(message));
+                    }
+                    catch (IllegalArgumentException e) {
+                        event.getChannel().sendMessage("Incorrect quote format, either give no argument or an integer").queue();
+                    }
+                }
+                return true;
             case "confetti":
                 event.getChannel().sendMessage(
                         " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
@@ -164,6 +183,12 @@ public class Main {
                 return true;
             case "fancify":
                 event.getChannel().sendMessage("But... but... I'm already fancy af").queue();
+                return true;
+            case "complaints":
+                event.getChannel().sendMessage(
+                        "You may kindly take your complaints and insert them into your anal cavity "
+                                + "making sure to use plenty of lube."
+                ).queue();
                 return true;
             default:
                 return false;
@@ -185,6 +210,9 @@ public class Main {
             case "addSessionTime":
                 SessionTimes.addSessionTime(event.getMember(), event.getChannel(), message);
                 return true;
+            case "gameReminder":
+                SessionTimes.getSessionReminder(event.getMember(), event.getChannel());
+                return true;
             default:
                 return false;
         }
@@ -204,6 +232,9 @@ public class Main {
                 return true;
             case "removeGame":
                 SessionTimes.removeGame(event.getChannel(), message);
+                return true;
+            case "removeQuote":
+                Quotes.removeQuote(event.getChannel(), Integer.parseInt(message));
                 return true;
             case "lock":
                 isLocked = true;
@@ -227,6 +258,7 @@ public class Main {
     private static void save() {
         UsersCharacters.save();
         SessionTimes.save();
+        Quotes.save();
 
         System.out.println("Saves complete");
     }
@@ -235,6 +267,7 @@ public class Main {
     private static void load() {
         UsersCharacters.load();
         SessionTimes.load();
+        Quotes.load();
 
         System.out.println("Load complete");
     }
