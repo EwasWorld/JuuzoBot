@@ -118,7 +118,7 @@ public class Main {
     private static boolean generalCommandsHandler(MessageReceivedEvent event, String command, String message) {
         switch (command) {
             case "help":
-                event.getChannel().sendMessage(Help.help).queue();
+                event.getChannel().sendMessage(Help.getHelp()).queue();
                 return true;
             case "charHelp":
                 event.getChannel().sendMessage(Help.charHelp).queue();
@@ -202,7 +202,7 @@ public class Main {
     private static boolean dmCommandsHandler(MessageReceivedEvent event, String command, String message) {
         switch (command) {
             case "dmHelp":
-                event.getChannel().sendMessage(Help.help + "\n" + Help.dmHelp).queue();
+                event.getChannel().sendMessage(Help.getdmHelp()).queue();
                 return true;
             case "dateFormat":
                 event.getChannel().sendMessage(Help.dateFormatHelp).queue();
@@ -225,7 +225,7 @@ public class Main {
     private static boolean adminCommandsHandler(MessageReceivedEvent event, String command, String message) {
         switch (command) {
             case "adminHelp":
-                event.getChannel().sendMessage(Help.help + "\n" + Help.dmHelp + "\n" + Help.adminHelp).queue();
+                event.getChannel().sendMessage(Help.getadminHelp()).queue();
                 return true;
             case "addGame":
                 SessionTimes.addGame(event.getChannel(), message);
