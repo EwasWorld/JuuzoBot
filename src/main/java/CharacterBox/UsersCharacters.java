@@ -178,11 +178,45 @@ public class UsersCharacters implements Serializable {
     }
 
 
+    /*
+     * Roll a specific stat, saving throw, or initiative
+     */
+    public static String roll(long id, String message) {
+        message = message.toUpperCase();
+
+        if (userCharacters.containsKey(id)) {
+            Character character = userCharacters.get(id);
+            String characterName = character.getName();
+
+            if (message.equals("INITIATIVE")) {
+                return characterName + " " + character.rollInitiative();
+            }
+
+            try {
+                AbilitySkillConstants.AbilityEnum ability = AbilitySkillConstants.AbilityEnum.valueOf(message);
+                return characterName + " " + character.rollSavingThrow(ability);
+            } catch (IllegalArgumentException e) {
+                // It may have been a skill check
+            }
+
+            try {
+                AbilitySkillConstants.SkillEnum skill = AbilitySkillConstants.SkillEnum.valueOf(message);
+                return characterName + " " + character.rollSkillCheck(skill);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("You can only roll abilities, skills, or initiative");
+            }
+        }
+        else {
+            throw new IllegalStateException("You don't seem to have a character yet. Make one using !newChar");
+        }
+    }
+
+
     public static void save() {
         try {
             LoadSaveConstants.save(fileLocation, userCharacters);
         } catch (IllegalStateException e) {
-            System.out.println("Session times save failed");
+            System.out.println("Character save failed");
         }
     }
 
@@ -191,7 +225,7 @@ public class UsersCharacters implements Serializable {
         try {
             userCharacters = (Map<Long, Character>) LoadSaveConstants.loadFirstObject(fileLocation);
         } catch (IllegalStateException e) {
-            System.out.println("Session times load failed");
+            System.out.println("Character load failed");
         }
     }
 }

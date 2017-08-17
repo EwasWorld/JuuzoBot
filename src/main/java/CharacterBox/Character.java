@@ -295,4 +295,29 @@ public class Character implements Serializable {
             return false;
         }
     }
+
+    public String rollInitiative() {
+        int modifier = abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
+
+    public String rollSavingThrow(AbilitySkillConstants.AbilityEnum ability) {
+        int modifier =  abilities.getModifier(ability);
+
+        if (savingThrows.contains(ability)) {
+            modifier += AbilitySkillConstants.getProficiencyBonus(level);
+        }
+
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
+
+    public String rollSkillCheck(AbilitySkillConstants.SkillEnum skill) {
+        int modifier = abilities.getModifier(skill.getMainAbility());
+
+        if (skillProficiencies.contains(skill)) {
+            modifier += AbilitySkillConstants.getProficiencyBonus(level);
+        }
+
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
 }

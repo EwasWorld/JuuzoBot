@@ -80,23 +80,25 @@ public class Main {
             }
 
 
-            if (!isLocked || user.getId().equals(IDs.eywaID)) {
-                generalCommandsHandler(event, command, message);
+            try {
+                if (!isLocked || user.getId().equals(IDs.eywaID)) {
+                    generalCommandsHandler(event, command, message);
 
-                for (Role role : event.getMember().getRoles()) {
-                    if (role.getName().equals("dm")) {
-                        dmCommandsHandler(event, command, message);
+                    for (Role role : event.getMember().getRoles()) {
+                        if (role.getName().equals("dm")) {
+                            dmCommandsHandler(event, command, message);
+                        }
+                    }
+
+                    if (user.getId().equals(IDs.eywaID)) {
+                        adminCommandsHandler(event, command, message);
                     }
                 }
-
-                if (user.getId().equals(IDs.eywaID)) {
-                    adminCommandsHandler(event, command, message);
+                else {
+                    throw new IllegalStateException("Functions are temporarily disabled for now :c Try again later");
                 }
-            }
-            else {
-                event.getChannel().sendMessage(
-                        "Functions are temporarily disabled for now :c Try again later"
-                ).queue();
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                event.getChannel().sendMessage(e.getMessage()).queue();
             }
         }
     }
@@ -120,110 +122,120 @@ public class Main {
      * Returns true if a command was completed
      */
     private static boolean generalCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        try {
-            switch (command) {
-                case "help":
-                    event.getChannel().sendMessage(Help.getHelp()).queue();
-                    return true;
-                case "charHelp":
-                    event.getChannel().sendMessage(Help.charHelp).queue();
-                    return true;
-                case "ping":
-                    event.getChannel().sendMessage("Pong").queue();
-                    return true;
-                case "gameTime":
+        switch (command) {
+            case "help":
+                event.getChannel().sendMessage(Help.getHelp()).queue();
+                return true;
+            case "charHelp":
+                event.getChannel().sendMessage(Help.charHelp).queue();
+                return true;
+            case "ping":
+                event.getChannel().sendMessage("Pong").queue();
+                return true;
+            case "gameTime":
+                event.getChannel().sendMessage(
+                        SessionTimes.getNextSessionAsString(event.getMember())
+                ).queue();
+                return true;
+            case "roll":
+                final String result;
+                if (containsDigit(message)) {
+                    result = Roll.rollDieFromChatEvent(message, event.getAuthor().getName());
+                }
+                else {
+                    result = UsersCharacters.roll(event.getAuthor().getIdLong(), message);
+                }
+                event.getChannel().sendMessage(result).queue();
+                return true;
+            case "potion":
+                event.getChannel().sendMessage(
+                        GrogList.drinkGrog(event.getAuthor().getName())
+                ).queue();
+                return true;
+            case "newChar":
+                event.getChannel().sendMessage(
+                        UsersCharacters.createUserCharacter(event.getAuthor().getIdLong(), message)
+                ).queue();
+                return true;
+            case "description":
+                event.getChannel().sendMessage(
+                        UsersCharacters.getCharacterDescription(event.getAuthor().getIdLong())
+                ).queue();
+                return true;
+            case "races":
+                event.getChannel().sendMessage(Race.getRacesList()).queue();
+                return true;
+            case "classes":
+                event.getChannel().sendMessage(Class_.getClassesList()).queue();
+                return true;
+            case "weapons":
+                event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
+                return true;
+            case "attack":
+                event.getChannel().sendMessage(
+                        UsersCharacters.attack(event.getAuthor(), message)
+                ).queue();
+                return true;
+            case "changeWeapon":
+                event.getChannel().sendMessage(
+                        UsersCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message)
+                ).queue();
+                return true;
+            case "deleteChar":
+                event.getChannel().sendMessage(
+                        UsersCharacters.deleteCharacter(event.getAuthor().getIdLong())
+                ).queue();
+                return true;
+            case "addQuote":
+                event.getChannel().sendMessage(
+                        Quotes.addQuote(message)
+                ).queue();
+                return true;
+            case "getQuote":
+                if (message.equals("")) {
                     event.getChannel().sendMessage(
-                            SessionTimes.getNextSessionAsString(event.getMember())
+                            Quotes.getQuote()
                     ).queue();
-                    return true;
-                case "roll":
-                    event.getChannel().sendMessage(
-                            Roll.rollDieFromChatEvent(message, event.getAuthor().getName())
-                    ).queue();
-                    return true;
-                case "potion":
-                    event.getChannel().sendMessage(
-                            GrogList.drinkGrog(event.getAuthor().getName())
-                    ).queue();
-                    return true;
-                case "newChar":
-                    event.getChannel().sendMessage(
-                            UsersCharacters.createUserCharacter(event.getAuthor().getIdLong(), message)
-                    ).queue();
-                    return true;
-                case "description":
-                    event.getChannel().sendMessage(
-                            UsersCharacters.getCharacterDescription(event.getAuthor().getIdLong())
-                    ).queue();
-                    return true;
-                case "races":
-                    event.getChannel().sendMessage(Race.getRacesList()).queue();
-                    return true;
-                case "classes":
-                    event.getChannel().sendMessage(Class_.getClassesList()).queue();
-                    return true;
-                case "weapons":
-                    event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
-                    return true;
-                case "attack":
-                    event.getChannel().sendMessage(
-                            UsersCharacters.attack(event.getAuthor(), message)
-                    ).queue();
-                    return true;
-                case "changeWeapon":
-                    event.getChannel().sendMessage(
-                            UsersCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message)
-                    ).queue();
-                    return true;
-                case "deleteChar":
-                    event.getChannel().sendMessage(
-                            UsersCharacters.deleteCharacter(event.getAuthor().getIdLong())
-                    ).queue();
-                    return true;
-                case "addQuote":
-                    event.getChannel().sendMessage(
-                            Quotes.addQuote(message)
-                    ).queue();
-                    return true;
-                case "getQuote":
-                    if (message.equals("")) {
+                }
+                else {
+                    try {
                         event.getChannel().sendMessage(
-                                Quotes.getQuote()
+                                Quotes.getQuote(Integer.parseInt(message))
                         ).queue();
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException(
+                                "Incorrect quote format, either give no argument or an integer");
                     }
-                    else {
-                        try {
-                            event.getChannel().sendMessage(
-                                    Quotes.getQuote(Integer.parseInt(message))
-                            ).queue();
-                        } catch (IllegalArgumentException e) {
-                            throw new IllegalArgumentException(
-                                    "Incorrect quote format, either give no argument or an integer");
-                        }
-                    }
-                    return true;
-                case "confetti":
-                    event.getChannel().sendMessage(
-                            " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
-                                    + " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
-                    ).queue();
-                    return true;
-                case "fancify":
-                    event.getChannel().sendMessage("But... but... I'm already fancy af").queue();
-                    return true;
-                case "complaints":
-                    event.getChannel().sendMessage(
-                            "You may kindly take your complaints and insert them into your anal cavity "
-                                    + "making sure to use plenty of lube."
-                    ).queue();
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
-            return true;
+                }
+                return true;
+            case "confetti":
+                event.getChannel().sendMessage(
+                        " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
+                                + " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
+                ).queue();
+                return true;
+            case "fancify":
+                event.getChannel().sendMessage("But... but... I'm already fancy af").queue();
+                return true;
+            case "complaints":
+                event.getChannel().sendMessage(
+                        "You may kindly take your complaints and insert them into your anal cavity "
+                                + "making sure to use plenty of lube."
+                ).queue();
+                return true;
+            default:
+                return false;
         }
+    }
+
+
+    private static boolean containsDigit(String message) {
+        for (int i = 0; i < 3; i++) {
+            if (Character.isDigit(message.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -231,30 +243,25 @@ public class Main {
      * Returns true if a command was completed
      */
     private static boolean dmCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        try {
-            switch (command) {
-                case "dmHelp":
-                    event.getChannel().sendMessage(Help.getdmHelp()).queue();
-                    return true;
-                case "dateFormat":
-                    event.getChannel().sendMessage(Help.dateFormatHelp).queue();
-                    return true;
-                case "addSessionTime":
-                    event.getChannel().sendMessage(
-                            SessionTimes.addSessionTime(event.getMember(), message)
-                    ).queue();
-                    return true;
-                case "gameReminder":
-                    event.getChannel().sendMessage(
-                            SessionTimes.getSessionReminder(event.getMember())
-                    ).queue();
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
-            return true;
+        switch (command) {
+            case "dmHelp":
+                event.getChannel().sendMessage(Help.getdmHelp()).queue();
+                return true;
+            case "dateFormat":
+                event.getChannel().sendMessage(Help.dateFormatHelp).queue();
+                return true;
+            case "addSessionTime":
+                event.getChannel().sendMessage(
+                        SessionTimes.addSessionTime(event.getMember(), message)
+                ).queue();
+                return true;
+            case "gameReminder":
+                event.getChannel().sendMessage(
+                        SessionTimes.getSessionReminder(event.getMember())
+                ).queue();
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -263,49 +270,44 @@ public class Main {
      * Returns true if a command was completed
      */
     private static boolean adminCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        try {
-            switch (command) {
-                case "adminHelp":
-                    event.getChannel().sendMessage(Help.getadminHelp()).queue();
-                    return true;
-                case "addGame":
+        switch (command) {
+            case "adminHelp":
+                event.getChannel().sendMessage(Help.getadminHelp()).queue();
+                return true;
+            case "addGame":
+                event.getChannel().sendMessage(
+                        SessionTimes.addGame(message)
+                ).queue();
+                return true;
+            case "removeGame":
+                event.getChannel().sendMessage(
+                        SessionTimes.removeGame(message)
+                ).queue();
+                return true;
+            case "removeQuote":
+                try {
                     event.getChannel().sendMessage(
-                            SessionTimes.addGame(message)
+                            Quotes.removeQuote(Integer.parseInt(message))
                     ).queue();
-                    return true;
-                case "removeGame":
-                    event.getChannel().sendMessage(
-                            SessionTimes.removeGame(message)
-                    ).queue();
-                    return true;
-                case "removeQuote":
-                    try {
-                        event.getChannel().sendMessage(
-                                Quotes.removeQuote(Integer.parseInt(message))
-                        ).queue();
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
-                    }
-                    return true;
-                case "lock":
-                    isLocked = true;
-                    return true;
-                case "unlock":
-                    isLocked = false;
-                    return true;
-                case "save":
-                    save();
-                    return true;
-                case "exit":
-                    save();
-                    System.exit(0);
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
-            return true;
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
+                }
+                return true;
+            case "lock":
+                isLocked = true;
+                return true;
+            case "unlock":
+                isLocked = false;
+                return true;
+            case "save":
+                save();
+                return true;
+            case "exit":
+                save();
+                System.exit(0);
+                return true;
+            default:
+                return false;
         }
     }
 

@@ -23,6 +23,7 @@ public class Help {
                     + start + "ping - test bot is working\n"
                     + start + "gameTime - prints time of your next game session\n"
                     + start + "roll [quantity] d {die size} [modifier] - roll a die\n"
+                    + start + "roll {skill/ability/initiative} - roll a skill check, saving throw, or initiative\n"
                     + start + "potion - drink a potion\n"
                     + start + "addQuote {start of message} - adds a quote to the bot to be preserved forever ｡◕‿◕｡✿ "
                     + "(NB: Juuzo has the memory of a goldfish and thus can only quote from the last 20 messages)\n"

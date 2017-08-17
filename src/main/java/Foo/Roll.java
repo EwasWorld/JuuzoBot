@@ -126,7 +126,7 @@ public class Roll {
     }
 
 
-    private String getStringForRoll() {
+    public String getStringForRoll() {
         return getStringForRoll(RollType.NORMAL);
     }
 
@@ -151,7 +151,7 @@ public class Roll {
                 return returnString + " and fumbled!";
             }
             else if (rollResult.isNaddy20()) {
-                return returnString + " and crits!";
+                return returnString + " with a nat 20!";
             }
             else {
                 return returnString;

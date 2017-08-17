@@ -42,36 +42,37 @@ public class AbilitySkillConstants {
         NATURE, PERCEPTION,
         PERFORMANCE, PERSUASION,
         RELIGION, SLEIGHTOFHAND,
-        STEALTH, SURVIVAL
-    }
+        STEALTH, SURVIVAL;
 
-    public static AbilityEnum convertSkillToAbility(SkillEnum skill) {
-        switch (skill) {
-            case ATHLETICS:
-                return AbilityEnum.STRENGTH;
-            case ACROBATICS:
-            case SLEIGHTOFHAND:
-            case STEALTH:
-                return AbilityEnum.DEXTERITY;
-            case ARCANA:
-            case HISTORY:
-            case INVESTIGATION:
-            case NATURE:
-            case RELIGION:
-                return AbilityEnum.INTELLIGENCE;
-            case ANIMALHANDLING:
-            case INSIGHT:
-            case MEDICINE:
-            case PERCEPTION:
-            case SURVIVAL:
-                return AbilityEnum.WISDOM;
-            case DECEPTION:
-            case INTIMIDATION:
-            case PERFORMANCE:
-            case PERSUASION:
-                return AbilityEnum.CHARISMA;
-            default:
-                return null;
+        private AbilityEnum mainAbility;
+
+        public AbilityEnum getMainAbility() {
+            return mainAbility;
+        }
+
+        static {
+            ATHLETICS.mainAbility = AbilityEnum.STRENGTH;
+
+            ACROBATICS.mainAbility = AbilityEnum.DEXTERITY;
+            SLEIGHTOFHAND.mainAbility = AbilityEnum.DEXTERITY;
+            STEALTH.mainAbility = AbilityEnum.DEXTERITY;
+
+            ARCANA.mainAbility = AbilityEnum.INTELLIGENCE;
+            HISTORY.mainAbility = AbilityEnum.INTELLIGENCE;
+            INVESTIGATION.mainAbility = AbilityEnum.INTELLIGENCE;
+            NATURE.mainAbility = AbilityEnum.INTELLIGENCE;
+            RELIGION.mainAbility = AbilityEnum.INTELLIGENCE;
+
+            ANIMALHANDLING.mainAbility = AbilityEnum.WISDOM;
+            INSIGHT.mainAbility = AbilityEnum.WISDOM;
+            MEDICINE.mainAbility = AbilityEnum.WISDOM;
+            PERCEPTION.mainAbility = AbilityEnum.WISDOM;
+            SURVIVAL.mainAbility = AbilityEnum.WISDOM;
+
+            DECEPTION.mainAbility = AbilityEnum.CHARISMA;
+            INTIMIDATION.mainAbility = AbilityEnum.CHARISMA;
+            PERFORMANCE.mainAbility = AbilityEnum.CHARISMA;
+            PERSUASION.mainAbility = AbilityEnum.CHARISMA;
         }
     }
 

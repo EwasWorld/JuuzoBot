@@ -76,6 +76,10 @@ public class SessionTimes implements Serializable {
             String roleName = message.split(" ")[0].toUpperCase();
             String fullName = message.substring(roleName.length() + 1);
 
+            if (gameTimes.containsKey(roleName)) {
+                throw new IllegalArgumentException("Game with the name " + roleName + " already exists");
+            }
+
             gameTimes.put(roleName, new SessionTimes(fullName));
             return "Game added";
         }
