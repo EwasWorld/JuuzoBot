@@ -3,7 +3,6 @@ package Grog;
 import com.google.gson.*;
 import Foo.IDs;
 import Foo.Roll;
-import net.dv8tion.jda.core.entities.MessageChannel;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,16 +44,14 @@ public class GrogList {
     }
 
 
-    public static void drinkGrog(String author, MessageChannel channel) {
+    public static String drinkGrog(String author) {
         try {
             int roll = Roll.quickRoll(1000) - 1;
             String effect = GrogList.getEffects().get(roll);
             effect = effect.replaceAll("PC", author);
-            effect = author + " drinks an Essence of Balthazar potion. " + effect;
-
-            channel.sendMessage(effect).queue();
+            return author + " drinks an Essence of Balthazar potion. " + effect;
         } catch (NullPointerException | FileNotFoundException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Potions seem to be broken right now");
         }
     }
 

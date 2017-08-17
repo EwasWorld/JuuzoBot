@@ -7,7 +7,6 @@ import CharacterBox.RaceBox.SubRace;
 import Foo.IDs;
 import Foo.LoadSaveConstants;
 import Foo.Roll;
-import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.io.*;
@@ -33,7 +32,10 @@ public class UsersCharacters implements Serializable {
     }
 
 
-    public static void createUserCharacter(MessageChannel channel, long id, String creationString) {
+    /*
+     * id is the id of the user who the created character will be bound to
+     */
+    public static String createUserCharacter(long id, String creationString) {
         if (userCharacters == null) {
             userCharacters = new HashMap<>();
         }
@@ -63,16 +65,14 @@ public class UsersCharacters implements Serializable {
             try {
                 race = Race.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
             } catch (IllegalArgumentException e) {
-                channel.sendMessage("Invalid race").queue();
-                return;
+                throw new IllegalArgumentException("Invalid race");
             }
         }
 
         try {
             class_ = Class_.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            channel.sendMessage("Invalid class").queue();
-            return;
+            throw new IllegalArgumentException("Invalid class");
         }
 
         String name = "";
@@ -86,41 +86,49 @@ public class UsersCharacters implements Serializable {
 
         Character character = new Character(name.trim(), race, subRace, class_);
         userCharacters.put(id, character);
-        channel.sendMessage("Character successfully created.\n" + character.getDescription()).queue();
+        return "Character successfully created.\n" + character.getDescription();
     }
 
 
-    public static void deleteCharacter(MessageChannel channel, long id) {
+    /*
+     * id is the id of the user who's character will be deleted
+     */
+    public static String deleteCharacter(long id) {
         if (userCharacters.containsKey(id)) {
             userCharacters.remove(id);
-            channel.sendMessage("Character removed").queue();
+            return "Character removed";
         }
         else {
-            channel.sendMessage("You don't have a character to delete").queue();
+            throw new IllegalStateException("You don't have a character to delete");
         }
     }
 
 
-    public static void changeCharacterWeapon(MessageChannel channel, User author, String newWeapon) {
-        long authorID = author.getIdLong();
-        if (getCharacter(authorID).isPresent()) {
-            if (userCharacters.get(authorID).changeWeapons(newWeapon)) {
-                channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+    /*
+     * id is the id of the user who's character who's weapon will be changed
+     */
+    public static String changeCharacterWeapon(long id, String newWeapon) {
+        if (getCharacter(id).isPresent()) {
+            if (userCharacters.get(id).changeWeapons(newWeapon)) {
+                return "Weapon change successful, enjoy your new toy.";
             }
             else {
-                channel.sendMessage("Weapon not recognised, you can see a list of weapons using !weapons").queue();
+                throw new IllegalArgumentException(
+                        "Weapon not recognised, you can see a list of weapons using !weapons");
             }
         }
         else {
-            channel.sendMessage(
+            throw new IllegalStateException(
                     "If you don't have a character yet you can't change their weapon. Use !newChar to make a new "
-                            + "character (!charHelp if you get stuck)")
-                    .queue();
+                            + "character (!charHelp if you get stuck)");
         }
     }
 
 
-    public static void attack(User author, String victim, MessageChannel channel) {
+    /*
+     * The attacker will be the character of the author
+     */
+    public static String attack(User author, String victim) {
         final String attacker = author.getName();
         victim = victim.trim().replace("@", "");
 
@@ -147,23 +155,25 @@ public class UsersCharacters implements Serializable {
             }
 
             message = message.replaceAll("PC", character.getName());
-            message = message.replaceAll("VIC", victim);
-            channel.sendMessage(message).queue();
+            return message.replaceAll("VIC", victim);
         }
         else {
-            channel.sendMessage(attacker
-                                        + ", I see you're eager to get to the violence but you'll need to make a character first using "
-                                        + "!newChar").queue();
+            throw new IllegalStateException(attacker
+                                        + ", I see you're eager to get to the violence but you'll need to make a "
+                                        + "character first using !newChar");
         }
     }
 
 
-    public static void printDescription(long id, MessageChannel channel) {
+    /*
+     * Returns the description of the character bound to the given id
+     */
+    public static String getCharacterDescription(long id) {
         if (userCharacters.containsKey(id)) {
-            channel.sendMessage(userCharacters.get(id).getDescription()).queue();
+            return userCharacters.get(id).getDescription();
         }
         else {
-            channel.sendMessage("You don't seem to have a character yet. Make one using !newChar").queue();
+            throw new IllegalStateException("You don't seem to have a character yet. Make one using !newChar");
         }
     }
 
@@ -171,8 +181,7 @@ public class UsersCharacters implements Serializable {
     public static void save() {
         try {
             LoadSaveConstants.save(fileLocation, userCharacters);
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             System.out.println("Session times save failed");
         }
     }
@@ -181,8 +190,7 @@ public class UsersCharacters implements Serializable {
     public static void load() {
         try {
             userCharacters = (Map<Long, Character>) LoadSaveConstants.loadFirstObject(fileLocation);
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             System.out.println("Session times load failed");
         }
     }

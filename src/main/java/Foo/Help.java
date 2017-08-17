@@ -2,7 +2,7 @@ package Foo;
 
 public class Help {
     private static final String start = "\t:carrot: !";
-    private static final String end = "(NB: tHeY'rE cAsE sEnSiTivE)";
+    private static final String end = "\n(NB: tHeY'rE cAsE sEnSiTivE)";
 
     public static String getHelp() {
         return help + end;

@@ -1,13 +1,15 @@
 package Foo;
 
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-
 import java.util.Random;
 
 
 
 public class Roll {
+    public static final String invalidFormat
+            = "Invalid input. Use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'";
+
+
+
     private enum RollType {NORMAL, ADVANTAGE, DISADVANTAGE}
 
 
@@ -31,7 +33,11 @@ public class Roll {
     }
 
 
-    public static void rollDieFromChatEvent(String message, String author, MessageChannel channel) {
+    /*
+     * Returns the roll for the person
+     * message should be in the format [adv/dis] [quantity] d {size} [modifier]
+     */
+    public static String rollDieFromChatEvent(String message, String author) {
         int quantity;
         int dieSize;
         int modifier;
@@ -39,15 +45,14 @@ public class Roll {
 
         message = message.replace(" ", "");
         if (!message.contains("d")) {
-            sendInvalidFormatMessage(channel);
-            return;
+            throw new IllegalArgumentException(invalidFormat);
         }
 
         final RollType rollType = getRollType(message);
         if (rollType != RollType.NORMAL) {
             message = message.substring(3);
         }
-        
+
         try {
             messageParts = message.split("d");
             quantity = getQuantity(messageParts[0]);
@@ -61,22 +66,18 @@ public class Roll {
                 }
                 dieSize = Integer.parseInt(messageParts[0]);
                 modifier = Integer.parseInt(messageParts[1]);
-                
             } catch (IllegalStateException e) {
                 dieSize = Integer.parseInt(message);
                 modifier = 0;
             }
 
-            message = author + " "
-                    + new Roll(quantity, dieSize, modifier).getStringForRoll(rollType);
-            channel.sendMessage(message).queue();
-
+            return author + " " + new Roll(quantity, dieSize, modifier).getStringForRoll(rollType);
         } catch (IllegalArgumentException e) {
-            sendInvalidFormatMessage(channel);
+            throw new IllegalArgumentException(invalidFormat);
         }
     }
-    
-    
+
+
     private static RollType getRollType(String message) {
         if (message.startsWith("adv")) {
             return RollType.ADVANTAGE;
@@ -120,12 +121,6 @@ public class Roll {
     }
 
 
-    private static void sendInvalidFormatMessage(MessageChannel channel) {
-        channel.sendMessage(
-                "Invalid input. Use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'").queue();
-    }
-
-
     public static int quickRoll(int dieSize) {
         return new Roll(dieSize).roll().result;
     }
@@ -136,17 +131,17 @@ public class Roll {
     }
 
 
+    /*
+     * Rolls the die and returns the output as a string (inc. crits and fumbles)
+     */
     private String getStringForRoll(RollType rollType) {
-        if (dieSize <= 0) {
-            throw new NumberFormatException("Invalid input");
-        }
-        else if (dieSize == 1) {
+        if (dieSize == 1) {
             // TODO roll a d1
             // quantity is number of bad things to happen or always just one thing?
             return "has incurred Eywa's wrath and is struck by a bolt of lightning";
         }
         else {
-            RollResult rollResult = roll(rollType);
+            final RollResult rollResult = roll(rollType);
             String returnString = "rolled a " + rollResult.getResult();
 
             if (rollResult.isCritFail() && rollResult.isNaddy20()) {
@@ -165,8 +160,11 @@ public class Roll {
     }
 
 
+    /*
+     * Rolls and applies advantage/disadvantage if necessary
+     */
     public RollResult roll(RollType rollType) {
-        RollResult roll1 = roll();
+        final RollResult roll1 = roll();
         switch (rollType) {
             case ADVANTAGE:
                 return max(roll1, roll());
@@ -179,12 +177,15 @@ public class Roll {
     }
 
 
+    /*
+     * Rolls the die
+     */
     public RollResult roll() {
         boolean naddy20 = false;
         boolean critFail = false;
 
         if (dieSize > 1) {
-            Random random = new Random();
+            final Random random = new Random();
             int total = 0;
 
             for (int j = 0; j < quantity; j++) {
@@ -206,7 +207,7 @@ public class Roll {
             return new RollResult(total, naddy20, critFail);
         }
         else {
-            throw new NumberFormatException("Invalid dieSize");
+            throw new IllegalArgumentException("Invalid die size");
         }
     }
 
@@ -237,7 +238,7 @@ public class Roll {
         private boolean critFail = false;
 
 
-        public RollResult(int result, boolean naddy20, boolean critFail) {
+        private RollResult(int result, boolean naddy20, boolean critFail) {
             this.result = result;
             this.naddy20 = naddy20;
             this.critFail = critFail;

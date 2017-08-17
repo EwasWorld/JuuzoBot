@@ -1,7 +1,5 @@
 package Foo;
 
-import net.dv8tion.jda.core.entities.MessageChannel;
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,17 +28,18 @@ public class Quotes implements Serializable {
 
 
     /*
-         * Temporarily stores a channel message
-         */
+     * Temporarily stores a channel message
+     */
     public static void addMessage(String author, String contents) {
         channelMessages[head] = new Quotes(author, ZonedDateTime.now(), contents);
         head = ++head % channelMessages.length;
     }
 
+
     /*
      * Finds the specified message and stores for the future
      */
-    public static void addQuote(MessageChannel channel, String searchMessage) {
+    public static String addQuote(String searchMessage) {
         Quotes quoteToAdd = null;
         for (Quotes quote : channelMessages) {
             if (quote != null && quote.message.startsWith(searchMessage)) {
@@ -48,32 +47,33 @@ public class Quotes implements Serializable {
                     quoteToAdd = quote;
                 }
                 else {
-                    channel.sendMessage("Quote is ambiguous, please clarify").queue();
-                    return;
+                    throw new IllegalArgumentException("Quote is ambiguous, please clarify");
                 }
             }
         }
 
         if (quoteToAdd == null) {
-            channel.sendMessage("Quote not found").queue();
+            throw new IllegalArgumentException("Quote not found");
         }
         else {
             quotes.add(quoteToAdd);
-            channel.sendMessage(getQuote(quotes.size() - 1)).queue();
+            return getQuote(quotes.size() - 1);
         }
     }
+
 
     /*
      * Gets a random quote
      */
-    public static void getQuote(MessageChannel channel) {
-        if (quotes.size() == 0) {
-            channel.sendMessage(getQuote(new Random().nextInt(quotes.size()))).queue();
+    public static String getQuote() {
+        if (quotes.size() != 0) {
+            return getQuote(new Random().nextInt(quotes.size()));
         }
         else {
-            channel.sendMessage("There are no saved quotes").queue();
+            throw new IllegalStateException("There are no saved quotes");
         }
     }
+
 
     /*
      * Gets a specific quote
@@ -94,29 +94,16 @@ public class Quotes implements Serializable {
         }
     }
 
-    /*
-     * Gets a random quote
-     */
-    public static void getQuote(MessageChannel channel, int index) {
-        try {
-            channel.sendMessage(getQuote(index)).queue();
-        } catch (IllegalArgumentException e) {
-            channel.sendMessage(e.getMessage()).queue();
-        }
-    }
 
     /*
      * Removes the specified quote from the bot
      */
-    public static void removeQuote(MessageChannel channel, int index) {
-        try {
-            getQuote(index);
-            quotes.remove(index);
-            channel.sendMessage("Quote removed").queue();
-        } catch (IllegalArgumentException e) {
-            channel.sendMessage(e.getMessage()).queue();
-        }
+    public static String removeQuote(int index) {
+        getQuote(index);
+        quotes.remove(index);
+        return "Quote removed";
     }
+
 
     public static void save() {
         try {
@@ -125,6 +112,7 @@ public class Quotes implements Serializable {
             System.out.println("Quotes save failed");
         }
     }
+
 
     public static void load() {
         try {
