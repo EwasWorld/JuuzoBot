@@ -19,25 +19,27 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class Class_ {
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/ClassBox/Classes.json";
-    private static Map<ClassEnum, Class_> classes;
-
-    private int hitDie;
-    private AbilitySkillConstants.AbilityEnum[] abilityOrder;
-    private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
-    private int skillProficienciesQuantity;
-    private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
-    private Funds funds;
-    private WeaponProficiencies weaponProficiencies;
-    private Weapon.WeaponsEnum startWeapon;
-
-
-
     public enum ClassEnum {
         BARBARIAN, BARD, CLERIC, DRUID, FINESSEFIGHTER,
         FIGHTER, MONK, PALADIN, RANGER, ROGUE,
         SORCERER, WARLOCK, WIZARD
     }
+
+
+
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/ClassBox/Classes.json";
+    private static Map<ClassEnum, Class_> classes;
+    private int hitDie;
+    // [0] will be the highest stat
+    private AbilitySkillConstants.AbilityEnum[] abilityOrder;
+    private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
+    // The number of skill proficiencies to be chosen from skillProficiencies
+    private int skillQuantity;
+    // Possible skill proficiencies
+    private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
+    private FundsSetUp fundsSetUp;
+    private WeaponProficiencies weaponProficiencies;
+    private Weapon.WeaponsEnum startWeapon;
 
 
     private Class_(Object rawObj) {
@@ -47,14 +49,14 @@ public class Class_ {
             final JsonObject object = (JsonObject) element;
 
             final ClassEnum classEnum = ClassEnum.valueOf(object.get("name").getAsString().toUpperCase());
-            final JsonObject funds = object.getAsJsonObject("funds");
+            final JsonObject funds = object.getAsJsonObject("fundsSetUp");
             classes.put(classEnum, new Class_(
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
-                    object.get("skillProficienciesQuantity").getAsInt(),
+                    object.get("skillQuantity").getAsInt(),
                     createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
-                    new Funds(
+                    new FundsSetUp(
                             funds.get("quantity").getAsInt(),
                             funds.get("multiply").getAsBoolean()
                     ),
@@ -65,36 +67,14 @@ public class Class_ {
     }
 
 
-    private Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
-                   Set<AbilitySkillConstants.AbilityEnum> savingThrows, int skillProficienciesQuantity,
-                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, Funds funds,
-                   WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
-    {
-        this.hitDie = hitDie;
-        this.abilityOrder = abilityOrder;
-        this.savingThrows = savingThrows;
-        this.skillProficienciesQuantity = skillProficienciesQuantity;
-        this.skillProficiencies = skillProficiencies;
-        this.funds = funds;
-        this.weaponProficiencies = weaponProficiencies;
-        this.startWeapon = startWeapon;
-    }
-
-
     private static AbilitySkillConstants.AbilityEnum[] createAbilityOrder(JsonObject abilityOrderObj) {
         final AbilitySkillConstants.AbilityEnum[] newAbilityOrder = new AbilitySkillConstants.AbilityEnum[6];
-        newAbilityOrder[abilityOrderObj.get("str").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.STRENGTH;
-        newAbilityOrder[abilityOrderObj.get("dex").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.DEXTERITY;
-        newAbilityOrder[abilityOrderObj.get("con").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.CONSTITUTION;
-        newAbilityOrder[abilityOrderObj.get("int").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.INTELLIGENCE;
-        newAbilityOrder[abilityOrderObj.get("wis").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.WISDOM;
-        newAbilityOrder[abilityOrderObj.get("cha").getAsInt() - 1]
-                = AbilitySkillConstants.AbilityEnum.CHARISMA;
+        newAbilityOrder[abilityOrderObj.get("str").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.STRENGTH;
+        newAbilityOrder[abilityOrderObj.get("dex").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.DEXTERITY;
+        newAbilityOrder[abilityOrderObj.get("con").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.CONSTITUTION;
+        newAbilityOrder[abilityOrderObj.get("int").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.INTELLIGENCE;
+        newAbilityOrder[abilityOrderObj.get("wis").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.WISDOM;
+        newAbilityOrder[abilityOrderObj.get("cha").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.CHARISMA;
         return newAbilityOrder;
     }
 
@@ -119,7 +99,7 @@ public class Class_ {
 
 
     private static WeaponProficiencies createWeaponProficiencies(JsonArray weaponProficienciesArray) {
-        WeaponProficiencies weaponProficiencies = new WeaponProficiencies();
+        final WeaponProficiencies weaponProficiencies = new WeaponProficiencies();
         for (JsonElement weaponProficiency : weaponProficienciesArray) {
             try {
                 weaponProficiencies.add(Weapon.WeaponsEnum.valueOf(weaponProficiency.getAsString().toUpperCase()));
@@ -134,6 +114,22 @@ public class Class_ {
             }
         }
         return weaponProficiencies;
+    }
+
+
+    private Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
+                   Set<AbilitySkillConstants.AbilityEnum> savingThrows, int skillQuantity,
+                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
+                   WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
+    {
+        this.hitDie = hitDie;
+        this.abilityOrder = abilityOrder;
+        this.savingThrows = savingThrows;
+        this.skillQuantity = skillQuantity;
+        this.skillProficiencies = skillProficiencies;
+        this.fundsSetUp = fundsSetUp;
+        this.weaponProficiencies = weaponProficiencies;
+        this.startWeapon = startWeapon;
     }
 
 
@@ -164,7 +160,7 @@ public class Class_ {
         }
 
         String classes = "Available classes: ";
-        ClassEnum[] classEnums = ClassEnum.values();
+        final ClassEnum[] classEnums = ClassEnum.values();
 
         for (int i = 0; i < classEnums.length; i++) {
             classes += classEnums[i].toString();
@@ -193,8 +189,8 @@ public class Class_ {
     }
 
 
-    public int getSkillProficienciesQuantity() {
-        return skillProficienciesQuantity;
+    public int getSkillQuantity() {
+        return skillQuantity;
     }
 
 
@@ -203,8 +199,8 @@ public class Class_ {
     }
 
 
-    public Funds getFunds() {
-        return funds;
+    public int rollFunds() {
+        return fundsSetUp.rollFunds();
     }
 
 

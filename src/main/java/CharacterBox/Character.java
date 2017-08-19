@@ -42,7 +42,7 @@ public class Character implements Serializable {
         final Race raceInfo = Race.getRaceInfo(race);
         final SubRace subRaceInfo = getSubraceInfo(subRace);
 
-        Map<AbilitySkillConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
+        final Map<AbilitySkillConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
         for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
             AbilitySkillConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
             int score = AbilitySkillConstants.startingAbilityScores[i]
@@ -53,14 +53,13 @@ public class Character implements Serializable {
         abilities = new Abilities(abilitiesMap);
 
         savingThrows = classInfo.getSavingThrows();
-        addSkillProficiencies(race, classInfo.getSkillProficiencies(), classInfo.getSkillProficienciesQuantity());
+        addSkillProficiencies(race, classInfo.getSkillProficiencies(), classInfo.getSkillQuantity());
         weaponProficiencies = classInfo.getWeaponProficiencies();
         weapon = classInfo.getStartWeapon();
-        funds = classInfo.getFunds().rollFunds();
+        funds = classInfo.rollFunds();
         hp = classInfo.getHitDie() + abilities.getModifier(AbilitySkillConstants.AbilityEnum.CONSTITUTION);
 
-        age = new Random().nextInt(raceInfo.getAgeUpperBound() - raceInfo.getAgeLowerBound()) + raceInfo
-                .getAgeLowerBound();
+        age = raceInfo.generateRandomAge();
         speed = raceInfo.getSpeed();
 
         languages = raceInfo.getLanguages();
@@ -75,9 +74,8 @@ public class Character implements Serializable {
 
     private SubRace getSubraceInfo(SubRace.SubRaceEnum subRaceEnum) {
         if (subRaceEnum != null) {
-            SubRace subRace = Race.getRaceInfo(subRaceEnum);
+            final SubRace subRace = Race.getRaceInfo(subRaceEnum);
             if (race != subRace.getMainRace()) {
-                // TODO: Handle
                 throw new IllegalArgumentException("Invalid subrace");
             }
             else {
@@ -91,35 +89,28 @@ public class Character implements Serializable {
 
 
     /*
-     * Half elves get 2 extra random proficiencies
+     * Half elves get 2 extra random skill proficiencies
+     * Half orcs get proficiency in intimidation
      */
-    private void addSkillProficiencies(Race.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+    private void addSkillProficiencies(Race.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies,
+                                       int quantity)
+    {
         addSkillProficiencies(possibleProficiencies, quantity);
-
-        if (race == Race.RaceEnum.HALFELF) {
-            AbilitySkillConstants.SkillEnum[] skillEnums = AbilitySkillConstants.SkillEnum.values();
-            for (int i = 0; i < 2; i++) {
-                AbilitySkillConstants.SkillEnum skill;
-                do {
-                    skill = skillEnums[new Random().nextInt(skillEnums.length)];
-                } while (skillProficiencies.contains(skill));
-                skillProficiencies.add(skill);
-            }
-        }
-        else if (race == Race.RaceEnum.HALFORC) {
-            skillProficiencies.add(AbilitySkillConstants.SkillEnum.INTIMIDATION);
-        }
-    }
-
-
-    private void addSkillProficiencies(Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
-        skillProficiencies = new HashSet<>();
-        for (int i = 0; i < quantity; i++) {
-            int size = possibleProficiencies.size();
-            AbilitySkillConstants.SkillEnum chosenSkill = possibleProficiencies
-                    .toArray(new AbilitySkillConstants.SkillEnum[size])[new Random().nextInt(size)];
-            skillProficiencies.add(chosenSkill);
-            possibleProficiencies.remove(chosenSkill);
+        switch (race) {
+            case HALFELF:
+                final AbilitySkillConstants.SkillEnum[] skillEnums = AbilitySkillConstants.SkillEnum.values();
+                for (int i = 0; i < 2; i++) {
+                    AbilitySkillConstants.SkillEnum skill;
+                    // Find a skill that the character doesn't yet have proficiency in
+                    do {
+                        skill = skillEnums[new Random().nextInt(skillEnums.length)];
+                    } while (skillProficiencies.contains(skill));
+                    skillProficiencies.add(skill);
+                }
+                break;
+            case HALFORC:
+                skillProficiencies.add(AbilitySkillConstants.SkillEnum.INTIMIDATION);
+                break;
         }
     }
 
@@ -153,6 +144,21 @@ public class Character implements Serializable {
     }
 
 
+    /*
+     * Choose a specified number of proficiencies from the given set
+     */
+    private void addSkillProficiencies(Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+        skillProficiencies = new HashSet<>();
+        for (int i = 0; i < quantity; i++) {
+            int size = possibleProficiencies.size();
+            final AbilitySkillConstants.SkillEnum chosenSkill = possibleProficiencies
+                    .toArray(new AbilitySkillConstants.SkillEnum[size])[new Random().nextInt(size)];
+            skillProficiencies.add(chosenSkill);
+            possibleProficiencies.remove(chosenSkill);
+        }
+    }
+
+
     public String getDescription() {
         String subraceString = "";
         if (subRace != null) {
@@ -175,15 +181,10 @@ public class Character implements Serializable {
         string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
         string += String.format("Languages: %s\n", getLanguagesAsString());
-        string += String.format("Funds: %d\n", funds);
+        string += String.format("FundsSetUp: %d\n", funds);
         string += String.format("Weapon Proficiencies: %s\n", weaponProficiencies.toString());
         string += String.format("Weapon: %s\n", weapon.toString());
         return string;
-    }
-
-
-    public String getName() {
-        return name;
     }
 
 
@@ -223,27 +224,41 @@ public class Character implements Serializable {
     }
 
 
+    public String getName() {
+        return name;
+    }
+
+
     public Weapon getWeaponInfo() {
         return Weapon.getWeaponInfo(weapon);
     }
 
 
+    /*
+     * Returns an attack roll using the current weapon
+     */
     public Roll.RollResult attackRoll() {
         return new Roll(1, 20, getAttackModifier()).roll();
     }
 
 
+    /*
+     * Returns the attack modifier for the current weapon
+     */
     public int getAttackModifier() {
-        int modifier = 0;
+        int modifier = getAbilityAttackModifier(Weapon.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
 
         if (weaponProficiencies.contains(weapon)) {
             modifier = AbilitySkillConstants.getProficiencyBonus(level);
         }
 
-        return modifier + getAbilityAttackModifier(Weapon.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
+        return modifier;
     }
 
 
+    /*
+     * Returns the modifier of the ability that the current weapon uses to modify attacks (str or dex)
+     */
     private int getAbilityAttackModifier(Weapon.AttackTypeEnum attackType) {
         switch (attackType) {
             case MELEE:
@@ -264,6 +279,9 @@ public class Character implements Serializable {
     }
 
 
+    /*
+     * Returns a damage roll for the current weapon
+     */
     public int rollDamage() {
         int damage = getAttackModifier() + getWeaponInfo().rollDamage();
 
@@ -274,6 +292,9 @@ public class Character implements Serializable {
     }
 
 
+    /*
+     * Returns a critical damage roll for the current weapon
+     */
     public int rollCriticalDamage() {
         int damage = getAttackModifier() + getWeaponInfo().rollCriticalDamage();
 
@@ -283,26 +304,24 @@ public class Character implements Serializable {
         return damage;
     }
 
-    /*
-     * Returns true if successful
-     */
-    public boolean changeWeapons(String newWeapon) {
+
+    public void changeWeapons(String newWeapon) {
         try {
             weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
-            return true;
-        }
-        catch (IllegalArgumentException e) {
-            return false;
+        } catch (IllegalArgumentException e) {throw new IllegalArgumentException(
+                "Weapon not recognised, you can see a list of weapons using !weapons");
         }
     }
 
+
     public String rollInitiative() {
-        int modifier = abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
+        final int modifier = abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
         return new Roll(1, 20, modifier).getStringForRoll();
     }
 
+
     public String rollSavingThrow(AbilitySkillConstants.AbilityEnum ability) {
-        int modifier =  abilities.getModifier(ability);
+        int modifier = abilities.getModifier(ability);
 
         if (savingThrows.contains(ability)) {
             modifier += AbilitySkillConstants.getProficiencyBonus(level);
@@ -310,6 +329,7 @@ public class Character implements Serializable {
 
         return new Roll(1, 20, modifier).getStringForRoll();
     }
+
 
     public String rollSkillCheck(AbilitySkillConstants.SkillEnum skill) {
         int modifier = abilities.getModifier(skill.getMainAbility());

@@ -1,8 +1,8 @@
 package Grog;
 
-import com.google.gson.*;
 import Foo.IDs;
 import Foo.Roll;
+import com.google.gson.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,22 +28,6 @@ public class GrogList {
     }
 
 
-    private static List<String> getEffects() throws FileNotFoundException {
-        if (effects == null) {
-            try {
-                final GsonBuilder gsonBuilder = new GsonBuilder();
-                final Gson gson = gsonBuilder.registerTypeAdapter(GrogList.class, new GrogList.GrogDeserializer()).create();
-
-                final String grogJson = new String(readAllBytes(Paths.get(fileLocation)));
-                gson.fromJson(grogJson, GrogList.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return effects;
-    }
-
-
     public static String drinkGrog(String author) {
         try {
             int roll = Roll.quickRoll(1000) - 1;
@@ -54,6 +38,24 @@ public class GrogList {
             throw new IllegalStateException("Potions seem to be broken right now");
         }
     }
+
+
+    private static List<String> getEffects() throws FileNotFoundException {
+        if (effects == null) {
+            try {
+                final GsonBuilder gsonBuilder = new GsonBuilder();
+                final Gson gson = gsonBuilder.registerTypeAdapter(GrogList.class, new GrogList.GrogDeserializer())
+                        .create();
+
+                final String grogJson = new String(readAllBytes(Paths.get(fileLocation)));
+                gson.fromJson(grogJson, GrogList.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return effects;
+    }
+
 
 
     private static class GrogDeserializer implements JsonDeserializer<GrogList> {

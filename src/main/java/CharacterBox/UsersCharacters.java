@@ -9,7 +9,7 @@ import Foo.LoadSaveConstants;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.User;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,18 +18,9 @@ import java.util.Optional;
 
 public class UsersCharacters implements Serializable {
     private static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
-    private static Map<Long, Character> userCharacters = new HashMap<>();
+    // When a character makes an attack the number that must be beaten or equaled for a hit
     private static final int defenderAC = 13;
-
-
-    public static Optional<Character> getCharacter(long id) {
-        if (userCharacters.keySet().contains(id)) {
-            return Optional.of(userCharacters.get(id));
-        }
-        else {
-            return Optional.empty();
-        }
-    }
+    private static Map<Long, Character> userCharacters = new HashMap<>();
 
 
     /*
@@ -109,18 +100,23 @@ public class UsersCharacters implements Serializable {
      */
     public static String changeCharacterWeapon(long id, String newWeapon) {
         if (getCharacter(id).isPresent()) {
-            if (userCharacters.get(id).changeWeapons(newWeapon)) {
-                return "Weapon change successful, enjoy your new toy.";
-            }
-            else {
-                throw new IllegalArgumentException(
-                        "Weapon not recognised, you can see a list of weapons using !weapons");
-            }
+            userCharacters.get(id).changeWeapons(newWeapon);
+            return "Weapon change successful, enjoy your new toy.";
         }
         else {
             throw new IllegalStateException(
-                    "If you don't have a character yet you can't change their weapon. Use !newChar to make a new "
-                            + "character (!charHelp if you get stuck)");
+                    "If you don't have a character yet you can't change their weapon. "
+                            + "Use !newChar to make a new character (!charHelp if you get stuck)");
+        }
+    }
+
+
+    public static Optional<Character> getCharacter(long id) {
+        if (userCharacters.keySet().contains(id)) {
+            return Optional.of(userCharacters.get(id));
+        }
+        else {
+            return Optional.empty();
         }
     }
 
@@ -133,21 +129,16 @@ public class UsersCharacters implements Serializable {
         victim = victim.trim().replace("@", "");
 
         if (userCharacters.containsKey(author.getIdLong())) {
-            Character character = userCharacters.get(author.getIdLong());
-            Weapon weapon = character.getWeaponInfo();
+            final Character character = userCharacters.get(author.getIdLong());
+            final Weapon weapon = character.getWeaponInfo();
             String message = weapon.getAttackLine();
 
-            Roll.RollResult attackRoll = character.attackRoll();
+            final Roll.RollResult attackRoll = character.attackRoll();
             if (attackRoll.getResult() >= defenderAC && !attackRoll.isCritFail()) {
                 message += " " + weapon.getHitLine();
 
                 int damage;
-                if (attackRoll.isNaddy20()) {
-                    damage = character.rollCriticalDamage();
-                }
-                else {
-                    damage = character.rollDamage();
-                }
+                damage = getDamage(character, attackRoll.isNaddy20());
                 message += String.format(" VIC took %d damage", damage);
             }
             else {
@@ -159,8 +150,19 @@ public class UsersCharacters implements Serializable {
         }
         else {
             throw new IllegalStateException(attacker
-                                        + ", I see you're eager to get to the violence but you'll need to make a "
-                                        + "character first using !newChar");
+                                                    + ", I see you're eager to get to the violence but you'll need to"
+                                                    + " make a "
+                                                    + "character first using !newChar");
+        }
+    }
+
+
+    private static int getDamage(Character character, boolean isNaddy20) {
+        if (isNaddy20) {
+            return character.rollCriticalDamage();
+        }
+        else {
+            return character.rollDamage();
         }
     }
 
@@ -185,22 +187,22 @@ public class UsersCharacters implements Serializable {
         message = message.toUpperCase();
 
         if (userCharacters.containsKey(id)) {
-            Character character = userCharacters.get(id);
-            String characterName = character.getName();
+            final Character character = userCharacters.get(id);
+            final String characterName = character.getName();
 
             if (message.equals("INITIATIVE")) {
                 return characterName + " " + character.rollInitiative();
             }
 
             try {
-                AbilitySkillConstants.AbilityEnum ability = AbilitySkillConstants.AbilityEnum.valueOf(message);
+                final AbilitySkillConstants.AbilityEnum ability = AbilitySkillConstants.AbilityEnum.valueOf(message);
                 return characterName + " " + character.rollSavingThrow(ability);
             } catch (IllegalArgumentException e) {
                 // It may have been a skill check
             }
 
             try {
-                AbilitySkillConstants.SkillEnum skill = AbilitySkillConstants.SkillEnum.valueOf(message);
+                final AbilitySkillConstants.SkillEnum skill = AbilitySkillConstants.SkillEnum.valueOf(message);
                 return characterName + " " + character.rollSkillCheck(skill);
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("You can only roll abilities, skills, or initiative");

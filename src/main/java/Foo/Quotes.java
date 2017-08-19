@@ -14,10 +14,10 @@ public class Quotes implements Serializable {
     private static Quotes[] channelMessages = new Quotes[20];
     private static List<Quotes> quotes = new ArrayList<>();
     private static int head = 0;
+    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm z");
     private String author;
     private ZonedDateTime date;
     private String message;
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm z");
 
 
     public Quotes(String author, ZonedDateTime date, String message) {
@@ -63,19 +63,6 @@ public class Quotes implements Serializable {
 
 
     /*
-     * Gets a random quote
-     */
-    public static String getQuote() {
-        if (quotes.size() != 0) {
-            return getQuote(new Random().nextInt(quotes.size()));
-        }
-        else {
-            throw new IllegalStateException("There are no saved quotes");
-        }
-    }
-
-
-    /*
      * Gets a specific quote
      */
     public static String getQuote(int index) {
@@ -91,6 +78,19 @@ public class Quotes implements Serializable {
                     "Quote number %d\n**%s** - %s\n*%s*", index,
                     quote.author, dateTimeFormatter.format(quote.date), quote.message
             );
+        }
+    }
+
+
+    /*
+     * Gets a random quote
+     */
+    public static String getQuote() {
+        if (quotes.size() != 0) {
+            return getQuote(new Random().nextInt(quotes.size()));
+        }
+        else {
+            throw new IllegalStateException("There are no saved quotes");
         }
     }
 

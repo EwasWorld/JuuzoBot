@@ -47,60 +47,12 @@ public class Main {
     }
 
 
-    private static class CommandListener extends ListenerAdapter {
-        @Override
-        public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-            super.onGuildMemberJoin(event);
+    private static void load() {
+        UsersCharacters.load();
+        SessionTimes.load();
+        Quotes.load();
 
-            final List<TextChannel> channels = event.getGuild().getTextChannelsByName("general", false);
-            if (channels.size() == 1) {
-                final MessageChannel channel = channels.get(0);
-                channel.sendMessage(String.format("Welcome @%s", event.getMember().getUser().getId()));
-            }
-        }
-
-
-        @Override
-        public void onMessageReceived(MessageReceivedEvent event) {
-            super.onMessageReceived(event);
-            // TODO: Note to self
-
-            String message = event.getMessage().getContent();
-            if (!message.startsWith("!")) {
-                Quotes.addMessage(event.getAuthor().getName(), message);
-                return;
-            }
-            String command = message.substring(1).split(" ")[0];
-            message = getRemainingMessage(command, message);
-
-
-            User user = event.getAuthor();
-            if (user.isBot()) {
-                return;
-            }
-
-
-            try {
-                if (!isLocked || user.getId().equals(IDs.eywaID)) {
-                    generalCommandsHandler(event, command, message);
-
-                    for (Role role : event.getMember().getRoles()) {
-                        if (role.getName().equals("dm")) {
-                            dmCommandsHandler(event, command, message);
-                        }
-                    }
-
-                    if (user.getId().equals(IDs.eywaID)) {
-                        adminCommandsHandler(event, command, message);
-                    }
-                }
-                else {
-                    throw new IllegalStateException("Functions are temporarily disabled for now :c Try again later");
-                }
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                event.getChannel().sendMessage(e.getMessage()).queue();
-            }
-        }
+        System.out.println("Load complete");
     }
 
 
@@ -139,13 +91,18 @@ public class Main {
                 return true;
             case "roll":
                 final String result;
-                if (containsDigit(message)) {
-                    result = Roll.rollDieFromChatEvent(message, event.getAuthor().getName());
+                if (!message.equals("")) {
+                    if (containsDigit(message)) {
+                        result = Roll.rollDieFromChatEvent(message, event.getAuthor().getName());
+                    }
+                    else {
+                        result = UsersCharacters.roll(event.getAuthor().getIdLong(), message);
+                    }
+                    event.getChannel().sendMessage(result).queue();
                 }
                 else {
-                    result = UsersCharacters.roll(event.getAuthor().getIdLong(), message);
+                    throw new IllegalArgumentException("Arguments missing. See !help for details");
                 }
-                event.getChannel().sendMessage(result).queue();
                 return true;
             case "potion":
                 event.getChannel().sendMessage(
@@ -245,7 +202,7 @@ public class Main {
     private static boolean dmCommandsHandler(MessageReceivedEvent event, String command, String message) {
         switch (command) {
             case "dmHelp":
-                event.getChannel().sendMessage(Help.getdmHelp()).queue();
+                event.getChannel().sendMessage(Help.getDmHelp()).queue();
                 return true;
             case "dateFormat":
                 event.getChannel().sendMessage(Help.dateFormatHelp).queue();
@@ -272,7 +229,7 @@ public class Main {
     private static boolean adminCommandsHandler(MessageReceivedEvent event, String command, String message) {
         switch (command) {
             case "adminHelp":
-                event.getChannel().sendMessage(Help.getadminHelp()).queue();
+                event.getChannel().sendMessage(Help.getAdminHelp()).queue();
                 return true;
             case "addGame":
                 event.getChannel().sendMessage(
@@ -321,11 +278,60 @@ public class Main {
     }
 
 
-    private static void load() {
-        UsersCharacters.load();
-        SessionTimes.load();
-        Quotes.load();
 
-        System.out.println("Load complete");
+    private static class CommandListener extends ListenerAdapter {
+        @Override
+        public void onMessageReceived(MessageReceivedEvent event) {
+            super.onMessageReceived(event);
+            // TODO: Note to self
+
+            String message = event.getMessage().getContent();
+            if (!message.startsWith("!")) {
+                Quotes.addMessage(event.getAuthor().getName(), message);
+                return;
+            }
+            String command = message.substring(1).split(" ")[0];
+            message = getRemainingMessage(command, message);
+
+
+            User user = event.getAuthor();
+            if (user.isBot()) {
+                return;
+            }
+
+
+            try {
+                if (!isLocked || user.getId().equals(IDs.eywaID)) {
+                    generalCommandsHandler(event, command, message);
+
+                    for (Role role : event.getMember().getRoles()) {
+                        if (role.getName().equals("dm")) {
+                            dmCommandsHandler(event, command, message);
+                        }
+                    }
+
+                    if (user.getId().equals(IDs.eywaID)) {
+                        adminCommandsHandler(event, command, message);
+                    }
+                }
+                else {
+                    throw new IllegalStateException("Functions are temporarily disabled for now :c Try again later");
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                event.getChannel().sendMessage(e.getMessage()).queue();
+            }
+        }
+
+
+        @Override
+        public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+            super.onGuildMemberJoin(event);
+
+            final List<TextChannel> channels = event.getGuild().getTextChannelsByName("general", false);
+            if (channels.size() == 1) {
+                final MessageChannel channel = channels.get(0);
+                channel.sendMessage(String.format("Welcome @%s", event.getMember().getUser().getId()));
+            }
+        }
     }
 }

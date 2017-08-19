@@ -9,31 +9,20 @@ import java.util.Set;
 
 public class CharacterConstants {
     public enum BackgroundEnum {
-        ACOLYTE, CHARLATAN,
-        CRIMINAL, ENTERTAINER,
-        FOLKHERO, GUILDARTISAN,
-        HERMIT, NOBLE,
-        OUTLANDER, SAGE,
-        SAILOR, SOLDIER,
-        URCHIN
+        ACOLYTE, CHARLATAN, CRIMINAL, ENTERTAINER, FOLKHERO, GUILDARTISAN,
+        HERMIT, NOBLE, OUTLANDER, SAGE, SAILOR, SOLDIER, URCHIN
     }
 
-    public enum Size {
-        TINY, SMALL,
-        MEDIUM, LARGE,
-        HUGE, GARGANTUAN
-    }
+
+
+    public enum Size {TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN}
+
+
 
     public enum Language {
-        COMMON, DWARVISH,
-        ELVISH, GIANT,
-        GNOMISH, GOBLIN,
-        HALFLING, ORC,
-        ABYSSAL, CELESTIAL,
-        DRACONIC, DEEPSPEECH,
-        INFERNAL, PRIMORDIAL,
-        SYLVAN, UNDERCOMMON,
-        WILDCARD
+        COMMON, DWARVISH, ELVISH, GIANT, GNOMISH, GOBLIN,
+        HALFLING, ORC, ABYSSAL, CELESTIAL, DRACONIC, DEEPSPEECH,
+        INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD
     }
 
 
@@ -53,13 +42,5 @@ public class CharacterConstants {
         languages.removeAll(usedLanguages);
         languages.remove(Language.WILDCARD);
         return (Language) languages.toArray()[new Random().nextInt(languages.size())];
-    }
-
-
-    public static int getProficiencyBonus(int level) {
-        switch (level) {
-            default:
-                return 2;
-        }
     }
 }

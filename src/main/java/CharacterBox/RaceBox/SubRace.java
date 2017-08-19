@@ -1,7 +1,7 @@
 package CharacterBox.RaceBox;
 
-import CharacterBox.AbilitySkillConstants;
 import CharacterBox.Abilities;
+import CharacterBox.AbilitySkillConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +9,9 @@ import java.util.Map;
 
 
 public class SubRace extends Race {
-    public enum SubRaceEnum {
-        HILL, MOUNTAIN, FOREST, STOUT, ROCK, HIGH, WOOD, DARK, LIGHTFOOT;
-    }
+    public enum SubRaceEnum {HILL, MOUNTAIN, FOREST, STOUT, ROCK, HIGH, WOOD, DARK, LIGHTFOOT;}
+
+
 
     private RaceEnum mainRace;
     private Abilities extraAbilityIncreases;

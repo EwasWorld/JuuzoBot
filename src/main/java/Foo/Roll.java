@@ -7,13 +7,6 @@ import java.util.Random;
 public class Roll {
     public static final String invalidFormat
             = "Invalid input. Use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'";
-
-
-
-    private enum RollType {NORMAL, ADVANTAGE, DISADVANTAGE}
-
-
-
     private int quantity;
     private int dieSize;
     private int modifier;
@@ -101,6 +94,9 @@ public class Roll {
     }
 
 
+    /*
+     * Throws an IllegalStateException if there is no modifier
+     */
     private static String[] splitDieAndModifierStrings(String message) {
         if (message.contains("+") || message.contains("-")) {
             if (message.contains("+")) {
@@ -108,7 +104,7 @@ public class Roll {
                 return message.split("plus");
             }
             else {
-                String[] messageParts = message.split("-");
+                final String[] messageParts = message.split("-");
 
                 // Put the negative sign back in so that when the int is parsed it works correctly
                 messageParts[1] = "-" + messageParts[1];
@@ -118,16 +114,6 @@ public class Roll {
         else {
             throw new IllegalStateException("Incorrect die size and modifier");
         }
-    }
-
-
-    public static int quickRoll(int dieSize) {
-        return new Roll(dieSize).roll().result;
-    }
-
-
-    public String getStringForRoll() {
-        return getStringForRoll(RollType.NORMAL);
     }
 
 
@@ -230,6 +216,20 @@ public class Roll {
             return second;
         }
     }
+
+
+    public static int quickRoll(int dieSize) {
+        return new Roll(dieSize).roll().result;
+    }
+
+
+    public String getStringForRoll() {
+        return getStringForRoll(RollType.NORMAL);
+    }
+
+
+    private enum RollType {NORMAL, ADVANTAGE, DISADVANTAGE}
+
 
 
     public class RollResult {

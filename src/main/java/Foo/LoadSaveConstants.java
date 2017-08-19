@@ -12,16 +12,13 @@ public class LoadSaveConstants {
         save(fileLocation, new ArrayList<>(Arrays.asList(objects)));
     }
 
-    public static void save(String fileLocation, Object object) {
-        save(fileLocation, new ArrayList<>(Arrays.asList(new Object[] {object})));
-    }
 
     public static void save(String fileLocation, List<Object> objects) {
         try {
-            File saveFile = new File(fileLocation);
+            final File saveFile = new File(fileLocation);
             saveFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(saveFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            final FileOutputStream fos = new FileOutputStream(saveFile);
+            final ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(objects);
 
@@ -33,12 +30,21 @@ public class LoadSaveConstants {
     }
 
 
+    public static void save(String fileLocation, Object object) {
+        save(fileLocation, new ArrayList<>(Arrays.asList(new Object[]{object})));
+    }
+
+
+    public static Object loadFirstObject(String fileLocation) {
+        return load(fileLocation).get(0);
+    }
+
+
     public static List<Object> load(String fileLocation) {
-        List<Object> objects;
+        final List<Object> objects;
         try {
-            File saveFile = new File(fileLocation);
-            FileInputStream fis = new FileInputStream(saveFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+            final FileInputStream fis = new FileInputStream(new File(fileLocation));
+            final ObjectInputStream ois = new ObjectInputStream(fis);
 
             objects = (List<Object>) ois.readObject();
 
@@ -49,9 +55,5 @@ public class LoadSaveConstants {
         }
 
         return objects;
-    }
-
-    public static Object loadFirstObject(String fileLocation) {
-        return load(fileLocation).get(0);
     }
 }

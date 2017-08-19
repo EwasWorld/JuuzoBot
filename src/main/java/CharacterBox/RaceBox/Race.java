@@ -1,7 +1,7 @@
 package CharacterBox.RaceBox;
 
-import CharacterBox.AbilitySkillConstants;
 import CharacterBox.Abilities;
+import CharacterBox.AbilitySkillConstants;
 import CharacterBox.CharacterConstants;
 import Foo.IDs;
 import com.google.gson.*;
@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static java.nio.file.Files.find;
 import static java.nio.file.Files.readAllBytes;
 
 
@@ -19,10 +20,13 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Race {
+    public enum RaceEnum {DWARF, ELF, HALFLING, HUMAN, DRAGONBORN, GNOME, HALFELF, HALFORC, TIEFLING}
+
+
+
     private static final String fileLocation = IDs.mainFilePath + "CharacterBox/RaceBox/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
-
     private Abilities abilityIncreases;
     private int ageLowerBound;
     private int ageUpperBound;
@@ -31,22 +35,14 @@ public class Race {
     private Set<CharacterConstants.Language> languages;
 
 
-
-    public enum RaceEnum {
-        DWARF, ELF,
-        HALFLING, HUMAN,
-        DRAGONBORN, GNOME,
-        HALFELF, HALFORC,
-        TIEFLING
-    }
+    protected Race() { }
 
 
-    protected Race() {
-    }
-
-
+    /*
+     * Create races and subraces maps
+     */
     public Race(Object rawObj) {
-        JsonObject mainObject = (JsonObject) rawObj;
+        final JsonObject mainObject = (JsonObject) rawObj;
         races = new HashMap<>();
         for (JsonElement element : mainObject.getAsJsonArray("mainraces")) {
             final JsonObject object = (JsonObject) element;
@@ -74,24 +70,8 @@ public class Race {
     }
 
 
-    private Race(Abilities abilityIncreases, int ageLowerBound,
-                int ageUpperBound, CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
-    {
-        if (ageLowerBound >= ageUpperBound) {
-            throw new IllegalArgumentException("Lower bound age must be larger than upper bound");
-        }
-
-        this.abilityIncreases = abilityIncreases;
-        this.ageLowerBound = ageLowerBound;
-        this.ageUpperBound = ageUpperBound;
-        this.size = size;
-        this.speed = speed;
-        this.languages = languages;
-    }
-
-
     private static Abilities createAbilityIncreases(JsonObject abilityIncreases) {
-        Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
+        final Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
         abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.CONSTITUTION, abilityIncreases.get("con").getAsInt());
@@ -106,11 +86,27 @@ public class Race {
      * If there is a wildcard language then it picks one at random
      */
     private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) {
-        Set<CharacterConstants.Language> languages = new HashSet<>();
+        final Set<CharacterConstants.Language> languages = new HashSet<>();
         for (JsonElement language : languagesJson) {
             languages.add(CharacterConstants.Language.valueOf(language.getAsString().toUpperCase()));
         }
         return languages;
+    }
+
+
+    private Race(Abilities abilityIncreases, int ageLowerBound, int ageUpperBound,
+                 CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
+    {
+        if (ageLowerBound >= ageUpperBound) {
+            throw new IllegalArgumentException("Lower bound age must be larger than upper bound");
+        }
+
+        this.abilityIncreases = abilityIncreases;
+        this.ageLowerBound = ageLowerBound;
+        this.ageUpperBound = ageUpperBound;
+        this.size = size;
+        this.speed = speed;
+        this.languages = languages;
     }
 
 
@@ -119,14 +115,6 @@ public class Race {
             getRacesFromFile();
         }
         return races.get(raceEnum);
-    }
-
-
-    public static SubRace getRaceInfo(SubRace.SubRaceEnum subRaceEnum) {
-        if (subRaces == null) {
-            getRacesFromFile();
-        }
-        return subRaces.get(subRaceEnum);
     }
 
 
@@ -143,13 +131,21 @@ public class Race {
     }
 
 
+    public static SubRace getRaceInfo(SubRace.SubRaceEnum subRaceEnum) {
+        if (subRaces == null) {
+            getRacesFromFile();
+        }
+        return subRaces.get(subRaceEnum);
+    }
+
+
     public static String getRacesList() {
         if (races == null) {
             getRacesFromFile();
         }
 
         String races = "Available races: ";
-        RaceEnum[] raceEnums = RaceEnum.values();
+        final RaceEnum[] raceEnums = RaceEnum.values();
 
         for (int i = 0; i < raceEnums.length; i++) {
             races += raceEnums[i].toString();
@@ -160,10 +156,10 @@ public class Race {
         }
 
         races += "\n\nSubraces: ";
-        Iterator<SubRace.SubRaceEnum> subRaceIterator = subRaces.keySet().iterator();
+        final Iterator<SubRace.SubRaceEnum> subRaceIterator = subRaces.keySet().iterator();
         while (subRaceIterator.hasNext()) {
             SubRace.SubRaceEnum subRaceEnum = subRaceIterator.next();
-            races+= subRaceEnum.toString() + " " + subRaces.get(subRaceEnum).getMainRace();
+            races += subRaceEnum.toString() + " " + subRaces.get(subRaceEnum).getMainRace();
 
             if (subRaceIterator.hasNext()) {
                 races += ", ";
@@ -179,13 +175,8 @@ public class Race {
     }
 
 
-    public int getAgeLowerBound() {
-        return ageLowerBound;
-    }
-
-
-    public int getAgeUpperBound() {
-        return ageUpperBound;
+    public int generateRandomAge() {
+        return new Random().nextInt(ageUpperBound - ageLowerBound) + ageLowerBound;
     }
 
 
@@ -206,7 +197,7 @@ public class Race {
 
     private static class RaceSetUpDeserializer implements JsonDeserializer<Race> {
         public Race deserialize(JsonElement json, Type typeOfT,
-                                 JsonDeserializationContext context) throws JsonParseException
+                                JsonDeserializationContext context) throws JsonParseException
         {
             return new Race(json.getAsJsonObject().get("races"));
         }

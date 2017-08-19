@@ -3,11 +3,13 @@ package Foo;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
-import java.io.*;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -53,6 +55,26 @@ public class SessionTimes implements Serializable {
     }
 
 
+    private static String getRoleName(Role role) {
+        return role.getName().toUpperCase();
+    }
+
+
+    /*
+     * Find the session role for the given member
+     */
+    private static Role getSessionRole(Member author) {
+        for (Role role : author.getRoles()) {
+            if (gameTimes.containsKey(getRoleName(role))) {
+                return role;
+            }
+        }
+        throw new IllegalStateException(
+                "You do not have a session role or your session is not in the database, pm a mod for help"
+        );
+    }
+
+
     /*
      * Removes a game with a specified short name from the map
      */
@@ -90,6 +112,21 @@ public class SessionTimes implements Serializable {
 
 
     /*
+     * Returns a string containing the next session time and a countdown until the session
+     */
+    public static String getNextSessionAsString(Member author) {
+        final String sessionName = getRoleName(getSessionRole(author));
+        final Date gameTime = getNextSessionTime(sessionName);
+
+        return String.format(
+                "Next session for %s is %s. That's in %s",
+                gameTimes.get(sessionName).fullName, printDateFormat.format(gameTime),
+                getStringTimeUntil(gameTime)
+        );
+    }
+
+
+    /*
      * Returns the next session time for the specified session name provided that time is in the future
      */
     private static Date getNextSessionTime(String sessionName) {
@@ -111,55 +148,6 @@ public class SessionTimes implements Serializable {
 
 
     /*
-     * Find the session role for the given member
-     */
-    private static Role getSessionRole(Member author) {
-        for (Role role : author.getRoles()) {
-            if (gameTimes.containsKey(getRoleName(role))) {
-                return role;
-            }
-        }
-        throw new IllegalStateException(
-                "You do not have a session role or your session is not in the database, pm a mod for help"
-        );
-    }
-
-
-    /*
-     * Returns a string containing the next session time and a countdown until the session
-     */
-    public static String getNextSessionAsString(Member author) {
-        final String sessionName = getRoleName(getSessionRole(author));
-        final Date gameTime = getNextSessionTime(sessionName);
-
-        return String.format(
-                "Next session for %s is %s. That's in %s",
-                gameTimes.get(sessionName).fullName, printDateFormat.format(gameTime),
-                getStringTimeUntil(gameTime)
-        );
-    }
-
-
-    private static String getRoleName(Role role) {
-        return role.getName().toUpperCase();
-    }
-
-
-    /*
-     * Returns string containing a mention to all players and a countdown to the next session
-     */
-    public static String getSessionReminder(Member author) {
-        final Role sessionRole = getSessionRole(author);
-        final Date gameTime = getNextSessionTime(getRoleName(sessionRole));
-
-        return String.format(
-                "%s -bangs pots together-\nGame time in t-minus %s",
-                sessionRole.getAsMention(), getStringTimeUntil(gameTime)
-        );
-    }
-
-
-    /*
      * Returns a string showing the time until the given date
      */
     private static String getStringTimeUntil(Date date) {
@@ -173,6 +161,20 @@ public class SessionTimes implements Serializable {
                         - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
                 TimeUnit.MILLISECONDS.toSeconds(millis)
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+        );
+    }
+
+
+    /*
+     * Returns string containing a mention to all players and a countdown to the next session
+     */
+    public static String getSessionReminder(Member author) {
+        final Role sessionRole = getSessionRole(author);
+        final Date gameTime = getNextSessionTime(getRoleName(sessionRole));
+
+        return String.format(
+                "%s -bangs pots together-\nGame time in t-minus %s",
+                sessionRole.getAsMention(), getStringTimeUntil(gameTime)
         );
     }
 
