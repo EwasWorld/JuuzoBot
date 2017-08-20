@@ -4,8 +4,7 @@ import CharacterBox.AttackBox.Weapon;
 import CharacterBox.ClassBox.Class_;
 import CharacterBox.RaceBox.Race;
 import CharacterBox.RaceBox.SubRace;
-import Foo.IDs;
-import Foo.LoadSaveConstants;
+import DataPersistenceBox.DataPersistence;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.User;
 
@@ -17,7 +16,7 @@ import java.util.Optional;
 
 
 public class UsersCharacters implements Serializable {
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/UserCharactersSave.txt";
+    private static final String fileName = "UserCharactersSave.txt";
     // When a character makes an attack the number that must be beaten or equaled for a hit
     private static final int defenderAC = 13;
     private static Map<Long, Character> userCharacters = new HashMap<>();
@@ -216,7 +215,7 @@ public class UsersCharacters implements Serializable {
 
     public static void save() {
         try {
-            LoadSaveConstants.save(fileLocation, userCharacters);
+            DataPersistence.save(fileName, userCharacters);
         } catch (IllegalStateException e) {
             System.out.println("Character save failed");
         }
@@ -225,7 +224,7 @@ public class UsersCharacters implements Serializable {
 
     public static void load() {
         try {
-            userCharacters = (Map<Long, Character>) LoadSaveConstants.loadFirstObject(fileLocation);
+            userCharacters = (Map<Long, Character>) DataPersistence.loadFirstObject(fileName);
         } catch (IllegalStateException e) {
             System.out.println("Character load failed");
         }

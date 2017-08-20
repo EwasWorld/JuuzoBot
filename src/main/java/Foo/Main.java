@@ -5,6 +5,7 @@ import CharacterBox.AttackBox.Weapon;
 import CharacterBox.ClassBox.Class_;
 import CharacterBox.RaceBox.Race;
 import CharacterBox.UsersCharacters;
+import DataPersistenceBox.DataPersistence;
 import Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -43,16 +44,8 @@ public class Main {
         }
 
         jda.addEventListener(new CommandListener());
-        load();
-    }
-
-
-    private static void load() {
-        UsersCharacters.load();
-        SessionTimes.load();
-        Quotes.load();
-
-        System.out.println("Load complete");
+        DataPersistence.loadData();
+        new Thread(new DataPersistence()).start();
     }
 
 
@@ -257,24 +250,15 @@ public class Main {
                 isLocked = false;
                 return true;
             case "save":
-                save();
+                DataPersistence.saveData();
                 return true;
             case "exit":
-                save();
+                DataPersistence.saveData();
                 System.exit(0);
                 return true;
             default:
                 return false;
         }
-    }
-
-
-    private static void save() {
-        UsersCharacters.save();
-        SessionTimes.save();
-        Quotes.save();
-
-        System.out.println("Saves complete");
     }
 
 

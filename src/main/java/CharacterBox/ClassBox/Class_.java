@@ -49,12 +49,12 @@ public class Class_ {
             final JsonObject object = (JsonObject) element;
 
             final ClassEnum classEnum = ClassEnum.valueOf(object.get("name").getAsString().toUpperCase());
-            final JsonObject funds = object.getAsJsonObject("fundsSetUp");
+            final JsonObject funds = object.getAsJsonObject("funds");
             classes.put(classEnum, new Class_(
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
-                    object.get("skillQuantity").getAsInt(),
+                    object.get("skillProficienciesQuantity").getAsInt(),
                     createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
                     new FundsSetUp(
                             funds.get("quantity").getAsInt(),

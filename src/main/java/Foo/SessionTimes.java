@@ -1,5 +1,6 @@
 package Foo;
 
+import DataPersistenceBox.DataPersistence;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class SessionTimes implements Serializable {
-    private static final String fileLocation = IDs.mainFilePath + "Foo/SessionTimes.txt";
+    private static final String fileName = "SessionTimes.txt";
     private static Map<String, SessionTimes> gameTimes = new HashMap<>();
     private static DateFormat setDateFormat = new SimpleDateFormat("HH:mm dd/M/yy z");
     private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
@@ -181,7 +182,7 @@ public class SessionTimes implements Serializable {
 
     public static void save() {
         try {
-            LoadSaveConstants.save(fileLocation, gameTimes);
+            DataPersistence.save(fileName, gameTimes);
         } catch (IllegalStateException e) {
             System.out.println("Session times save failed");
         }
@@ -190,7 +191,7 @@ public class SessionTimes implements Serializable {
 
     public static void load() {
         try {
-            gameTimes = (Map<String, SessionTimes>) LoadSaveConstants.loadFirstObject(fileLocation);
+            gameTimes = (Map<String, SessionTimes>) DataPersistence.loadFirstObject(fileName);
         } catch (IllegalStateException e) {
             System.out.println("Session times load failed");
         }

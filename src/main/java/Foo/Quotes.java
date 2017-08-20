@@ -1,5 +1,7 @@
 package Foo;
 
+import DataPersistenceBox.DataPersistence;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,7 +12,7 @@ import java.util.Random;
 
 
 public class Quotes implements Serializable {
-    private static final String fileLocation = IDs.mainFilePath + "Foo/Quotes.txt";
+    private static final String fileName = "Quotes.txt";
     private static Quotes[] channelMessages = new Quotes[20];
     private static List<Quotes> quotes = new ArrayList<>();
     private static int head = 0;
@@ -107,7 +109,7 @@ public class Quotes implements Serializable {
 
     public static void save() {
         try {
-            LoadSaveConstants.save(fileLocation, quotes);
+            DataPersistence.save(fileName, quotes);
         } catch (IllegalStateException e) {
             System.out.println("Quotes save failed");
         }
@@ -116,7 +118,7 @@ public class Quotes implements Serializable {
 
     public static void load() {
         try {
-            quotes = (List<Quotes>) LoadSaveConstants.loadFirstObject(fileLocation);
+            quotes = (List<Quotes>) DataPersistence.loadFirstObject(fileName);
         } catch (IllegalStateException e) {
             System.out.println("Quotes load failed");
         }
