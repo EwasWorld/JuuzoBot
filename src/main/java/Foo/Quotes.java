@@ -49,13 +49,13 @@ public class Quotes implements Serializable {
                     quoteToAdd = quote;
                 }
                 else {
-                    throw new IllegalArgumentException("Quote is ambiguous, please clarify");
+                    throw new BadUserInputException("Quote is ambiguous, please clarify");
                 }
             }
         }
 
         if (quoteToAdd == null) {
-            throw new IllegalArgumentException("Quote not found");
+            throw new BadUserInputException("Quote not found");
         }
         else {
             quotes.add(quoteToAdd);
@@ -65,14 +65,32 @@ public class Quotes implements Serializable {
 
 
     /*
+     * If a number is given in the string then the quote with the corresponding number is returned
+     * If the string is empty a random quote is returned
+     */
+    public static String getQuote(String index) {
+        if (index.equals("")) {
+            return Quotes.getQuote();
+        }
+        else {
+            try {
+                return Quotes.getQuote(Integer.parseInt(index));
+            } catch (IllegalArgumentException e) {
+                throw new BadUserInputException("Incorrect quote format, either give no argument or an integer");
+            }
+        }
+    }
+
+
+    /*
      * Gets a specific quote
      */
     public static String getQuote(int index) {
         if (quotes.size() == 0) {
-            throw new IllegalArgumentException("There are no saved quotes");
+            throw new BadStateException("There are no saved quotes");
         }
         else if (index >= quotes.size()) {
-            throw new IllegalArgumentException("Quote number is too high");
+            throw new BadUserInputException("Quote number is too high");
         }
         else {
             final Quotes quote = quotes.get(index);
@@ -92,7 +110,7 @@ public class Quotes implements Serializable {
             return getQuote(new Random().nextInt(quotes.size()));
         }
         else {
-            throw new IllegalStateException("There are no saved quotes");
+            throw new BadStateException("There are no saved quotes");
         }
     }
 
@@ -103,6 +121,18 @@ public class Quotes implements Serializable {
     public static void removeQuote(int index) {
         getQuote(index);
         quotes.remove(index);
+    }
+
+
+    public static int size() {
+        return quotes.size();
+    }
+
+
+    public static void clearMessagesAndQuotes() {
+        channelMessages = new Quotes[20];
+        quotes = new ArrayList<>();
+
     }
 
 

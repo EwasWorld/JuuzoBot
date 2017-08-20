@@ -142,21 +142,9 @@ public class Main {
                 ).queue();
                 return true;
             case "getQuote":
-                if (message.equals("")) {
-                    event.getChannel().sendMessage(
-                            Quotes.getQuote()
-                    ).queue();
-                }
-                else {
-                    try {
-                        event.getChannel().sendMessage(
-                                Quotes.getQuote(Integer.parseInt(message))
-                        ).queue();
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException(
-                                "Incorrect quote format, either give no argument or an integer");
-                    }
-                }
+                event.getChannel().sendMessage(
+                        Quotes.getQuote(message)
+                ).queue();
                 return true;
             case "confetti":
                 event.getChannel().sendMessage(
@@ -296,9 +284,9 @@ public class Main {
                     }
                 }
                 else {
-                    throw new IllegalStateException("Functions are temporarily disabled for now :c Try again later");
+                    throw new BadUserInputException("Functions are temporarily disabled for now :c Try again later");
                 }
-            } catch (IllegalArgumentException | IllegalStateException e) {
+            } catch (BadUserInputException | BadStateException e) {
                 event.getChannel().sendMessage(e.getMessage()).queue();
             }
         }

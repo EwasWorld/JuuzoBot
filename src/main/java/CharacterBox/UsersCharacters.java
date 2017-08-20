@@ -5,6 +5,7 @@ import CharacterBox.ClassBox.Class_;
 import CharacterBox.RaceBox.Race;
 import CharacterBox.RaceBox.SubRace;
 import DataPersistenceBox.DataPersistence;
+import Foo.BadUserInputException;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.User;
 
@@ -55,14 +56,14 @@ public class UsersCharacters implements Serializable {
             try {
                 race = Race.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid race");
+                throw new BadUserInputException("Invalid race");
             }
         }
 
         try {
             class_ = Class_.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid class");
+            throw new BadUserInputException("Invalid class");
         }
 
         String name = "";
@@ -201,7 +202,7 @@ public class UsersCharacters implements Serializable {
                 final AbilitySkillConstants.SkillEnum skill = AbilitySkillConstants.SkillEnum.valueOf(message);
                 return characterName + " " + character.rollSkillCheck(skill);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("You can only roll abilities, skills, or initiative");
+                throw new BadUserInputException("You can only roll abilities, skills, or initiative");
             }
         }
         else {

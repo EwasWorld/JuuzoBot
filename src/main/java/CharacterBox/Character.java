@@ -6,6 +6,7 @@ import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.ClassBox.Class_;
 import CharacterBox.RaceBox.Race;
 import CharacterBox.RaceBox.SubRace;
+import Foo.BadUserInputException;
 import Foo.Roll;
 
 import java.io.Serializable;
@@ -76,7 +77,7 @@ public class Character implements Serializable {
         if (subRaceEnum != null) {
             final SubRace subRace = Race.getRaceInfo(subRaceEnum);
             if (race != subRace.getMainRace()) {
-                throw new IllegalArgumentException("Invalid subrace");
+                throw new BadUserInputException("Invalid subrace");
             }
             else {
                 return subRace;
@@ -308,8 +309,8 @@ public class Character implements Serializable {
     public void changeWeapons(String newWeapon) {
         try {
             weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
-        } catch (IllegalArgumentException e) {throw new IllegalArgumentException(
-                "Weapon not recognised, you can see a list of weapons using !weapons");
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException("Weapon not recognised, you can see a list of weapons using !weapons");
         }
     }
 

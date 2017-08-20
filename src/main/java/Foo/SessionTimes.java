@@ -47,7 +47,7 @@ public class SessionTimes implements Serializable {
                     printDateFormat.format(gameTimes.get(gameName).gameTime)
             );
         } catch (ParseException e) {
-            throw new IllegalArgumentException(
+            throw new BadUserInputException(
                     "Bad date format, please use 'HH:mm dd/M/yy z'\n"
                             + "e.g. '16:00 21/8/17 BST'\n"
                             + "  or '16:00 21/8/17 GMT + 1' (spaces around '+' are important)"
@@ -70,7 +70,7 @@ public class SessionTimes implements Serializable {
                 return role;
             }
         }
-        throw new IllegalStateException(
+        throw new BadStateException(
                 "You do not have a session role or your session is not in the database, pm a mod for help"
         );
     }
@@ -84,7 +84,7 @@ public class SessionTimes implements Serializable {
             gameTimes.remove(game.toUpperCase());
         }
         else {
-            throw new IllegalArgumentException("Game doesn't exist therefore wasn't removed");
+            throw new BadUserInputException("Game doesn't exist therefore wasn't removed");
         }
     }
 
@@ -99,13 +99,13 @@ public class SessionTimes implements Serializable {
             final String fullName = message.substring(roleName.length() + 1);
 
             if (gameTimes.containsKey(roleName)) {
-                throw new IllegalArgumentException("Game with the name " + roleName + " already exists");
+                throw new BadUserInputException("Game with the name " + roleName + " already exists");
             }
 
             gameTimes.put(roleName, new SessionTimes(fullName));
         }
         else {
-            throw new IllegalArgumentException("Incorrect format. Please provide a role name and a date");
+            throw new BadUserInputException("Incorrect format. Please provide a role name and a date");
         }
     }
 
@@ -129,17 +129,15 @@ public class SessionTimes implements Serializable {
      * Returns the next session time for the specified session name provided that time is in the future
      */
     private static Date getNextSessionTime(String sessionName) {
-        try {
+        if (gameTimes.containsKey(sessionName)) {
             final Date gameTime = gameTimes.get(sessionName).gameTime;
 
-            if (gameTime.getTime() > System.currentTimeMillis()) {
+            if (gameTime != null && gameTime.getTime() > System.currentTimeMillis()) {
                 return gameTime;
             }
-        } catch (NullPointerException e) {
-            // Thrown if the game is not found in gameTimes. The below exception should be thrown instead
         }
 
-        throw new IllegalStateException(String.format(
+        throw new BadStateException(String.format(
                 "There seems to be no session time for %s. Ask your dm to update it",
                 gameTimes.get(sessionName.toUpperCase()).fullName
         ));
@@ -175,6 +173,15 @@ public class SessionTimes implements Serializable {
                 "%s -bangs pots together-\nGame time in t-minus %s",
                 sessionRole.getAsMention(), getStringTimeUntil(gameTime)
         );
+    }
+
+
+    public static void clearGameInformation() {
+        gameTimes = new HashMap<>();
+    }
+
+    public static int size() {
+        return gameTimes.size();
     }
 
 

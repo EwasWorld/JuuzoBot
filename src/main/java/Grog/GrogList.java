@@ -1,5 +1,6 @@
 package Grog;
 
+import Foo.BadStateException;
 import Foo.IDs;
 import Foo.Roll;
 import com.google.gson.*;
@@ -35,7 +36,7 @@ public class GrogList {
             effect = effect.replaceAll("PC", author);
             return author + " drinks an Essence of Balthazar potion. " + effect;
         } catch (NullPointerException | FileNotFoundException e) {
-            throw new IllegalStateException("Potions seem to be broken right now");
+            throw new BadStateException("Potions seem to be broken right now");
         }
     }
 

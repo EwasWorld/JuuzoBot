@@ -38,7 +38,7 @@ public class Roll {
 
         message = message.replace(" ", "");
         if (!message.contains("d")) {
-            throw new IllegalArgumentException(invalidFormat);
+            throw new BadUserInputException(invalidFormat);
         }
 
         final RollType rollType = getRollType(message);
@@ -48,6 +48,10 @@ public class Roll {
 
         try {
             messageParts = message.split("d");
+            if (messageParts.length == 0) {
+                throw new BadUserInputException(invalidFormat);
+            }
+
             quantity = getQuantity(messageParts[0]);
             message = messageParts[1];
 
@@ -55,7 +59,7 @@ public class Roll {
                 messageParts = splitDieAndModifierStrings(message);
 
                 if (messageParts.length != 2) {
-                    throw new IllegalArgumentException("Incorrect die size or modifier");
+                    throw new BadUserInputException("Incorrect die size or modifier");
                 }
                 dieSize = Integer.parseInt(messageParts[0]);
                 modifier = Integer.parseInt(messageParts[1]);
@@ -66,7 +70,7 @@ public class Roll {
 
             return author + " " + new Roll(quantity, dieSize, modifier).getStringForRoll(rollType);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(invalidFormat);
+            throw new BadUserInputException(invalidFormat);
         }
     }
 
@@ -112,7 +116,7 @@ public class Roll {
             }
         }
         else {
-            throw new IllegalStateException("Incorrect die size and modifier");
+            throw new BadStateException("Incorrect die size and modifier");
         }
     }
 
@@ -193,7 +197,7 @@ public class Roll {
             return new RollResult(total, naddy20, critFail);
         }
         else {
-            throw new IllegalArgumentException("Invalid die size");
+            throw new BadUserInputException("Invalid die size");
         }
     }
 

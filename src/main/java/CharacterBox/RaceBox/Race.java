@@ -3,6 +3,7 @@ package CharacterBox.RaceBox;
 import CharacterBox.Abilities;
 import CharacterBox.AbilitySkillConstants;
 import CharacterBox.CharacterConstants;
+import Foo.BadUserInputException;
 import Foo.IDs;
 import com.google.gson.*;
 
@@ -98,7 +99,7 @@ public class Race {
                  CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
     {
         if (ageLowerBound >= ageUpperBound) {
-            throw new IllegalArgumentException("Lower bound age must be larger than upper bound");
+            throw new BadUserInputException("Lower bound age must be larger than upper bound");
         }
 
         this.abilityIncreases = abilityIncreases;
