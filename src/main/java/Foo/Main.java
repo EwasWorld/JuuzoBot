@@ -2,9 +2,9 @@ package Foo;
 
 
 import CharacterBox.AttackBox.Weapon;
-import CharacterBox.ClassBox.Class_;
-import CharacterBox.RaceBox.Race;
-import CharacterBox.UsersCharacters;
+import CharacterBox.BroardInfo.Class_;
+import CharacterBox.BroardInfo.Race;
+import CharacterBox.UserCharacters;
 import DataPersistenceBox.DataPersistence;
 import Grog.GrogList;
 import net.dv8tion.jda.core.AccountType;
@@ -89,7 +89,7 @@ public class Main {
                         result = Roll.rollDieFromChatEvent(message, event.getAuthor().getName());
                     }
                     else {
-                        result = UsersCharacters.roll(event.getAuthor().getIdLong(), message);
+                        result = UserCharacters.roll(event.getAuthor().getIdLong(), message);
                     }
                     event.getChannel().sendMessage(result).queue();
                 }
@@ -103,15 +103,15 @@ public class Main {
                 ).queue();
                 return true;
             case "newChar":
-                UsersCharacters.createUserCharacter(event.getAuthor().getIdLong(), message);
+                UserCharacters.createUserCharacter(event.getAuthor().getIdLong(), message);
                 event.getChannel().sendMessage(
                         "Character successfully created\n"
-                                + UsersCharacters.getCharacterDescription(event.getAuthor().getIdLong())
+                                + UserCharacters.getCharacterDescription(event.getAuthor().getIdLong())
                 ).queue();
                 return true;
             case "description":
                 event.getChannel().sendMessage(
-                        UsersCharacters.getCharacterDescription(event.getAuthor().getIdLong())
+                        UserCharacters.getCharacterDescription(event.getAuthor().getIdLong())
                 ).queue();
                 return true;
             case "races":
@@ -125,15 +125,15 @@ public class Main {
                 return true;
             case "attack":
                 event.getChannel().sendMessage(
-                        UsersCharacters.attack(event.getAuthor(), message)
+                        UserCharacters.attack(event.getAuthor(), message)
                 ).queue();
                 return true;
             case "changeWeapon":
-                UsersCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message);
+                UserCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message);
                 event.getChannel().sendMessage("Weapon change successful, enjoy your new toy.").queue();
                 return true;
             case "deleteChar":
-                UsersCharacters.deleteCharacter(event.getAuthor().getIdLong());
+                UserCharacters.deleteCharacter(event.getAuthor().getIdLong());
                 event.getChannel().sendMessage("Character deleted").queue();
                 return true;
             case "addQuote":

@@ -1,7 +1,7 @@
-package CharacterBox.RaceBox;
+package CharacterBox.BroardInfo;
 
 import CharacterBox.Abilities;
-import CharacterBox.AbilitySkillConstants;
+import CharacterBox.CharacterConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +18,8 @@ public class SubRace extends Race {
 
 
     public SubRace() {
-        final Map<AbilitySkillConstants.AbilityEnum, Integer> abilities = new HashMap<>();
-        for (AbilitySkillConstants.AbilityEnum abilityEnum : AbilitySkillConstants.AbilityEnum.values()) {
+        final Map<CharacterConstants.AbilityEnum, Integer> abilities = new HashMap<>();
+        for (CharacterConstants.AbilityEnum abilityEnum : CharacterConstants.AbilityEnum.values()) {
             abilities.put(abilityEnum, 0);
         }
         extraAbilityIncreases = new Abilities(abilities);
@@ -38,7 +38,7 @@ public class SubRace extends Race {
     }
 
 
-    public int getExtraAbilityIncreases(AbilitySkillConstants.AbilityEnum ability) {
+    public int getExtraAbilityIncreases(CharacterConstants.AbilityEnum ability) {
         return extraAbilityIncreases.getStat(ability);
     }
 }

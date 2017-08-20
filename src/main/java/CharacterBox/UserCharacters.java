@@ -1,9 +1,9 @@
 package CharacterBox;
 
 import CharacterBox.AttackBox.Weapon;
-import CharacterBox.ClassBox.Class_;
-import CharacterBox.RaceBox.Race;
-import CharacterBox.RaceBox.SubRace;
+import CharacterBox.BroardInfo.Class_;
+import CharacterBox.BroardInfo.Race;
+import CharacterBox.BroardInfo.SubRace;
 import DataPersistenceBox.DataPersistence;
 import Foo.BadUserInputException;
 import Foo.Roll;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 
 
-public class UsersCharacters implements Serializable {
+public class UserCharacters implements Serializable {
     private static final String fileName = "UserCharactersSave.txt";
     // When a character makes an attack the number that must be beaten or equaled for a hit
     private static final int defenderAC = 13;
@@ -192,14 +192,14 @@ public class UsersCharacters implements Serializable {
             }
 
             try {
-                final AbilitySkillConstants.AbilityEnum ability = AbilitySkillConstants.AbilityEnum.valueOf(message);
+                final CharacterConstants.AbilityEnum ability = CharacterConstants.AbilityEnum.valueOf(message);
                 return characterName + " " + character.rollSavingThrow(ability);
             } catch (IllegalArgumentException e) {
                 // It may have been a skill check
             }
 
             try {
-                final AbilitySkillConstants.SkillEnum skill = AbilitySkillConstants.SkillEnum.valueOf(message);
+                final CharacterConstants.SkillEnum skill = CharacterConstants.SkillEnum.valueOf(message);
                 return characterName + " " + character.rollSkillCheck(skill);
             } catch (IllegalArgumentException e) {
                 throw new BadUserInputException("You can only roll abilities, skills, or initiative");

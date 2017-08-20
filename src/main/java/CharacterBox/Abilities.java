@@ -6,20 +6,20 @@ import java.util.Map;
 
 
 public class Abilities implements Serializable {
-    private Map<AbilitySkillConstants.AbilityEnum, Integer> abilities;
+    private Map<CharacterConstants.AbilityEnum, Integer> abilities;
 
 
-    public Abilities(Map<AbilitySkillConstants.AbilityEnum, Integer> abilities) {
+    public Abilities(Map<CharacterConstants.AbilityEnum, Integer> abilities) {
         this.abilities = abilities;
     }
 
 
-    public int getStat(AbilitySkillConstants.AbilityEnum ability) {
+    public int getStat(CharacterConstants.AbilityEnum ability) {
         return abilities.get(ability);
     }
 
 
-    public int getModifier(AbilitySkillConstants.AbilityEnum ability) {
-        return AbilitySkillConstants.getModifier(abilities.get(ability));
+    public int getModifier(CharacterConstants.AbilityEnum ability) {
+        return CharacterConstants.getModifier(abilities.get(ability));
     }
 }

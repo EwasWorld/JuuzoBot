@@ -1,8 +1,8 @@
-package CharacterBox.ClassBox;
+package CharacterBox.BroardInfo;
 
-import CharacterBox.AbilitySkillConstants;
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
+import CharacterBox.CharacterConstants;
 import Foo.IDs;
 import com.google.gson.*;
 
@@ -27,16 +27,16 @@ public class Class_ {
 
 
 
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/ClassBox/Classes.json";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/BroardInfo/Classes.json";
     private static Map<ClassEnum, Class_> classes;
     private int hitDie;
     // [0] will be the highest stat
-    private AbilitySkillConstants.AbilityEnum[] abilityOrder;
-    private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
+    private CharacterConstants.AbilityEnum[] abilityOrder;
+    private Set<CharacterConstants.AbilityEnum> savingThrows;
     // The number of skill proficiencies to be chosen from skillProficiencies
     private int skillQuantity;
     // Possible skill proficiencies
-    private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
+    private Set<CharacterConstants.SkillEnum> skillProficiencies;
     private FundsSetUp fundsSetUp;
     private WeaponProficiencies weaponProficiencies;
     private Weapon.WeaponsEnum startWeapon;
@@ -67,32 +67,32 @@ public class Class_ {
     }
 
 
-    private static AbilitySkillConstants.AbilityEnum[] createAbilityOrder(JsonObject abilityOrderObj) {
-        final AbilitySkillConstants.AbilityEnum[] newAbilityOrder = new AbilitySkillConstants.AbilityEnum[6];
-        newAbilityOrder[abilityOrderObj.get("str").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.STRENGTH;
-        newAbilityOrder[abilityOrderObj.get("dex").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.DEXTERITY;
-        newAbilityOrder[abilityOrderObj.get("con").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.CONSTITUTION;
-        newAbilityOrder[abilityOrderObj.get("int").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.INTELLIGENCE;
-        newAbilityOrder[abilityOrderObj.get("wis").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.WISDOM;
-        newAbilityOrder[abilityOrderObj.get("cha").getAsInt() - 1] = AbilitySkillConstants.AbilityEnum.CHARISMA;
+    private static CharacterConstants.AbilityEnum[] createAbilityOrder(JsonObject abilityOrderObj) {
+        final CharacterConstants.AbilityEnum[] newAbilityOrder = new CharacterConstants.AbilityEnum[6];
+        newAbilityOrder[abilityOrderObj.get("str").getAsInt() - 1] = CharacterConstants.AbilityEnum.STRENGTH;
+        newAbilityOrder[abilityOrderObj.get("dex").getAsInt() - 1] = CharacterConstants.AbilityEnum.DEXTERITY;
+        newAbilityOrder[abilityOrderObj.get("con").getAsInt() - 1] = CharacterConstants.AbilityEnum.CONSTITUTION;
+        newAbilityOrder[abilityOrderObj.get("int").getAsInt() - 1] = CharacterConstants.AbilityEnum.INTELLIGENCE;
+        newAbilityOrder[abilityOrderObj.get("wis").getAsInt() - 1] = CharacterConstants.AbilityEnum.WISDOM;
+        newAbilityOrder[abilityOrderObj.get("cha").getAsInt() - 1] = CharacterConstants.AbilityEnum.CHARISMA;
         return newAbilityOrder;
     }
 
 
-    private static Set<AbilitySkillConstants.AbilityEnum> createSavingThrows(JsonArray savingThrowsArray) {
-        final Set<AbilitySkillConstants.AbilityEnum> savingThrows = new HashSet<>();
+    private static Set<CharacterConstants.AbilityEnum> createSavingThrows(JsonArray savingThrowsArray) {
+        final Set<CharacterConstants.AbilityEnum> savingThrows = new HashSet<>();
         for (JsonElement savingThrow : savingThrowsArray) {
-            savingThrows.add(AbilitySkillConstants.AbilityEnum.valueOf(savingThrow.getAsString().toUpperCase()));
+            savingThrows.add(CharacterConstants.AbilityEnum.valueOf(savingThrow.getAsString().toUpperCase()));
         }
         return savingThrows;
     }
 
 
-    private static Set<AbilitySkillConstants.SkillEnum> createSkillProficiencies(JsonArray skillProficienciesArray) {
-        final Set<AbilitySkillConstants.SkillEnum> skillProficiencies = new HashSet<>();
+    private static Set<CharacterConstants.SkillEnum> createSkillProficiencies(JsonArray skillProficienciesArray) {
+        final Set<CharacterConstants.SkillEnum> skillProficiencies = new HashSet<>();
         for (JsonElement skillProficiency : skillProficienciesArray) {
             skillProficiencies
-                    .add(AbilitySkillConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
+                    .add(CharacterConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
         }
         return skillProficiencies;
     }
@@ -117,9 +117,9 @@ public class Class_ {
     }
 
 
-    private Class_(int hitDie, AbilitySkillConstants.AbilityEnum[] abilityOrder,
-                   Set<AbilitySkillConstants.AbilityEnum> savingThrows, int skillQuantity,
-                   Set<AbilitySkillConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
+    private Class_(int hitDie, CharacterConstants.AbilityEnum[] abilityOrder,
+                   Set<CharacterConstants.AbilityEnum> savingThrows, int skillQuantity,
+                   Set<CharacterConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
                    WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
     {
         this.hitDie = hitDie;
@@ -179,12 +179,12 @@ public class Class_ {
     }
 
 
-    public AbilitySkillConstants.AbilityEnum[] getAbilityOrder() {
+    public CharacterConstants.AbilityEnum[] getAbilityOrder() {
         return abilityOrder;
     }
 
 
-    public Set<AbilitySkillConstants.AbilityEnum> getSavingThrows() {
+    public Set<CharacterConstants.AbilityEnum> getSavingThrows() {
         return savingThrows;
     }
 
@@ -194,7 +194,7 @@ public class Class_ {
     }
 
 
-    public Set<AbilitySkillConstants.SkillEnum> getSkillProficiencies() {
+    public Set<CharacterConstants.SkillEnum> getSkillProficiencies() {
         return skillProficiencies;
     }
 

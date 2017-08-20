@@ -1,4 +1,4 @@
-package CharacterBox.ClassBox;
+package CharacterBox.BroardInfo;
 
 import Foo.Roll;
 

@@ -3,9 +3,9 @@ package CharacterBox;
 
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
-import CharacterBox.ClassBox.Class_;
-import CharacterBox.RaceBox.Race;
-import CharacterBox.RaceBox.SubRace;
+import CharacterBox.BroardInfo.Class_;
+import CharacterBox.BroardInfo.Race;
+import CharacterBox.BroardInfo.SubRace;
 import Foo.BadUserInputException;
 import Foo.Roll;
 
@@ -24,8 +24,8 @@ public class Character implements Serializable {
     private int hp;
     private int speed;
     private Abilities abilities;
-    private Set<AbilitySkillConstants.AbilityEnum> savingThrows;
-    private Set<AbilitySkillConstants.SkillEnum> skillProficiencies;
+    private Set<CharacterConstants.AbilityEnum> savingThrows;
+    private Set<CharacterConstants.SkillEnum> skillProficiencies;
     private Set<CharacterConstants.Language> languages;
     private int funds;
     private WeaponProficiencies weaponProficiencies;
@@ -43,10 +43,10 @@ public class Character implements Serializable {
         final Race raceInfo = Race.getRaceInfo(race);
         final SubRace subRaceInfo = getSubraceInfo(subRace);
 
-        final Map<AbilitySkillConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
+        final Map<CharacterConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
         for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
-            AbilitySkillConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
-            int score = AbilitySkillConstants.startingAbilityScores[i]
+            CharacterConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
+            int score = CharacterConstants.startingAbilityScores[i]
                     + raceInfo.getAbilityIncreases(ability)
                     + subRaceInfo.getExtraAbilityIncreases(ability);
             abilitiesMap.put(ability, score);
@@ -58,7 +58,7 @@ public class Character implements Serializable {
         weaponProficiencies = classInfo.getWeaponProficiencies();
         weapon = classInfo.getStartWeapon();
         funds = classInfo.rollFunds();
-        hp = classInfo.getHitDie() + abilities.getModifier(AbilitySkillConstants.AbilityEnum.CONSTITUTION);
+        hp = classInfo.getHitDie() + abilities.getModifier(CharacterConstants.AbilityEnum.CONSTITUTION);
 
         age = raceInfo.generateRandomAge();
         speed = raceInfo.getSpeed();
@@ -93,15 +93,15 @@ public class Character implements Serializable {
      * Half elves get 2 extra random skill proficiencies
      * Half orcs get proficiency in intimidation
      */
-    private void addSkillProficiencies(Race.RaceEnum race, Set<AbilitySkillConstants.SkillEnum> possibleProficiencies,
+    private void addSkillProficiencies(Race.RaceEnum race, Set<CharacterConstants.SkillEnum> possibleProficiencies,
                                        int quantity)
     {
         addSkillProficiencies(possibleProficiencies, quantity);
         switch (race) {
             case HALFELF:
-                final AbilitySkillConstants.SkillEnum[] skillEnums = AbilitySkillConstants.SkillEnum.values();
+                final CharacterConstants.SkillEnum[] skillEnums = CharacterConstants.SkillEnum.values();
                 for (int i = 0; i < 2; i++) {
-                    AbilitySkillConstants.SkillEnum skill;
+                    CharacterConstants.SkillEnum skill;
                     // Find a skill that the character doesn't yet have proficiency in
                     do {
                         skill = skillEnums[new Random().nextInt(skillEnums.length)];
@@ -110,7 +110,7 @@ public class Character implements Serializable {
                 }
                 break;
             case HALFORC:
-                skillProficiencies.add(AbilitySkillConstants.SkillEnum.INTIMIDATION);
+                skillProficiencies.add(CharacterConstants.SkillEnum.INTIMIDATION);
                 break;
         }
     }
@@ -148,12 +148,12 @@ public class Character implements Serializable {
     /*
      * Choose a specified number of proficiencies from the given set
      */
-    private void addSkillProficiencies(Set<AbilitySkillConstants.SkillEnum> possibleProficiencies, int quantity) {
+    private void addSkillProficiencies(Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity) {
         skillProficiencies = new HashSet<>();
         for (int i = 0; i < quantity; i++) {
             int size = possibleProficiencies.size();
-            final AbilitySkillConstants.SkillEnum chosenSkill = possibleProficiencies
-                    .toArray(new AbilitySkillConstants.SkillEnum[size])[new Random().nextInt(size)];
+            final CharacterConstants.SkillEnum chosenSkill = possibleProficiencies
+                    .toArray(new CharacterConstants.SkillEnum[size])[new Random().nextInt(size)];
             skillProficiencies.add(chosenSkill);
             possibleProficiencies.remove(chosenSkill);
         }
@@ -172,12 +172,12 @@ public class Character implements Serializable {
         string += String.format("Age: %s\n", age);
         string += String.format(
                 "Stats: Str %d, Dex %d, Con %d, Int %d, Wis %d, Cha %d\n",
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.STRENGTH),
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.DEXTERITY),
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.CONSTITUTION),
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.INTELLIGENCE),
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.WISDOM),
-                abilities.getStat(AbilitySkillConstants.AbilityEnum.CHARISMA)
+                abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH),
+                abilities.getStat(CharacterConstants.AbilityEnum.DEXTERITY),
+                abilities.getStat(CharacterConstants.AbilityEnum.CONSTITUTION),
+                abilities.getStat(CharacterConstants.AbilityEnum.INTELLIGENCE),
+                abilities.getStat(CharacterConstants.AbilityEnum.WISDOM),
+                abilities.getStat(CharacterConstants.AbilityEnum.CHARISMA)
         );
         string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
@@ -191,7 +191,7 @@ public class Character implements Serializable {
 
     private String getSavingThrowsAsString() {
         String string = "";
-        for (AbilitySkillConstants.AbilityEnum ability : savingThrows) {
+        for (CharacterConstants.AbilityEnum ability : savingThrows) {
             string += ability.toString() + ", ";
         }
         string = string.trim();
@@ -203,7 +203,7 @@ public class Character implements Serializable {
 
     private String getSkillProficienciesAsString() {
         String string = "";
-        for (AbilitySkillConstants.SkillEnum skill : skillProficiencies) {
+        for (CharacterConstants.SkillEnum skill : skillProficiencies) {
             string += skill.toString() + ", ";
         }
         string = string.trim();
@@ -250,7 +250,7 @@ public class Character implements Serializable {
         int modifier = getAbilityAttackModifier(Weapon.getWeaponInfo(weapon).getWeaponAttackTypeEnum());
 
         if (weaponProficiencies.contains(weapon)) {
-            modifier = AbilitySkillConstants.getProficiencyBonus(level);
+            modifier = CharacterConstants.getProficiencyBonus(level);
         }
 
         return modifier;
@@ -263,13 +263,13 @@ public class Character implements Serializable {
     private int getAbilityAttackModifier(Weapon.AttackTypeEnum attackType) {
         switch (attackType) {
             case MELEE:
-                return abilities.getModifier(AbilitySkillConstants.AbilityEnum.STRENGTH);
+                return abilities.getModifier(CharacterConstants.AbilityEnum.STRENGTH);
             case RANGE:
-                return abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
+                return abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
             case FINESSE:
             default:
-                if (abilities.getStat(AbilitySkillConstants.AbilityEnum.STRENGTH) > abilities
-                        .getStat(AbilitySkillConstants.AbilityEnum.DEXTERITY))
+                if (abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH) > abilities
+                        .getStat(CharacterConstants.AbilityEnum.DEXTERITY))
                 {
                     return getAbilityAttackModifier(Weapon.AttackTypeEnum.MELEE);
                 }
@@ -316,27 +316,27 @@ public class Character implements Serializable {
 
 
     public String rollInitiative() {
-        final int modifier = abilities.getModifier(AbilitySkillConstants.AbilityEnum.DEXTERITY);
+        final int modifier = abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
         return new Roll(1, 20, modifier).getStringForRoll();
     }
 
 
-    public String rollSavingThrow(AbilitySkillConstants.AbilityEnum ability) {
+    public String rollSavingThrow(CharacterConstants.AbilityEnum ability) {
         int modifier = abilities.getModifier(ability);
 
         if (savingThrows.contains(ability)) {
-            modifier += AbilitySkillConstants.getProficiencyBonus(level);
+            modifier += CharacterConstants.getProficiencyBonus(level);
         }
 
         return new Roll(1, 20, modifier).getStringForRoll();
     }
 
 
-    public String rollSkillCheck(AbilitySkillConstants.SkillEnum skill) {
+    public String rollSkillCheck(CharacterConstants.SkillEnum skill) {
         int modifier = abilities.getModifier(skill.getMainAbility());
 
         if (skillProficiencies.contains(skill)) {
-            modifier += AbilitySkillConstants.getProficiencyBonus(level);
+            modifier += CharacterConstants.getProficiencyBonus(level);
         }
 
         return new Roll(1, 20, modifier).getStringForRoll();

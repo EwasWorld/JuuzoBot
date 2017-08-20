@@ -1,7 +1,6 @@
-package CharacterBox.RaceBox;
+package CharacterBox.BroardInfo;
 
 import CharacterBox.Abilities;
-import CharacterBox.AbilitySkillConstants;
 import CharacterBox.CharacterConstants;
 import Foo.BadUserInputException;
 import Foo.IDs;
@@ -12,7 +11,6 @@ import java.lang.reflect.Type;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.nio.file.Files.find;
 import static java.nio.file.Files.readAllBytes;
 
 
@@ -25,7 +23,7 @@ public class Race {
 
 
 
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/RaceBox/Races.json";
+    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/BroardInfo/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
     private Abilities abilityIncreases;
@@ -72,13 +70,13 @@ public class Race {
 
 
     private static Abilities createAbilityIncreases(JsonObject abilityIncreases) {
-        final Map<AbilitySkillConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.CONSTITUTION, abilityIncreases.get("con").getAsInt());
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.INTELLIGENCE, abilityIncreases.get("int").getAsInt());
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.WISDOM, abilityIncreases.get("wis").getAsInt());
-        abilityIncreasesMap.put(AbilitySkillConstants.AbilityEnum.CHARISMA, abilityIncreases.get("cha").getAsInt());
+        final Map<CharacterConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.CONSTITUTION, abilityIncreases.get("con").getAsInt());
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.INTELLIGENCE, abilityIncreases.get("int").getAsInt());
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.WISDOM, abilityIncreases.get("wis").getAsInt());
+        abilityIncreasesMap.put(CharacterConstants.AbilityEnum.CHARISMA, abilityIncreases.get("cha").getAsInt());
         return new Abilities(abilityIncreasesMap);
     }
 
@@ -171,7 +169,7 @@ public class Race {
     }
 
 
-    public int getAbilityIncreases(AbilitySkillConstants.AbilityEnum ability) {
+    public int getAbilityIncreases(CharacterConstants.AbilityEnum ability) {
         return abilityIncreases.getStat(ability);
     }
 
