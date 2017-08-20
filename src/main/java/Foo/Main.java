@@ -103,8 +103,10 @@ public class Main {
                 ).queue();
                 return true;
             case "newChar":
+                UsersCharacters.createUserCharacter(event.getAuthor().getIdLong(), message);
                 event.getChannel().sendMessage(
-                        UsersCharacters.createUserCharacter(event.getAuthor().getIdLong(), message)
+                        "Character successfully created\n"
+                                + UsersCharacters.getCharacterDescription(event.getAuthor().getIdLong())
                 ).queue();
                 return true;
             case "description":
@@ -127,14 +129,12 @@ public class Main {
                 ).queue();
                 return true;
             case "changeWeapon":
-                event.getChannel().sendMessage(
-                        UsersCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message)
-                ).queue();
+                UsersCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message);
+                event.getChannel().sendMessage("Weapon change successful, enjoy your new toy.").queue();
                 return true;
             case "deleteChar":
-                event.getChannel().sendMessage(
-                        UsersCharacters.deleteCharacter(event.getAuthor().getIdLong())
-                ).queue();
+                UsersCharacters.deleteCharacter(event.getAuthor().getIdLong());
+                event.getChannel().sendMessage("Character deleted").queue();
                 return true;
             case "addQuote":
                 event.getChannel().sendMessage(
@@ -225,20 +225,17 @@ public class Main {
                 event.getChannel().sendMessage(Help.getAdminHelp()).queue();
                 return true;
             case "addGame":
-                event.getChannel().sendMessage(
-                        SessionTimes.addGame(message)
-                ).queue();
+                SessionTimes.addGame(message);
+                event.getChannel().sendMessage("Game added").queue();
                 return true;
             case "removeGame":
-                event.getChannel().sendMessage(
-                        SessionTimes.removeGame(message)
-                ).queue();
+                SessionTimes.removeGame(message);
+                event.getChannel().sendMessage("Game removed").queue();
                 return true;
             case "removeQuote":
                 try {
-                    event.getChannel().sendMessage(
-                            Quotes.removeQuote(Integer.parseInt(message))
-                    ).queue();
+                    Quotes.removeQuote(Integer.parseInt(message));
+                    event.getChannel().sendMessage("Quote removed").queue();
                 } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
                 }

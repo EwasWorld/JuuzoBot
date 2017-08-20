@@ -25,7 +25,7 @@ public class UsersCharacters implements Serializable {
     /*
      * id is the id of the user who the created character will be bound to
      */
-    public static String createUserCharacter(long id, String creationString) {
+    public static void createUserCharacter(long id, String creationString) {
         if (userCharacters == null) {
             userCharacters = new HashMap<>();
         }
@@ -76,17 +76,15 @@ public class UsersCharacters implements Serializable {
 
         Character character = new Character(name.trim(), race, subRace, class_);
         userCharacters.put(id, character);
-        return "Character successfully created.\n" + character.getDescription();
     }
 
 
     /*
      * id is the id of the user who's character will be deleted
      */
-    public static String deleteCharacter(long id) {
+    public static void deleteCharacter(long id) {
         if (userCharacters.containsKey(id)) {
             userCharacters.remove(id);
-            return "Character removed";
         }
         else {
             throw new IllegalStateException("You don't have a character to delete");
@@ -97,10 +95,9 @@ public class UsersCharacters implements Serializable {
     /*
      * id is the id of the user who's character who's weapon will be changed
      */
-    public static String changeCharacterWeapon(long id, String newWeapon) {
+    public static void changeCharacterWeapon(long id, String newWeapon) {
         if (getCharacter(id).isPresent()) {
             userCharacters.get(id).changeWeapons(newWeapon);
-            return "Weapon change successful, enjoy your new toy.";
         }
         else {
             throw new IllegalStateException(

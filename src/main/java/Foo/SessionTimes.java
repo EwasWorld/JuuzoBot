@@ -79,10 +79,9 @@ public class SessionTimes implements Serializable {
     /*
      * Removes a game with a specified short name from the map
      */
-    public static String removeGame(String game) {
+    public static void removeGame(String game) {
         if (game.contains(game.toUpperCase())) {
             gameTimes.remove(game.toUpperCase());
-            return "Game removed";
         }
         else {
             throw new IllegalArgumentException("Game doesn't exist therefore wasn't removed");
@@ -94,17 +93,16 @@ public class SessionTimes implements Serializable {
      * Adds a game to the map so that session times can be added
      * message should contain the short game name first then the full name of the game
      */
-    public static String addGame(String message) {
+    public static void addGame(String message) {
         if (message.split(" ").length >= 2) {
-            String roleName = message.split(" ")[0].toUpperCase();
-            String fullName = message.substring(roleName.length() + 1);
+            final String roleName = message.split(" ")[0].toUpperCase();
+            final String fullName = message.substring(roleName.length() + 1);
 
             if (gameTimes.containsKey(roleName)) {
                 throw new IllegalArgumentException("Game with the name " + roleName + " already exists");
             }
 
             gameTimes.put(roleName, new SessionTimes(fullName));
-            return "Game added";
         }
         else {
             throw new IllegalArgumentException("Incorrect format. Please provide a role name and a date");

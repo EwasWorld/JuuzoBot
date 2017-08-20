@@ -100,10 +100,9 @@ public class Quotes implements Serializable {
     /*
      * Removes the specified quote from the bot
      */
-    public static String removeQuote(int index) {
+    public static void removeQuote(int index) {
         getQuote(index);
         quotes.remove(index);
-        return "Quote removed";
     }
 
 
