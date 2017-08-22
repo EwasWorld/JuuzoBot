@@ -5,7 +5,7 @@ import CharacterBox.BroardInfo.Class_;
 import CharacterBox.BroardInfo.Race;
 import CharacterBox.BroardInfo.SubRace;
 import DataPersistenceBox.DataPersistence;
-import Foo.BadUserInputException;
+import ExceptionsBox.BadUserInputException;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.User;
 
@@ -103,7 +103,7 @@ public class UserCharacters implements Serializable {
         else {
             throw new IllegalStateException(
                     "If you don't have a character yet you can't change their weapon. "
-                            + "Use !newChar to make a new character (!charHelp if you get stuck)");
+                            + "Use !NewCommand to make a new character (!charHelp if you get stuck)");
         }
     }
 
@@ -149,7 +149,7 @@ public class UserCharacters implements Serializable {
             throw new IllegalStateException(attacker
                                                     + ", I see you're eager to get to the violence but you'll need to"
                                                     + " make a "
-                                                    + "character first using !newChar");
+                                                    + "character first using !NewCommand");
         }
     }
 
@@ -172,7 +172,7 @@ public class UserCharacters implements Serializable {
             return userCharacters.get(id).getDescription();
         }
         else {
-            throw new IllegalStateException("You don't seem to have a character yet. Make one using !newChar");
+            throw new IllegalStateException("You don't seem to have a character yet. Make one using !NewCommand");
         }
     }
 
@@ -206,7 +206,7 @@ public class UserCharacters implements Serializable {
             }
         }
         else {
-            throw new IllegalStateException("You don't seem to have a character yet. Make one using !newChar");
+            throw new IllegalStateException("You don't seem to have a character yet. Make one using !NewCommand");
         }
     }
 

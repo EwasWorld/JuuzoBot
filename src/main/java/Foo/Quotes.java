@@ -1,6 +1,8 @@
 package Foo;
 
 import DataPersistenceBox.DataPersistence;
+import ExceptionsBox.BadStateException;
+import ExceptionsBox.BadUserInputException;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;

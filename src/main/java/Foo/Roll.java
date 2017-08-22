@@ -1,5 +1,8 @@
 package Foo;
 
+import ExceptionsBox.BadStateException;
+import ExceptionsBox.BadUserInputException;
+
 import java.util.Random;
 
 

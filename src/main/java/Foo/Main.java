@@ -1,18 +1,15 @@
 package Foo;
 
 
-import CharacterBox.AttackBox.Weapon;
-import CharacterBox.BroardInfo.Class_;
-import CharacterBox.BroardInfo.Race;
-import CharacterBox.UserCharacters;
 import DataPersistenceBox.DataPersistence;
-import Grog.GrogList;
+import ExceptionsBox.BadStateException;
+import ExceptionsBox.BadUserInputException;
+import ExceptionsBox.IncorrectPermissionsException;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
@@ -20,13 +17,20 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import org.reflections.Reflections;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import javax.security.auth.login.LoginException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 
 public class Main {
-    public static JDA jda;
+    private static JDA jda;
     private static boolean isLocked = false;
 
 
@@ -46,221 +50,55 @@ public class Main {
         jda.addEventListener(new CommandListener());
         DataPersistence.loadData();
         new Thread(new DataPersistence()).start();
+        CommandListener.loadCommands();
     }
 
 
-    /*
-     * Removes the command string from the start of the message and returns the remainder
-     */
-    private static String getRemainingMessage(String command, String message) {
-        message = message.substring(1);
-        if (!message.equals(command)) {
-            return message.substring(command.length() + 1);
-        }
-        else {
-            return "";
-        }
+    public static boolean isIsLocked() {
+        return isLocked;
     }
 
 
-    /*
-     * Returns true if a command was completed
-     */
-    private static boolean generalCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        switch (command) {
-            case "help":
-                event.getChannel().sendMessage(Help.getHelp()).queue();
-                return true;
-            case "charHelp":
-                event.getChannel().sendMessage(Help.charHelp).queue();
-                return true;
-            case "ping":
-                event.getChannel().sendMessage("Pong").queue();
-                return true;
-            case "gameTime":
-                event.getChannel().sendMessage(
-                        SessionTimes.getNextSessionAsString(event.getMember())
-                ).queue();
-                return true;
-            case "roll":
-                final String result;
-                if (!message.equals("")) {
-                    if (containsDigit(message)) {
-                        result = Roll.rollDieFromChatEvent(message, event.getAuthor().getName());
-                    }
-                    else {
-                        result = UserCharacters.roll(event.getAuthor().getIdLong(), message);
-                    }
-                    event.getChannel().sendMessage(result).queue();
-                }
-                else {
-                    throw new IllegalArgumentException("Arguments missing. See !help for details");
-                }
-                return true;
-            case "potion":
-                event.getChannel().sendMessage(
-                        GrogList.drinkGrog(event.getAuthor().getName())
-                ).queue();
-                return true;
-            case "newChar":
-                UserCharacters.createUserCharacter(event.getAuthor().getIdLong(), message);
-                event.getChannel().sendMessage(
-                        "Character successfully created\n"
-                                + UserCharacters.getCharacterDescription(event.getAuthor().getIdLong())
-                ).queue();
-                return true;
-            case "description":
-                event.getChannel().sendMessage(
-                        UserCharacters.getCharacterDescription(event.getAuthor().getIdLong())
-                ).queue();
-                return true;
-            case "races":
-                event.getChannel().sendMessage(Race.getRacesList()).queue();
-                return true;
-            case "classes":
-                event.getChannel().sendMessage(Class_.getClassesList()).queue();
-                return true;
-            case "weapons":
-                event.getChannel().sendMessage(Weapon.getWeaponsList()).queue();
-                return true;
-            case "attack":
-                event.getChannel().sendMessage(
-                        UserCharacters.attack(event.getAuthor(), message)
-                ).queue();
-                return true;
-            case "changeWeapon":
-                UserCharacters.changeCharacterWeapon(event.getAuthor().getIdLong(), message);
-                event.getChannel().sendMessage("Weapon change successful, enjoy your new toy.").queue();
-                return true;
-            case "deleteChar":
-                UserCharacters.deleteCharacter(event.getAuthor().getIdLong());
-                event.getChannel().sendMessage("Character deleted").queue();
-                return true;
-            case "addQuote":
-                event.getChannel().sendMessage(
-                        Quotes.addQuote(message)
-                ).queue();
-                return true;
-            case "getQuote":
-                event.getChannel().sendMessage(
-                        Quotes.getQuote(message)
-                ).queue();
-                return true;
-            case "confetti":
-                event.getChannel().sendMessage(
-                        " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
-                                + " :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada:  :tada: "
-                ).queue();
-                return true;
-            case "fancify":
-                event.getChannel().sendMessage("But... but... I'm already fancy af").queue();
-                return true;
-            case "complaints":
-                event.getChannel().sendMessage(
-                        "You may kindly take your complaints and insert them into your anal cavity "
-                                + "making sure to use plenty of lube."
-                ).queue();
-                return true;
-            default:
-                return false;
-        }
+    public static void setIsLocked(boolean isLocked) {
+        Main.isLocked = isLocked;
     }
-
-
-    private static boolean containsDigit(String message) {
-        for (int i = 0; i < 3; i++) {
-            if (Character.isDigit(message.charAt(i))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /*
-     * Returns true if a command was completed
-     */
-    private static boolean dmCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        switch (command) {
-            case "dmHelp":
-                event.getChannel().sendMessage(Help.getDmHelp()).queue();
-                return true;
-            case "dateFormat":
-                event.getChannel().sendMessage(Help.dateFormatHelp).queue();
-                return true;
-            case "addSessionTime":
-                event.getChannel().sendMessage(
-                        SessionTimes.addSessionTime(event.getMember(), message)
-                ).queue();
-                return true;
-            case "gameReminder":
-                event.getChannel().sendMessage(
-                        SessionTimes.getSessionReminder(event.getMember())
-                ).queue();
-                return true;
-            default:
-                return false;
-        }
-    }
-
-
-    /*
-     * Returns true if a command was completed
-     */
-    private static boolean adminCommandsHandler(MessageReceivedEvent event, String command, String message) {
-        switch (command) {
-            case "adminHelp":
-                event.getChannel().sendMessage(Help.getAdminHelp()).queue();
-                return true;
-            case "addGame":
-                SessionTimes.addGame(message);
-                event.getChannel().sendMessage("Game added").queue();
-                return true;
-            case "removeGame":
-                SessionTimes.removeGame(message);
-                event.getChannel().sendMessage("Game removed").queue();
-                return true;
-            case "removeQuote":
-                try {
-                    Quotes.removeQuote(Integer.parseInt(message));
-                    event.getChannel().sendMessage("Quote removed").queue();
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
-                }
-                return true;
-            case "lock":
-                isLocked = true;
-                return true;
-            case "unlock":
-                isLocked = false;
-                return true;
-            case "save":
-                DataPersistence.saveData();
-                return true;
-            case "exit":
-                DataPersistence.saveData();
-                System.exit(0);
-                return true;
-            default:
-                return false;
-        }
-    }
-
 
 
     private static class CommandListener extends ListenerAdapter {
+        private static Map<String, AbstractCommand> commands = new HashMap<>();
+
+
+        private static void loadCommands() {
+            Reflections reflections = new Reflections("CommandsBox");
+            Set<Class<? extends AbstractCommand>> classes = reflections.getSubTypesOf(AbstractCommand.class);
+            for (Class<? extends AbstractCommand> s : classes) {
+                try {
+                    if (Modifier.isAbstract(s.getModifiers())) {
+                        continue;
+                    }
+                    AbstractCommand c = s.getConstructor().newInstance();
+                    if (!commands.containsKey(c.getCommand())) {
+                        commands.put(c.getCommand().toUpperCase(), c);
+                    }
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                        NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
-            // TODO: Note to self
 
-            String message = event.getMessage().getContent();
-            if (!message.startsWith("!")) {
-                Quotes.addMessage(event.getAuthor().getName(), message);
+            String args = event.getMessage().getContent();
+            if (!args.startsWith("!")) {
+                Quotes.addMessage(event.getAuthor().getName(), args);
                 return;
             }
-            String command = message.substring(1).split(" ")[0];
-            message = getRemainingMessage(command, message);
+            String command = args.substring(1).split(" ")[0].toUpperCase();
+            args = getRemainingMessage(command, args);
 
 
             User user = event.getAuthor();
@@ -270,24 +108,34 @@ public class Main {
 
 
             try {
-                if (!isLocked || user.getId().equals(IDs.eywaID)) {
-                    generalCommandsHandler(event, command, message);
-
-                    for (Role role : event.getMember().getRoles()) {
-                        if (role.getName().equals("dm")) {
-                            dmCommandsHandler(event, command, message);
-                        }
+                if (commands.size() != 0) {
+                    if (commands.containsKey(command)) {
+                        commands.get(command).execute(args, event.getChannel(), event.getMember());
+                        // TODO: Note to self command
                     }
-
-                    if (user.getId().equals(IDs.eywaID)) {
-                        adminCommandsHandler(event, command, message);
+                    else {
+                        throw new BadUserInputException("I have no memory of this command");
                     }
                 }
                 else {
-                    throw new BadUserInputException("Functions are temporarily disabled for now :c Try again later");
+                    throw new BadStateException("I'm so broken right now I just can't even");
                 }
-            } catch (BadUserInputException | BadStateException e) {
+            } catch (BadUserInputException | BadStateException | IncorrectPermissionsException e) {
                 event.getChannel().sendMessage(e.getMessage()).queue();
+            }
+        }
+
+
+        /*
+         * Removes the command string from the start of the message and returns the remainder
+         */
+        private static String getRemainingMessage(String command, String message) {
+            message = message.substring(1);
+            if (!message.equalsIgnoreCase(command)) {
+                return message.substring(command.length() + 1);
+            }
+            else {
+                return "";
             }
         }
 

@@ -1,4 +1,4 @@
-import Foo.BadUserInputException;
+import ExceptionsBox.BadUserInputException;
 import Foo.Roll;
 import junit.framework.TestCase;
 

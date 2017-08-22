@@ -6,7 +6,7 @@ import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.BroardInfo.Class_;
 import CharacterBox.BroardInfo.Race;
 import CharacterBox.BroardInfo.SubRace;
-import Foo.BadUserInputException;
+import ExceptionsBox.BadUserInputException;
 import Foo.Roll;
 
 import java.io.Serializable;

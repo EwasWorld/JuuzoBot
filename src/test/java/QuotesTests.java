@@ -1,4 +1,4 @@
-import Foo.BadUserInputException;
+import ExceptionsBox.BadUserInputException;
 import Foo.Quotes;
 import junit.framework.TestCase;
 

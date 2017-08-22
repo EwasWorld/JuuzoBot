@@ -1,6 +1,8 @@
 package Foo;
 
 import DataPersistenceBox.DataPersistence;
+import ExceptionsBox.BadStateException;
+import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 

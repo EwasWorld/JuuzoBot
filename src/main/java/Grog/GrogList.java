@@ -1,6 +1,6 @@
 package Grog;
 
-import Foo.BadStateException;
+import ExceptionsBox.BadStateException;
 import Foo.IDs;
 import Foo.Roll;
 import com.google.gson.*;

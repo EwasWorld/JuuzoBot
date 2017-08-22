@@ -2,7 +2,7 @@ package CharacterBox.BroardInfo;
 
 import CharacterBox.Abilities;
 import CharacterBox.CharacterConstants;
-import Foo.BadUserInputException;
+import ExceptionsBox.BadUserInputException;
 import Foo.IDs;
 import com.google.gson.*;
 
