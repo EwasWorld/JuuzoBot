@@ -1,4 +1,4 @@
-package Foo;
+package CoreBox;
 
 
 import DataPersistenceBox.DataPersistence;
@@ -26,7 +26,7 @@ import java.util.*;
 
 
 
-public class Main {
+public class Bot {
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = false;
@@ -58,7 +58,7 @@ public class Main {
 
 
     public static void setIsLocked(boolean isLocked) {
-        Main.isLocked = isLocked;
+        Bot.isLocked = isLocked;
     }
 
 

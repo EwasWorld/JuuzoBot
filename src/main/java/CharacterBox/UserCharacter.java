@@ -9,7 +9,7 @@ import CharacterBox.BroardInfo.SubRace;
 import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
-import Foo.Roll;
+import CoreBox.Roll;
 import net.dv8tion.jda.core.entities.User;
 
 import java.io.Serializable;

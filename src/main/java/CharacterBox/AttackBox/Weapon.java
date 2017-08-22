@@ -1,7 +1,7 @@
 package CharacterBox.AttackBox;
 
-import Foo.IDs;
-import Foo.Roll;
+import CoreBox.IDs;
+import CoreBox.Roll;
 import com.google.gson.*;
 
 import java.io.IOException;

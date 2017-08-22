@@ -1,4 +1,4 @@
-package Foo;
+package CoreBox;
 
 import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;

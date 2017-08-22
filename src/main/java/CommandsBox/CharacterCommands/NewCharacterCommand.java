@@ -2,7 +2,7 @@ package CommandsBox.CharacterCommands;
 
 import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
-import Foo.AbstractCommand;
+import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 

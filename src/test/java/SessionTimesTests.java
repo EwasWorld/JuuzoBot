@@ -1,5 +1,5 @@
 import ExceptionsBox.BadUserInputException;
-import Foo.SessionTimes;
+import CoreBox.SessionTimes;
 import junit.framework.TestCase;
 
 

@@ -1,9 +1,9 @@
 package DataPersistenceBox;
 
 import CharacterBox.UserCharacter;
-import Foo.IDs;
-import Foo.Quotes;
-import Foo.SessionTimes;
+import CoreBox.IDs;
+import CoreBox.Quotes;
+import CoreBox.SessionTimes;
 
 import java.io.*;
 import java.util.ArrayList;

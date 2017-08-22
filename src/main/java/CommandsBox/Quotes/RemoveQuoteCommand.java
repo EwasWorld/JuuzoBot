@@ -1,8 +1,8 @@
 package CommandsBox.Quotes;
 
 import CommandsBox.HelpCommand;
-import Foo.AbstractCommand;
-import Foo.Quotes;
+import CoreBox.AbstractCommand;
+import CoreBox.Quotes;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 

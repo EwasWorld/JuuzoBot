@@ -1,8 +1,8 @@
 package CommandsBox;
 
 import ExceptionsBox.BadUserInputException;
-import Foo.AbstractCommand;
-import Foo.Main;
+import CoreBox.AbstractCommand;
+import CoreBox.Bot;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
@@ -52,7 +52,7 @@ public class HelpCommand extends AbstractCommand {
         HelpVisibility helpVisibility = getExecuteHelpVisibility(args);
         String help = "Working commands {required} [optional]:\n";
 
-        for (AbstractCommand command : Main.getCommands()) {
+        for (AbstractCommand command : Bot.getCommands()) {
             if (rank.hasPermission(command.getRequiredRank()) && command.getHelpVisibility() == helpVisibility) {
                 help += start + command.getCommand() + getCommandArguments(command)
                         + " - " + command.getDescription() + "\n";

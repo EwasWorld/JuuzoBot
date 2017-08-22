@@ -3,7 +3,7 @@ package CharacterBox.BroardInfo;
 import CharacterBox.Abilities;
 import CharacterBox.CharacterConstants;
 import ExceptionsBox.BadUserInputException;
-import Foo.IDs;
+import CoreBox.IDs;
 import com.google.gson.*;
 
 import java.io.IOException;

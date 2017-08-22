@@ -3,7 +3,7 @@ package CharacterBox.BroardInfo;
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.CharacterConstants;
-import Foo.IDs;
+import CoreBox.IDs;
 import com.google.gson.*;
 
 import java.io.IOException;

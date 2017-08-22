@@ -1,9 +1,8 @@
 package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
-import Foo.AbstractCommand;
-import Foo.Help;
-import Foo.SessionTimes;
+import CoreBox.AbstractCommand;
+import CoreBox.SessionTimes;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 

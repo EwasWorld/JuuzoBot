@@ -1,6 +1,6 @@
 package Grog;
 
-import Foo.IDs;
+import CoreBox.IDs;
 
 import java.io.File;
 import java.io.IOException;

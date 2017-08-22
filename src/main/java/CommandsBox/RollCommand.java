@@ -1,8 +1,8 @@
 package CommandsBox;
 
 import CharacterBox.UserCharacter;
-import Foo.AbstractCommand;
-import Foo.Roll;
+import CoreBox.AbstractCommand;
+import CoreBox.Roll;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 

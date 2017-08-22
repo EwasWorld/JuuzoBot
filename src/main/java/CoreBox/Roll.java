@@ -1,4 +1,4 @@
-package Foo;
+package CoreBox;
 
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;

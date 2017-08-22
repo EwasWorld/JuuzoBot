@@ -1,5 +1,5 @@
 import ExceptionsBox.BadUserInputException;
-import Foo.Roll;
+import CoreBox.Roll;
 import junit.framework.TestCase;
 
 

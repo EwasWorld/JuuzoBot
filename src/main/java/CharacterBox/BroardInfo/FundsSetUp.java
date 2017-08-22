@@ -1,6 +1,6 @@
 package CharacterBox.BroardInfo;
 
-import Foo.Roll;
+import CoreBox.Roll;
 
 
 

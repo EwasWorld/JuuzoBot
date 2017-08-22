@@ -1,6 +1,6 @@
 package CommandsBox;
 
-import Foo.AbstractCommand;
+import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 

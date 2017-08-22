@@ -1,8 +1,8 @@
 package Grog;
 
 import ExceptionsBox.BadStateException;
-import Foo.IDs;
-import Foo.Roll;
+import CoreBox.IDs;
+import CoreBox.Roll;
 import com.google.gson.*;
 
 import java.io.FileNotFoundException;

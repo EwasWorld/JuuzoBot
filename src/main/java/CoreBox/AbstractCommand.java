@@ -1,4 +1,4 @@
-package Foo;
+package CoreBox;
 
 import CommandsBox.HelpCommand;
 import ExceptionsBox.BadStateException;
@@ -51,7 +51,7 @@ public abstract class AbstractCommand {
         if (!getRank(member).hasPermission(getRequiredRank())) {
             throw new IncorrectPermissionsException();
         }
-        else if (Main.isIsLocked() && !member.getUser().getId().equalsIgnoreCase(IDs.eywaID)) {
+        else if (Bot.isIsLocked() && !member.getUser().getId().equalsIgnoreCase(IDs.eywaID)) {
             throw new BadStateException("Bot is currently locked, please try again later");
         }
     }

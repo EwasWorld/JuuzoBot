@@ -1,5 +1,5 @@
 import ExceptionsBox.BadUserInputException;
-import Foo.Quotes;
+import CoreBox.Quotes;
 import junit.framework.TestCase;
 
 

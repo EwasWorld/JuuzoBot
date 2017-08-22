@@ -1,7 +1,7 @@
 package CommandsBox;
 
-import Foo.AbstractCommand;
-import Foo.Main;
+import CoreBox.AbstractCommand;
+import CoreBox.Bot;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
@@ -42,7 +42,7 @@ public class UnlockCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-        Main.setIsLocked(false);
+        Bot.setIsLocked(false);
         channel.sendMessage("Unlocked").queue();
     }
 }

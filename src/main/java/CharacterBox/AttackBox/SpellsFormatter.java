@@ -1,6 +1,6 @@
 package CharacterBox.AttackBox;
 
-import Foo.IDs;
+import CoreBox.IDs;
 import com.google.gson.*;
 
 import java.io.File;

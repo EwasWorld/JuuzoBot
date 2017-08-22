@@ -2,7 +2,7 @@ package CommandsBox.CharacterCommands;
 
 import CharacterBox.BroardInfo.Race;
 import CommandsBox.HelpCommand;
-import Foo.AbstractCommand;
+import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
