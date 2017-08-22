@@ -1,6 +1,6 @@
 package CommandsBox.CharacterCommands;
 
-import CharacterBox.UserCharacters;
+import CharacterBox.UserCharacter;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -34,12 +34,12 @@ public class NewCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
-        UserCharacters.createUserCharacter(author.getUser().getIdLong(), args);
+        UserCharacter.createUserCharacter(author.getUser().getIdLong(), args);
         channel.sendMessage(
                 "Character successfully created\n"
-                        + UserCharacters.getCharacterDescription(author.getUser().getIdLong())
+                        + UserCharacter.getCharacterDescription(author.getUser().getIdLong())
         ).queue();
 
     }

@@ -33,7 +33,7 @@ public class GetRacesCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         channel.sendMessage(Race.getRacesList()).queue();
     }

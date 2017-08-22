@@ -1,6 +1,6 @@
 package CommandsBox.CharacterCommands;
 
-import CharacterBox.UserCharacters;
+import CharacterBox.UserCharacter;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -33,9 +33,9 @@ public class ChangeWeaponsCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
-        UserCharacters.changeCharacterWeapon(author.getUser().getIdLong(), args);
+        UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
         channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
     }
 }

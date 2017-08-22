@@ -34,7 +34,7 @@ public class AddGameCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         SessionTimes.addGame(args);
         channel.sendMessage("Game added").queue();

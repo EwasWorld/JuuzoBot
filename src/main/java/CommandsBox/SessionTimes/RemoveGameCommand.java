@@ -34,7 +34,7 @@ public class RemoveGameCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         SessionTimes.removeGame(args);
         channel.sendMessage("Game removed").queue();

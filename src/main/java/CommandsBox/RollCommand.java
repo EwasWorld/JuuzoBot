@@ -1,6 +1,6 @@
 package CommandsBox;
 
-import CharacterBox.UserCharacters;
+import CharacterBox.UserCharacter;
 import Foo.AbstractCommand;
 import Foo.Roll;
 import net.dv8tion.jda.core.entities.Member;
@@ -35,7 +35,7 @@ public class RollCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         final String result;
         if (!args.equals("")) {
@@ -43,7 +43,7 @@ public class RollCommand extends AbstractCommand {
                 result = Roll.rollDieFromChatEvent(args, author.getUser().getName());
             }
             else {
-                result = UserCharacters.roll(author.getUser().getIdLong(), args);
+                result = UserCharacter.roll(author.getUser().getIdLong(), args);
             }
             channel.sendMessage(result).queue();
         }

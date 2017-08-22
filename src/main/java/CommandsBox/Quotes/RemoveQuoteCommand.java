@@ -34,7 +34,7 @@ public class RemoveQuoteCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         try {
             Quotes.removeQuote(Integer.parseInt(args));

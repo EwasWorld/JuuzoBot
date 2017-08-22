@@ -1,6 +1,6 @@
 package DataPersistenceBox;
 
-import CharacterBox.UserCharacters;
+import CharacterBox.UserCharacter;
 import Foo.IDs;
 import Foo.Quotes;
 import Foo.SessionTimes;
@@ -75,7 +75,7 @@ public class DataPersistence implements Runnable {
      * Load all data from files
      */
     public static void loadData() {
-        UserCharacters.load();
+        UserCharacter.load();
         SessionTimes.load();
         Quotes.load();
 
@@ -101,7 +101,7 @@ public class DataPersistence implements Runnable {
      * Save all the data currently stored
      */
     public static void saveData() {
-        UserCharacters.save();
+        UserCharacter.save();
         SessionTimes.save();
         Quotes.save();
 

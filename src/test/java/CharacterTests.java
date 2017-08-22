@@ -1,5 +1,5 @@
 import CharacterBox.AttackBox.Weapon;
-import CharacterBox.Character;
+import CharacterBox.UserCharacter;
 import CharacterBox.BroardInfo.Class_;
 import CharacterBox.BroardInfo.Race;
 import CharacterBox.BroardInfo.SubRace;
@@ -24,9 +24,9 @@ public class CharacterTests extends TestCase {
 
 
     public void testCreateCharacter() {
-        System.out.println(new Character("Akatsuki", Race.RaceEnum.ELF, null, Class_.ClassEnum.ROGUE).getDescription());
+        System.out.println(new UserCharacter("Akatsuki", Race.RaceEnum.ELF, null, Class_.ClassEnum.ROGUE).getDescription());
         System.out.println(
-                new Character("Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Class_.ClassEnum.ROGUE)
+                new UserCharacter("Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Class_.ClassEnum.ROGUE)
                         .getDescription());
 
         // TODO Test creating from string

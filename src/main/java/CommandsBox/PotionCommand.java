@@ -34,7 +34,7 @@ public class PotionCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         channel.sendMessage(GrogList.drinkGrog(author.getUser().getName())).queue();
     }

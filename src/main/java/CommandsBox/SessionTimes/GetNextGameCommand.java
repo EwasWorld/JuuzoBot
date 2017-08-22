@@ -34,6 +34,7 @@ public class GetNextGameCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
+        checkPermission(author);
 
         channel.sendMessage(
                 SessionTimes.getNextSessionAsString(author)

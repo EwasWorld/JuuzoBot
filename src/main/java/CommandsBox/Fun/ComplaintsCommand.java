@@ -33,7 +33,7 @@ public class ComplaintsCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         channel.sendMessage(
                 "You may kindly take your complaints and insert them into your anal cavity "

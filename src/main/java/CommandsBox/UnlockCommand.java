@@ -34,7 +34,7 @@ public class UnlockCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
         Main.setIsLocked(false);
         channel.sendMessage("Unlocked").queue();

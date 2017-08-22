@@ -1,6 +1,6 @@
 package CommandsBox.CharacterCommands;
 
-import CharacterBox.UserCharacters;
+import CharacterBox.UserCharacter;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -34,9 +34,9 @@ public class DeleteCommand extends AbstractCommand {
 
     @Override
     public void execute(String args, MessageChannel channel, Member author) {
-        checkPermission(author.getUser());
+        checkPermission(author);
 
-        UserCharacters.deleteCharacter(author.getUser().getIdLong());
+        UserCharacter.deleteCharacter(author.getUser().getIdLong());
         channel.sendMessage("Character deleted").queue();
     }
 }
