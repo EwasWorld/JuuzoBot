@@ -1,15 +1,16 @@
 package CommandsBox.CharacterCommands;
 
 import CharacterBox.UserCharacter;
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
-public class DeleteCommand extends AbstractCommand {
+public class DeleteCharacterCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.USER;
     }
 
@@ -28,7 +29,13 @@ public class DeleteCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "none";
+        return "";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.CHARACTER;
     }
 
 

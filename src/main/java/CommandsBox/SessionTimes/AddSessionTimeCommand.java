@@ -1,5 +1,6 @@
 package CommandsBox.SessionTimes;
 
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import Foo.Help;
 import Foo.SessionTimes;
@@ -9,8 +10,11 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 public class AddSessionTimeCommand extends AbstractCommand {
+    private static final String dateFormatHelp =
+                   "e.g. '16:00 21/8/17 BST' **or** '16:00 21/8/17 GMT + 1' (spaces around '+' are important)";
+
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.DM;
     }
 
@@ -29,7 +33,13 @@ public class AddSessionTimeCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{HH:mm dd/M/yy z}\n" + Help.dateFormatHelp;
+        return "{HH:mm dd/M/yy z}" + dateFormatHelp;
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 

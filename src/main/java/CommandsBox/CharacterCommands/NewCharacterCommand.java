@@ -1,33 +1,41 @@
 package CommandsBox.CharacterCommands;
 
 import CharacterBox.UserCharacter;
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
-public class DescriptionCommand extends AbstractCommand {
+public class NewCharacterCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.USER;
     }
 
 
     @Override
     public String getCommand() {
-        return "description";
+        return "newChar";
     }
 
 
     @Override
     public String getDescription() {
-        return "shows the details of your current character";
+        return "create a character";
     }
+
 
     @Override
     public String getArguments() {
-        return "none";
+        return "{name} [subrace] {race} {class}";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.CHARACTER;
     }
 
 
@@ -35,8 +43,11 @@ public class DescriptionCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
+        UserCharacter.createUserCharacter(author.getUser().getIdLong(), args);
         channel.sendMessage(
-                UserCharacter.getCharacterDescription(author.getUser().getIdLong())
+                "Character successfully created\n"
+                        + UserCharacter.getCharacterDescription(author.getUser().getIdLong())
         ).queue();
+
     }
 }

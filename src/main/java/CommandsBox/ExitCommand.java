@@ -9,7 +9,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class ExitCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.ADMIN;
     }
 
@@ -28,7 +28,13 @@ public class ExitCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "none";
+        return "";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 

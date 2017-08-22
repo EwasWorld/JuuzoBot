@@ -1,5 +1,6 @@
 package CommandsBox.Fun;
 
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -8,7 +9,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class ConfettiCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.USER;
     }
 
@@ -27,7 +28,13 @@ public class ConfettiCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "none";
+        return "";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NONE;
     }
 
 

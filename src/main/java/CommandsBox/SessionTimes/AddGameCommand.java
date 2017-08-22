@@ -1,5 +1,6 @@
 package CommandsBox.SessionTimes;
 
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import Foo.SessionTimes;
 import net.dv8tion.jda.core.entities.Member;
@@ -9,7 +10,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AddGameCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.ADMIN;
     }
 
@@ -29,6 +30,12 @@ public class AddGameCommand extends AbstractCommand {
     @Override
     public String getArguments() {
         return "{role} {full name}";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 

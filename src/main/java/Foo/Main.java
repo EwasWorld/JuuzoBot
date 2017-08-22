@@ -22,14 +22,12 @@ import org.reflections.Reflections;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import javax.security.auth.login.LoginException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 
 public class Main {
+    private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = false;
 
@@ -64,10 +62,12 @@ public class Main {
     }
 
 
+    public static List<AbstractCommand> getCommands() {
+        return new ArrayList<>(commands.values());
+    }
+
+
     private static class CommandListener extends ListenerAdapter {
-        private static Map<String, AbstractCommand> commands = new HashMap<>();
-
-
         private static void loadCommands() {
             Reflections reflections = new Reflections("CommandsBox");
             Set<Class<? extends AbstractCommand>> classes = reflections.getSubTypesOf(AbstractCommand.class);

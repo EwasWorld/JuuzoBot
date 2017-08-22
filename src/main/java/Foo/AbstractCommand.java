@@ -1,5 +1,6 @@
 package Foo;
 
+import CommandsBox.HelpCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.IncorrectPermissionsException;
 import net.dv8tion.jda.core.entities.Member;
@@ -23,12 +24,12 @@ public abstract class AbstractCommand {
 
 
         public boolean hasPermission(Rank rank) {
-            return level <= rank.level;
+            return level >= rank.level;
         }
     }
 
 
-    public abstract Rank getCommandCategory();
+    public abstract Rank getRequiredRank();
 
 
     public abstract String getCommand();
@@ -40,11 +41,14 @@ public abstract class AbstractCommand {
     public abstract String getArguments();
 
 
+    public abstract HelpCommand.HelpVisibility getHelpVisibility();
+
+
     public abstract void execute(String args, MessageChannel channel, Member author);
 
 
     protected void checkPermission(Member member) {
-        if (!getCommandCategory().hasPermission(getRank(member))) {
+        if (!getRank(member).hasPermission(getRequiredRank())) {
             throw new IncorrectPermissionsException();
         }
         else if (Main.isIsLocked() && !member.getUser().getId().equalsIgnoreCase(IDs.eywaID)) {
@@ -53,7 +57,7 @@ public abstract class AbstractCommand {
     }
 
 
-    private Rank getRank(Member member) {
+    protected Rank getRank(Member member) {
         Set<Rank> ranks = new HashSet<>();
         for (Role role : member.getRoles()) {
             try {

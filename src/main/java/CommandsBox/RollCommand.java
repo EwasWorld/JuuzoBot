@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class RollCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.USER;
     }
 
@@ -29,7 +29,7 @@ public class RollCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "[quantity] d {die size} [modifier]\n{skill/ability/initiative}";
+        return "[quantity] d {die size} [modifier] **OR** {skill/ability/initiative}";
     }
 
 
@@ -50,6 +50,12 @@ public class RollCommand extends AbstractCommand {
         else {
             throw new IllegalArgumentException("Arguments missing. See !help for details");
         }
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 

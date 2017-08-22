@@ -1,5 +1,6 @@
 package CommandsBox.Quotes;
 
+import CommandsBox.HelpCommand;
 import Foo.AbstractCommand;
 import Foo.Quotes;
 import net.dv8tion.jda.core.entities.Member;
@@ -9,7 +10,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AddQuoteCommand extends AbstractCommand {
     @Override
-    public Rank getCommandCategory() {
+    public Rank getRequiredRank() {
         return Rank.USER;
     }
 
@@ -30,6 +31,12 @@ public class AddQuoteCommand extends AbstractCommand {
     @Override
     public String getArguments() {
         return "{start of message}";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
