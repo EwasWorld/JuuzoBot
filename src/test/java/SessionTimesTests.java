@@ -1,4 +1,4 @@
-import Foo.BadStateException;
+import Foo.BadUserInputException;
 import Foo.SessionTimes;
 import junit.framework.TestCase;
 
@@ -19,7 +19,7 @@ public class SessionTimesTests extends TestCase {
         boolean exceptionThrown = false;
         try {
             SessionTimes.addGame("TG Test Game 2");
-        } catch (BadStateException e) {
+        } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
         assertTrue(exceptionThrown);
