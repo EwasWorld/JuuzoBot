@@ -385,7 +385,7 @@ public class UserCharacter implements Serializable {
         string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
         string += String.format("Languages: %s\n", getLanguagesAsString());
-        string += String.format("FundsSetUp: %d\n", funds);
+        string += String.format("Funds: %d\n", funds);
         string += String.format("Weapon Proficiencies: %s\n", weaponProficiencies.toString());
         string += String.format("Weapon: %s\n", weapon.toString());
         return string;

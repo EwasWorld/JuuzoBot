@@ -27,6 +27,7 @@ import java.util.*;
 
 
 public class Bot {
+    public static final String mainFilePath = IDs.pathToJuuzoBot + "JuuzoBot/" + "src/main/java/";
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = false;

@@ -3,7 +3,7 @@ package CharacterBox.BroardInfo;
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.CharacterConstants;
-import CoreBox.IDs;
+import CoreBox.Bot;
 import com.google.gson.*;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class Class_ {
 
 
 
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/BroardInfo/Classes.json";
+    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroardInfo/Classes.json";
     private static Map<ClassEnum, Class_> classes;
     private int hitDie;
     // [0] will be the highest stat

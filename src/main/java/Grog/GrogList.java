@@ -1,7 +1,7 @@
 package Grog;
 
+import CoreBox.Bot;
 import ExceptionsBox.BadStateException;
-import CoreBox.IDs;
 import CoreBox.Roll;
 import com.google.gson.*;
 
@@ -17,7 +17,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class GrogList {
-    private static final String fileLocation = IDs.mainFilePath + "Grog/GrogEffects.json";
+    private static final String fileLocation = Bot.mainFilePath + "Grog/GrogEffects.json";
     private static List<String> effects;
 
 

@@ -2,8 +2,8 @@ package CharacterBox.BroardInfo;
 
 import CharacterBox.Abilities;
 import CharacterBox.CharacterConstants;
+import CoreBox.Bot;
 import ExceptionsBox.BadUserInputException;
-import CoreBox.IDs;
 import com.google.gson.*;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class Race {
 
 
 
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/BroardInfo/Races.json";
+    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroardInfo/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
     private Abilities abilityIncreases;

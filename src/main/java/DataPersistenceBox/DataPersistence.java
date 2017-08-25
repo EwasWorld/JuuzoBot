@@ -1,6 +1,7 @@
 package DataPersistenceBox;
 
 import CharacterBox.UserCharacter;
+import CoreBox.Bot;
 import CoreBox.IDs;
 import CoreBox.Quotes;
 import CoreBox.SessionTimes;
@@ -16,7 +17,7 @@ import java.util.List;
  * Thread which backs up the data at regular time intervals
  */
 public class DataPersistence implements Runnable {
-    public static final String fileLocation = IDs.mainFilePath + "DataPersistenceBox/";
+    private static final String fileLocation = Bot.mainFilePath + "DataPersistenceBox/";
     private static final int backupIntervalMins = 60;
     private static final int minsToMillisecondsConversion = 60 * 1000;
 

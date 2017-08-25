@@ -32,7 +32,7 @@ public class AddSessionTimeCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{HH:mm dd/M/yy z}" + dateFormatHelp;
+        return "{HH:mm dd/M/yy z} " + dateFormatHelp;
     }
 
 

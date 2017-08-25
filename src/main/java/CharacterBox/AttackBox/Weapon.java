@@ -1,6 +1,6 @@
 package CharacterBox.AttackBox;
 
-import CoreBox.IDs;
+import CoreBox.Bot;
 import CoreBox.Roll;
 import com.google.gson.*;
 
@@ -65,7 +65,7 @@ public class Weapon {
 
 
 
-    private static final String fileLocation = IDs.mainFilePath + "CharacterBox/AttackBox/Weapons.json";
+    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/AttackBox/Weapons.json";
     private static Map<WeaponsEnum, Weapon> weapons;
     private AttackTypeEnum weaponTypeEnum;
     private int damageQuantity;

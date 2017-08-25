@@ -1,6 +1,6 @@
 package CharacterBox.AttackBox;
 
-import CoreBox.IDs;
+import CoreBox.Bot;
 import com.google.gson.*;
 
 import java.io.File;
@@ -15,8 +15,8 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class SpellsFormatter {
-    public static final String fileInLocation = IDs.mainFilePath + "CharacterBox/AttackBox/SpellsOriginal.json";
-    public static final String fileOutLocation = IDs.mainFilePath + "CharacterBox/AttackBox/SpellsFirstFormatWithType"
+    public static final String fileInLocation = Bot.mainFilePath + "CharacterBox/AttackBox/SpellsOriginal.json";
+    public static final String fileOutLocation = Bot.mainFilePath + "CharacterBox/AttackBox/SpellsFirstFormatWithType"
             + ".json";
 
 

@@ -1,6 +1,6 @@
 package Grog;
 
-import CoreBox.IDs;
+import CoreBox.Bot;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 
 public class GrogTxtToJSON {
-    private static final String fileNameNoExtention = IDs.mainFilePath + "Grog/GrogEffects";
+    private static final String fileNameNoExtention = Bot.mainFilePath + "Grog/GrogEffects";
 
 
     public static void main(String[] args) {
