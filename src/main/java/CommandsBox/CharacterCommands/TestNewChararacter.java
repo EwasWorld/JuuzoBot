@@ -8,34 +8,34 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
-public class NewCharacterCommand extends AbstractCommand {
+public class TestNewChararacter extends AbstractCommand {
     @Override
     public Rank getRequiredRank() {
-        return Rank.USER;
+        return Rank.ADMIN;
     }
 
 
     @Override
     public String getCommand() {
-        return "newChar";
+        return "testNewChar";
     }
 
 
     @Override
     public String getDescription() {
-        return "create a character";
+        return "create a new character without saving it or overwriting your current character";
     }
 
 
     @Override
     public String getArguments() {
-        return "{name} [subrace] {race} {class} {background}";
+        return "";
     }
 
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
@@ -43,11 +43,9 @@ public class NewCharacterCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-        UserCharacter.createUserCharacterAndAddToMap(author.getUser().getIdLong(), args);
         channel.sendMessage(
                 "Character successfully created:-\n\n"
-                        + UserCharacter.getCharacterDescription(author.getUser().getIdLong())
+                        + UserCharacter.createUserCharacter(args).getDescription()
         ).queue();
-
     }
 }

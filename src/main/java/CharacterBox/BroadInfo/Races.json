@@ -18,7 +18,17 @@
         "languages": [
           "Common",
           "Dwarvish"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful",
+            "Neutral"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral"
+          ]
+        }
       },
       {
         "name": "Elf",
@@ -37,7 +47,19 @@
         "languages": [
           "Common",
           "Elvish"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful",
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral",
+            "Evil"
+          ]
+        }
       },
       {
         "name": "Halfling",
@@ -56,7 +78,15 @@
         "languages": [
           "Common",
           "Halfling"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful"
+          ],
+          "goodEvil": [
+            "Good"
+          ]
+        }
       },
       {
         "name": "Human",
@@ -75,7 +105,19 @@
         "languages": [
           "Common",
           "WILDCARD"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful",
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral",
+            "Evil"
+          ]
+        }
       },
       {
         "name": "Dragonborn",
@@ -94,7 +136,17 @@
         "languages": [
           "Common",
           "Draconic"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Evil"
+          ]
+        }
       },
       {
         "name": "Gnome",
@@ -113,7 +165,18 @@
         "languages": [
           "Common",
           "Gnomish"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Lawful",
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral"
+          ]
+        }
       },
       {
         "name": "HalfElf",
@@ -133,7 +196,18 @@
           "Common",
           "Elvish",
           "Wildcard"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral",
+            "Evil"
+          ]
+        }
       },
       {
         "name": "HalfOrc",
@@ -152,7 +226,17 @@
         "languages": [
           "Common",
           "Orc"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Neutral",
+            "Evil"
+          ]
+        }
       },
       {
         "name": "Tiefling",
@@ -171,7 +255,18 @@
         "languages": [
           "Common",
           "Infernal"
-        ]
+        ],
+        "alignment": {
+          "lawChaos": [
+            "Neutral",
+            "Chaotic"
+          ],
+          "goodEvil": [
+            "Good",
+            "Neutral",
+            "Evil"
+          ]
+        }
       }
     ],
     "subraces": [

@@ -1,6 +1,6 @@
 package CommandsBox.CharacterCommands;
 
-import CharacterBox.BroardInfo.Race;
+import CharacterBox.BroadInfo.Race;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;

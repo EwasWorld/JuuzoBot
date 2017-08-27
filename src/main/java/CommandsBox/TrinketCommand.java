@@ -1,14 +1,13 @@
-package CommandsBox.CharacterCommands;
+package CommandsBox;
 
-import CharacterBox.BroadInfo.Class_;
-import CommandsBox.HelpCommand;
+import CharacterBox.BroadInfo.Trinkets;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
-public class GetClassesCommand extends AbstractCommand {
+public class TrinketCommand extends AbstractCommand {
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
@@ -17,14 +16,15 @@ public class GetClassesCommand extends AbstractCommand {
 
     @Override
     public String getCommand() {
-        return "classes";
+        return "trinket";
     }
 
 
     @Override
     public String getDescription() {
-        return "list of possible classes";
+        return "look around on the floor for some mildly interesting but usually useless item";
     }
+
 
     @Override
     public String getArguments() {
@@ -34,7 +34,7 @@ public class GetClassesCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
@@ -42,6 +42,6 @@ public class GetClassesCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-        channel.sendMessage(Class_.getClassesList()).queue();
+        channel.sendMessage(Trinkets.getTrinket(author.getUser().getName())).queue();
     }
 }

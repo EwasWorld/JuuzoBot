@@ -1,0 +1,32 @@
+,
+    {
+      "name": "",
+      "possibilities": [
+
+      ],
+      "proficiencies": [
+
+      ],
+      "languages": [
+
+      ],
+      "tools": [
+
+      ],
+      "traits": [
+
+      ],
+      "ideals": [
+        {
+          "name": "",
+          "description": "",
+          "alignment": ""
+        }
+      ],
+      "bonds": [
+
+      ],
+      "flaws": [
+
+      ]
+    }

@@ -1,6 +1,6 @@
 package CommandsBox.CharacterCommands;
 
-import CharacterBox.UserCharacter;
+import CharacterBox.BroadInfo.Background;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
@@ -8,7 +8,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
-public class NewCharacterCommand extends AbstractCommand {
+public class GetBackgroundsCommand extends AbstractCommand {
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
@@ -17,19 +17,19 @@ public class NewCharacterCommand extends AbstractCommand {
 
     @Override
     public String getCommand() {
-        return "newChar";
+        return "backgrounds";
     }
 
 
     @Override
     public String getDescription() {
-        return "create a character";
+        return "lists all possible backgrounds";
     }
 
 
     @Override
     public String getArguments() {
-        return "{name} [subrace] {race} {class} {background}";
+        return "";
     }
 
 
@@ -43,11 +43,6 @@ public class NewCharacterCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-        UserCharacter.createUserCharacterAndAddToMap(author.getUser().getIdLong(), args);
-        channel.sendMessage(
-                "Character successfully created:-\n\n"
-                        + UserCharacter.getCharacterDescription(author.getUser().getIdLong())
-        ).queue();
-
+        channel.sendMessage(Background.getBackgroundsList()).queue();
     }
 }

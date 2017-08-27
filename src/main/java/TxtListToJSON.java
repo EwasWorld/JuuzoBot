@@ -1,5 +1,3 @@
-package Grog;
-
 import CoreBox.Bot;
 
 import java.io.File;
@@ -9,13 +7,13 @@ import java.util.Scanner;
 
 
 
-public class GrogTxtToJSON {
-    private static final String fileNameNoExtention = Bot.mainFilePath + "Grog/GrogEffects";
+public class TxtListToJSON {
+    private static final String fileNameNoExtention = Bot.mainFilePath + "CharacterBox/BroadInfo/Trinkets";
 
 
     public static void main(String[] args) {
-        Scanner scanner = null;
-        PrintStream printStream = null;
+        Scanner scanner;
+        PrintStream printStream;
         try {
             scanner = new Scanner(new File(fileNameNoExtention + ".txt"));
             final File outFile = new File(fileNameNoExtention + ".json");
@@ -37,7 +35,10 @@ public class GrogTxtToJSON {
         while (scanner.hasNext()) {
             line = scanner.nextLine();
             line = line.replaceAll("\"", "'");
-            printToStreamWithPreceedingComma(printStream, line);
+            if (line.charAt(line.length() - 1) != ".".charAt(0)) {
+                line += ".";
+            }
+            printToStreamWithPrecedingComma(printStream, line);
         }
         printStream.println("]");
         printStream.println("}");
@@ -51,7 +52,7 @@ public class GrogTxtToJSON {
     }
 
 
-    private static void printToStreamWithPreceedingComma(PrintStream ps, String toPrint) {
+    private static void printToStreamWithPrecedingComma(PrintStream ps, String toPrint) {
         ps.print(", ");
         printToStream(ps, toPrint);
     }

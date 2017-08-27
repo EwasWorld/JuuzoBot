@@ -3,9 +3,7 @@ package CharacterBox;
 
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
-import CharacterBox.BroardInfo.Class_;
-import CharacterBox.BroardInfo.Race;
-import CharacterBox.BroardInfo.SubRace;
+import CharacterBox.BroadInfo.*;
 import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
@@ -25,9 +23,12 @@ public class UserCharacter implements Serializable {
 
     private String name;
     private int age;
+    private String alignment;
     private Class_.ClassEnum class_;
     private Race.RaceEnum race;
     private SubRace.SubRaceEnum subRace;
+    private UserBackground background;
+    private String trinket;
     private int level;
     private int hp;
     private int speed;
@@ -40,7 +41,9 @@ public class UserCharacter implements Serializable {
     private Weapon.WeaponsEnum weapon;
 
 
-    public UserCharacter(String name, Race.RaceEnum race, SubRace.SubRaceEnum subRace, Class_.ClassEnum class_) {
+    public UserCharacter(String name, Race.RaceEnum race, SubRace.SubRaceEnum subRace, Class_.ClassEnum class_,
+                         String background)
+    {
         this.name = name;
         this.class_ = class_;
         this.race = race;
@@ -50,7 +53,46 @@ public class UserCharacter implements Serializable {
         final Class_ classInfo = Class_.getClassInfo(class_);
         final Race raceInfo = Race.getRaceInfo(race);
         final SubRace subRaceInfo = getSubraceInfo(subRace);
+        final Background backgroundInfo = Background.getBackgroundInfo(background);
 
+        age = raceInfo.generateRandomAge();
+        speed = raceInfo.getSpeed();
+        Alignment alignment = raceInfo.getRandomAlignment();
+        this.alignment = alignment.getAlignmentInitials();
+        this.background = new UserBackground(background, alignment);
+
+        languages = new HashSet<>();
+        languages.addAll(raceInfo.getLanguages());
+        removeLanguageWildcards();
+        languages.addAll(backgroundInfo.getLanguages());
+        removeLanguageWildcards();
+
+        abilities = new Abilities(createAbilitiesMap(classInfo, raceInfo, subRaceInfo));
+        addSkillProficiencies(backgroundInfo, race, classInfo.getSkillProficiencies(), classInfo.getSkillQuantity());
+
+        savingThrows = classInfo.getSavingThrows();
+        weaponProficiencies = classInfo.getWeaponProficiencies();
+        weapon = classInfo.getStartWeapon();
+        funds = classInfo.rollFunds();
+        hp = classInfo.getHitDie() + abilities.getModifier(CharacterConstants.AbilityEnum.CONSTITUTION);
+
+        addSubraceSubtleties(subRace);
+        trinket = Trinkets.getTrinketLowerCaseStart();
+    }
+
+
+    private void removeLanguageWildcards() {
+        if (languages.contains(CharacterConstants.Language.WILDCARD)) {
+            languages.remove(CharacterConstants.Language.WILDCARD);
+            languages.add(CharacterConstants.getRandomLanguage(languages));
+        }
+        if (languages.contains(CharacterConstants.Language.WILDCARD2)) {
+            languages.remove(CharacterConstants.Language.WILDCARD2);
+            languages.add(CharacterConstants.getRandomLanguage(languages));
+        }
+    }
+
+    private Map<CharacterConstants.AbilityEnum, Integer> createAbilitiesMap(Class_ classInfo, Race raceInfo, SubRace subRaceInfo) {
         final Map<CharacterConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
         for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
             CharacterConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
@@ -59,82 +101,73 @@ public class UserCharacter implements Serializable {
                     + subRaceInfo.getExtraAbilityIncreases(ability);
             abilitiesMap.put(ability, score);
         }
-        abilities = new Abilities(abilitiesMap);
-
-        savingThrows = classInfo.getSavingThrows();
-        addSkillProficiencies(race, classInfo.getSkillProficiencies(), classInfo.getSkillQuantity());
-        weaponProficiencies = classInfo.getWeaponProficiencies();
-        weapon = classInfo.getStartWeapon();
-        funds = classInfo.rollFunds();
-        hp = classInfo.getHitDie() + abilities.getModifier(CharacterConstants.AbilityEnum.CONSTITUTION);
-
-        age = raceInfo.generateRandomAge();
-        speed = raceInfo.getSpeed();
-
-        languages = raceInfo.getLanguages();
-        if (languages.contains(CharacterConstants.Language.WILDCARD)) {
-            languages.remove(CharacterConstants.Language.WILDCARD);
-            languages.add(CharacterConstants.getRandomLanguage(languages));
-        }
-
-        addSubraceSubtleties(subRace);
+        return abilitiesMap;
     }
 
 
     /*
      * id is the id of the user who the created character will be bound to
      */
-    public static void createUserCharacter(long id, String creationString) {
+    public static void createUserCharacterAndAddToMap(long id, String creationString) {
+        userCharacters.put(id, createUserCharacter(creationString));
+    }
+
+
+    public static UserCharacter createUserCharacter(String creationString) {
         if (userCharacters == null) {
             userCharacters = new HashMap<>();
         }
 
         final String[] creationParts = creationString.split(" ");
+
+        if (creationParts.length < 4) {
+            throw new BadUserInputException("Not enough arguments, try checking out !help char");
+        }
+
         SubRace.SubRaceEnum subRace;
         final Race.RaceEnum race;
         final Class_.ClassEnum class_;
+        final String background = creationParts[creationParts.length - 1];
+
+        if (!Background.contains(background)) {
+            throw new BadUserInputException("Invalid background");
+        }
+
+        try {
+            class_ = Class_.ClassEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException("Invalid class");
+        }
+
+        try {
+            subRace = SubRace.SubRaceEnum.valueOf(creationParts[creationParts.length - 4].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // Not everyone wants a subrace
+            subRace = null;
+        }
 
         if (creationParts[creationParts.length - 3].equalsIgnoreCase("drow")) {
-            subRace = SubRace.SubRaceEnum.DARK;
-        }
-        else {
-            try {
-                subRace = SubRace.SubRaceEnum.valueOf(creationParts[creationParts.length - 3].toUpperCase());
-            } catch (IllegalArgumentException e) {
-                // Not everyone wants a subrace
-                subRace = null;
-            }
-        }
-
-        if (creationParts[creationParts.length - 2].equalsIgnoreCase("drow")) {
             race = Race.RaceEnum.ELF;
             subRace = SubRace.SubRaceEnum.DARK;
         }
         else {
             try {
-                race = Race.RaceEnum.valueOf(creationParts[creationParts.length - 2].toUpperCase());
+                race = Race.RaceEnum.valueOf(creationParts[creationParts.length - 3].toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new BadUserInputException("Invalid race");
             }
         }
 
-        try {
-            class_ = Class_.ClassEnum.valueOf(creationParts[creationParts.length - 1].toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException("Invalid class");
-        }
-
         String name = "";
-        for (int i = 0; i < creationParts.length - 2; i++) {
-            if (i < creationParts.length - 3 || subRace == null || creationParts[creationParts.length - 2]
-                    .equalsIgnoreCase("drow"))
+        for (int i = 0; i < creationParts.length - 3; i++) {
+            if (i < creationParts.length - 4 || subRace == null
+                    || creationParts[creationParts.length - 3].equalsIgnoreCase("drow"))
             {
                 name += creationParts[i] + " ";
             }
         }
 
-        UserCharacter character = new UserCharacter(name.trim(), race, subRace, class_);
-        userCharacters.put(id, character);
+        return new UserCharacter(name.trim(), race, subRace, class_, background);
     }
 
 
@@ -296,9 +329,10 @@ public class UserCharacter implements Serializable {
      * Half elves get 2 extra random skill proficiencies
      * Half orcs get proficiency in intimidation
      */
-    private void addSkillProficiencies(Race.RaceEnum race, Set<CharacterConstants.SkillEnum> possibleProficiencies,
-                                       int quantity)
+    private void addSkillProficiencies(Background backgroundInfo, Race.RaceEnum race,
+                                       Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity)
     {
+        skillProficiencies = backgroundInfo.getProficiencies();
         addSkillProficiencies(possibleProficiencies, quantity);
         switch (race) {
             case HALFELF:
@@ -352,7 +386,6 @@ public class UserCharacter implements Serializable {
      * Choose a specified number of proficiencies from the given set
      */
     private void addSkillProficiencies(Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity) {
-        skillProficiencies = new HashSet<>();
         for (int i = 0; i < quantity; i++) {
             int size = possibleProficiencies.size();
             final CharacterConstants.SkillEnum chosenSkill = possibleProficiencies
@@ -370,9 +403,9 @@ public class UserCharacter implements Serializable {
         }
 
         String string = "";
-        string += String.format("Name: %s\n", name);
+        string += String.format("%s, %s (%s)\n", name, age, alignment);
         string += String.format("Race/Class: %s%s %s\n", subraceString, race.toString(), class_.toString());
-        string += String.format("Age: %s\n", age);
+        string += String.format("Funds: %d\n", funds);
         string += String.format(
                 "Stats: Str %d, Dex %d, Con %d, Int %d, Wis %d, Cha %d\n",
                 abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH),
@@ -385,9 +418,12 @@ public class UserCharacter implements Serializable {
         string += String.format("Saving Throws: %s\n", getSavingThrowsAsString());
         string += String.format("Skill Proficiencies: %s\n", getSkillProficienciesAsString());
         string += String.format("Languages: %s\n", getLanguagesAsString());
-        string += String.format("Funds: %d\n", funds);
         string += String.format("Weapon Proficiencies: %s\n", weaponProficiencies.toString());
-        string += String.format("Weapon: %s\n", weapon.toString());
+        string += String.format("Weapon: %s\n\n", weapon.toString());
+        string += String.format("Background: %s\n%s\n\n", background.getName().toUpperCase(),
+                                background.getDescription());
+        string += String.format("For as long as I can remember I've had %s", trinket);
+
         return string;
     }
 

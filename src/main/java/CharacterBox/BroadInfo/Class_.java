@@ -1,4 +1,4 @@
-package CharacterBox.BroardInfo;
+package CharacterBox.BroadInfo;
 
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
@@ -27,7 +27,7 @@ public class Class_ {
 
 
 
-    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroardInfo/Classes.json";
+    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroadInfo/Classes.json";
     private static Map<ClassEnum, Class_> classes;
     private int hitDie;
     // [0] will be the highest stat
@@ -55,7 +55,7 @@ public class Class_ {
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
                     object.get("skillProficienciesQuantity").getAsInt(),
-                    createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
+                    CharacterConstants.createSkillProficiencies(object.getAsJsonArray("skillProficiencies")),
                     new FundsSetUp(
                             funds.get("quantity").getAsInt(),
                             funds.get("multiply").getAsBoolean()
@@ -85,16 +85,6 @@ public class Class_ {
             savingThrows.add(CharacterConstants.AbilityEnum.valueOf(savingThrow.getAsString().toUpperCase()));
         }
         return savingThrows;
-    }
-
-
-    private static Set<CharacterConstants.SkillEnum> createSkillProficiencies(JsonArray skillProficienciesArray) {
-        final Set<CharacterConstants.SkillEnum> skillProficiencies = new HashSet<>();
-        for (JsonElement skillProficiency : skillProficienciesArray) {
-            skillProficiencies
-                    .add(CharacterConstants.SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
-        }
-        return skillProficiencies;
     }
 
 

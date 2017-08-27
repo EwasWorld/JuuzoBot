@@ -1,6 +1,7 @@
-package CharacterBox.BroardInfo;
+package CharacterBox.BroadInfo;
 
 import CharacterBox.Abilities;
+import CharacterBox.Alignment;
 import CharacterBox.CharacterConstants;
 import CoreBox.Bot;
 import ExceptionsBox.BadUserInputException;
@@ -23,7 +24,7 @@ public class Race {
 
 
 
-    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroardInfo/Races.json";
+    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroadInfo/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
     private Abilities abilityIncreases;
@@ -32,9 +33,11 @@ public class Race {
     private CharacterConstants.Size size;
     private int speed;
     private Set<CharacterConstants.Language> languages;
+    private List<Alignment> alignments;
 
 
-    protected Race() { }
+    protected Race() {
+    }
 
 
     /*
@@ -46,13 +49,15 @@ public class Race {
         for (JsonElement element : mainObject.getAsJsonArray("mainraces")) {
             final JsonObject object = (JsonObject) element;
             final RaceEnum raceEnum = RaceEnum.valueOf(object.get("name").getAsString().toUpperCase());
+            final JsonObject alignments = object.getAsJsonObject("alignment");
             races.put(raceEnum, new Race(
                     createAbilityIncreases(object.getAsJsonObject("abilityIncreases")),
                     object.get("ageLowerBound").getAsInt(),
                     object.get("ageUpperBound").getAsInt(),
                     CharacterConstants.Size.valueOf(object.get("size").getAsString().toUpperCase()),
                     object.get("speed").getAsInt(),
-                    createLanguages(object.getAsJsonArray("languages"))
+                    CharacterConstants.createLanguages(object.getAsJsonArray("languages")),
+                    createAlignments(alignments)
             ));
         }
 
@@ -81,20 +86,28 @@ public class Race {
     }
 
 
-    /*
-     * If there is a wildcard language then it picks one at random
-     */
-    private static Set<CharacterConstants.Language> createLanguages(JsonArray languagesJson) {
-        final Set<CharacterConstants.Language> languages = new HashSet<>();
-        for (JsonElement language : languagesJson) {
-            languages.add(CharacterConstants.Language.valueOf(language.getAsString().toUpperCase()));
+    private List<Alignment> createAlignments(JsonObject alignments) {
+        final List<Alignment.GoodEvilEnum> goodEvils = new ArrayList<>();
+        for (JsonElement element : alignments.getAsJsonArray("goodEvil")) {
+            goodEvils.add(Alignment.GoodEvilEnum.valueOf(element.getAsString().toUpperCase()));
         }
-        return languages;
+
+        final List<Alignment> alignmentSet = new ArrayList<>();
+        for (JsonElement element : alignments.getAsJsonArray("lawChaos")) {
+            Alignment.LawChaosEnum lawChaos = Alignment.LawChaosEnum.valueOf(element.getAsString().toUpperCase());
+
+            for (Alignment.GoodEvilEnum goodEvil : goodEvils) {
+                alignmentSet.add(new Alignment(lawChaos, goodEvil));
+            }
+        }
+
+        return alignmentSet;
     }
 
 
     private Race(Abilities abilityIncreases, int ageLowerBound, int ageUpperBound,
-                 CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages)
+                 CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages,
+                 List<Alignment> alignments)
     {
         if (ageLowerBound >= ageUpperBound) {
             throw new BadUserInputException("Lower bound age must be larger than upper bound");
@@ -106,6 +119,7 @@ public class Race {
         this.size = size;
         this.speed = speed;
         this.languages = languages;
+        this.alignments = alignments;
     }
 
 
@@ -165,6 +179,7 @@ public class Race {
             }
         }
 
+        races += "\n\n(NB: For DROW use either 'DROW' or 'DARK ELF')";
         return races;
     }
 
@@ -191,6 +206,11 @@ public class Race {
 
     public Set<CharacterConstants.Language> getLanguages() {
         return languages;
+    }
+
+
+    public Alignment getRandomAlignment() {
+        return alignments.get(new Random().nextInt(alignments.size()));
     }
 
 

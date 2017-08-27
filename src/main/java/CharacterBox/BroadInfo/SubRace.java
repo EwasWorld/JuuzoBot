@@ -1,4 +1,4 @@
-package CharacterBox.BroardInfo;
+package CharacterBox.BroadInfo;
 
 import CharacterBox.Abilities;
 import CharacterBox.CharacterConstants;

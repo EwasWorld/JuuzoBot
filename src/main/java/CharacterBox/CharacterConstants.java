@@ -1,17 +1,13 @@
 package CharacterBox;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
+import java.util.*;
 
 
 
 public class CharacterConstants {
-    public enum BackgroundEnum {
-        ACOLYTE, CHARLATAN, CRIMINAL, ENTERTAINER, FOLKHERO, GUILDARTISAN,
-        HERMIT, NOBLE, OUTLANDER, SAGE, SAILOR, SOLDIER, URCHIN
-    }
 
 
 
@@ -22,7 +18,7 @@ public class CharacterConstants {
     public enum Language {
         COMMON, DWARVISH, ELVISH, GIANT, GNOMISH, GOBLIN,
         HALFLING, ORC, ABYSSAL, CELESTIAL, DRACONIC, DEEPSPEECH,
-        INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD
+        INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD, WILDCARD2
     }
 
 
@@ -73,6 +69,7 @@ public class CharacterConstants {
 
 
 
+    public static final int differenceBetweenLowerUpperAsciiA = 32;
     public static final int[] startingAbilityScores = {15, 14, 13, 12, 10, 8};
 
 
@@ -108,7 +105,6 @@ public class CharacterConstants {
                 return AbilityEnum.CONSTITUTION;
             case "Intelligence":
             case "Int":
-            case "Inte":
                 return AbilityEnum.INTELLIGENCE;
             case "Wisdom":
             case "Wis":
@@ -129,5 +125,37 @@ public class CharacterConstants {
 
     public static int getProficiencyBonus(int level) {
         return Math.floorDiv(level - 1, 4) + 2;
+    }
+
+
+    public static String[] getStringArrayFromJsonArray(JsonArray jsonArray) {
+        final List<String> stringsArrayList = new ArrayList<>();
+        for (JsonElement element : jsonArray) {
+            stringsArrayList.add(element.getAsString());
+        }
+
+        return stringsArrayList.toArray(new String[stringsArrayList.size()]);
+    }
+
+
+    public static Set<SkillEnum> createSkillProficiencies(JsonArray skillProficienciesArray) {
+        final Set<SkillEnum> skillProficiencies = new HashSet<>();
+        for (JsonElement skillProficiency : skillProficienciesArray) {
+            skillProficiencies
+                    .add(SkillEnum.valueOf(skillProficiency.getAsString().toUpperCase()));
+        }
+        return skillProficiencies;
+    }
+
+
+    /*
+         * If there is a wildcard language then it picks one at random
+         */
+    public static Set<Language> createLanguages(JsonArray languagesJson) {
+        final Set<Language> languages = new HashSet<>();
+        for (JsonElement language : languagesJson) {
+            languages.add(Language.valueOf(language.getAsString().toUpperCase()));
+        }
+        return languages;
     }
 }

@@ -1,5 +1,6 @@
 package CharacterBox.AttackBox;
 
+import CharacterBox.CharacterConstants;
 import CoreBox.Bot;
 import CoreBox.Roll;
 import com.google.gson.*;
@@ -91,21 +92,11 @@ public class Weapon {
                     Weapon.AttackTypeEnum.valueOf(object.get("attackType").getAsString().toUpperCase()),
                     damage.get("quantity").getAsInt(),
                     damage.get("die").getAsInt(),
-                    getStringArrayFromJsonArray(object.getAsJsonArray("attackLines")),
-                    getStringArrayFromJsonArray(object.getAsJsonArray("hitLines")),
-                    getStringArrayFromJsonArray(object.getAsJsonArray("missLines"))
+                    CharacterConstants.getStringArrayFromJsonArray(object.getAsJsonArray("attackLines")),
+                    CharacterConstants.getStringArrayFromJsonArray(object.getAsJsonArray("hitLines")),
+                    CharacterConstants.getStringArrayFromJsonArray(object.getAsJsonArray("missLines"))
             ));
         }
-    }
-
-
-    private String[] getStringArrayFromJsonArray(JsonArray jsonArray) {
-        final List<String> stringsArrayList = new ArrayList<>();
-        for (JsonElement element : jsonArray) {
-            stringsArrayList.add(element.getAsString());
-        }
-
-        return stringsArrayList.toArray(new String[stringsArrayList.size()]);
     }
 
 
