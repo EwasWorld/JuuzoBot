@@ -52,6 +52,7 @@ public class CharacterTests extends TestCase {
         testStrings.add("Fi Wood Elf Criminal Rogue");
         testStrings.add("Fi Elf Wood Criminal Rogue");
 
+        // TODO Shouldn't have to manually check the output...
         for (String testString : testStrings) {
             System.out.println("\n\nTest String: " + testString);
             try {

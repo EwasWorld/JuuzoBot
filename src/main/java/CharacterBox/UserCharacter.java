@@ -332,8 +332,14 @@ public class UserCharacter implements Serializable {
     private void addSkillProficiencies(Background backgroundInfo, Race.RaceEnum race,
                                        Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity)
     {
+        // clone possible proficiencies
+        Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>();
+        for (CharacterConstants.SkillEnum skill : possibleProficiencies) {
+            possibleProficienciesClone.add(skill);
+        }
+
         skillProficiencies = backgroundInfo.getProficiencies();
-        addSkillProficiencies(possibleProficiencies, quantity);
+        addSkillProficiencies(possibleProficienciesClone, quantity);
         switch (race) {
             case HALFELF:
                 final CharacterConstants.SkillEnum[] skillEnums = CharacterConstants.SkillEnum.values();
