@@ -1,10 +1,7 @@
 package DataPersistenceBox;
 
 import CharacterBox.UserCharacter;
-import CoreBox.Bot;
-import CoreBox.IDs;
-import CoreBox.Quotes;
-import CoreBox.SessionTimes;
+import CoreBox.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,7 +15,8 @@ import java.util.List;
  */
 public class DataPersistence implements Runnable {
     private static final String fileLocation = Bot.mainFilePath + "DataPersistenceBox/";
-    private static final int backupIntervalMins = 60;
+    // TODO: Different location for currently working on vs .jar
+    private static final int backupIntervalMins = 180;
     private static final int minsToMillisecondsConversion = 60 * 1000;
 
 

@@ -43,7 +43,7 @@ public class UserBackground implements Serializable {
 
         String string = "";
         string += String.format("%s %s", possibility, trait);
-        string += String.format(" I greatly value %s. %s", idealName.toLowerCase(), idealDescription);
+        string += String.format(" I'm driven by %s. %s", idealName.toLowerCase(), idealDescription);
         string += String.format(" %s However, %s", bond, flaw);
 
         return string;

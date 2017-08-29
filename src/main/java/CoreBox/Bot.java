@@ -122,6 +122,7 @@ public class Bot {
                     throw new BadStateException("I'm so broken right now I just can't even");
                 }
             } catch (BadUserInputException | BadStateException | IncorrectPermissionsException e) {
+                Logger.logEvent(event.getMessage().getContent(), e);
                 event.getChannel().sendMessage(e.getMessage()).queue();
             }
         }
