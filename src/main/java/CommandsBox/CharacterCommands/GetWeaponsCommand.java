@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GetWeaponsCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "weapons";
     }
@@ -25,6 +19,7 @@ public class GetWeaponsCommand extends AbstractCommand {
     public String getDescription() {
         return "list of possible weapons";
     }
+
 
     @Override
     public String getArguments() {
@@ -42,6 +37,12 @@ public class GetWeaponsCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-       channel.sendMessage(Weapon.getWeaponsList()).queue();
+        channel.sendMessage(Weapon.getWeaponsList()).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

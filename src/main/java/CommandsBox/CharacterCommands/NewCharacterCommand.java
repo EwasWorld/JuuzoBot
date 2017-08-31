@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class NewCharacterCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "newChar";
     }
@@ -48,6 +42,11 @@ public class NewCharacterCommand extends AbstractCommand {
                 "Character successfully created:-\n\n"
                         + UserCharacter.getCharacterDescription(author.getUser().getIdLong())
         ).queue();
+    }
 
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

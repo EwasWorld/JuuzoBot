@@ -1,19 +1,13 @@
 package CommandsBox;
 
-import DataPersistenceBox.DataPersistence;
 import CoreBox.AbstractCommand;
+import DataPersistenceBox.DataPersistence;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
 public class ExitCommand extends AbstractCommand {
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
     @Override
     public String getCommand() {
         return "exit";
@@ -45,5 +39,11 @@ public class ExitCommand extends AbstractCommand {
         DataPersistence.saveData();
         channel.sendMessage("Bye bye :c").queue();
         System.exit(0);
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

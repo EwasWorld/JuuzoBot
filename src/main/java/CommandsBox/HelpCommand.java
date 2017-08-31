@@ -1,24 +1,16 @@
 package CommandsBox;
 
-import ExceptionsBox.BadUserInputException;
 import CoreBox.AbstractCommand;
 import CoreBox.Bot;
+import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
 public class HelpCommand extends AbstractCommand {
-    private static final String start = "\t:carrot: !";
-
-
     public enum HelpVisibility {NONE, CHARACTER, NORMAL}
-
-
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
+    private static final String start = "\t:carrot: !";
 
 
     @Override
@@ -60,6 +52,12 @@ public class HelpCommand extends AbstractCommand {
         }
 
         channel.sendMessage(help).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 
 

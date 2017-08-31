@@ -57,45 +57,6 @@ public class Background {
     private String[] flaws;
 
 
-    public static Background getBackgroundInfo(String background) {
-        if (backgrounds == null) {
-            getBackgroundsFromFile();
-        }
-        background = background.toUpperCase();
-        if (backgrounds.containsKey(background)) {
-            return backgrounds.get(background);
-        }
-        else {
-            throw new BadUserInputException("Invalid background");
-        }
-    }
-
-
-    /*
-     * Returns whether the background given exists
-     */
-    public static boolean contains(String background) {
-        if (backgrounds == null) {
-            getBackgroundsFromFile();
-        }
-        return backgrounds.containsKey(background.toUpperCase());
-    }
-
-
-    private static void getBackgroundsFromFile() {
-        try {
-            final GsonBuilder gsonBuilder = new GsonBuilder();
-            final Gson gson = gsonBuilder.registerTypeAdapter(Background.class, new BackgroundsSetUpDeserializer())
-                    .create();
-
-            final String backgoundsSetUpJSON = new String(readAllBytes(Paths.get(fileLocation)));
-            gson.fromJson(backgoundsSetUpJSON, Background.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public Background(Object rawObj) {
         backgrounds = new HashMap<>();
 
@@ -129,6 +90,79 @@ public class Background {
             ));
         }
         return ideals.toArray(new Ideal[ideals.size()]);
+    }
+
+
+    private Background(String[] possibilities, Set<CharacterConstants.SkillEnum> proficiencies,
+                       Set<CharacterConstants.Language> languages, String[] traits,
+                       Ideal[] ideals, String[] bonds, String[] flaws)
+    {
+        this.possibilities = possibilities;
+        this.proficiencies = proficiencies;
+        this.languages = languages;
+        this.traits = traits;
+        this.ideals = ideals;
+        this.bonds = bonds;
+        this.flaws = flaws;
+    }
+
+
+    public static Background getBackgroundInfo(String background) {
+        if (backgrounds == null) {
+            getBackgroundsFromFile();
+        }
+        background = background.toUpperCase();
+        if (backgrounds.containsKey(background)) {
+            return backgrounds.get(background);
+        }
+        else {
+            throw new BadUserInputException("Invalid background");
+        }
+    }
+
+
+    private static void getBackgroundsFromFile() {
+        try {
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            final Gson gson = gsonBuilder.registerTypeAdapter(Background.class, new BackgroundsSetUpDeserializer())
+                    .create();
+
+            final String backgoundsSetUpJSON = new String(readAllBytes(Paths.get(fileLocation)));
+            gson.fromJson(backgoundsSetUpJSON, Background.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*
+     * Returns whether the background given exists
+     */
+    public static boolean contains(String background) {
+        if (backgrounds == null) {
+            getBackgroundsFromFile();
+        }
+        return backgrounds.containsKey(background.toUpperCase());
+    }
+
+
+    public static String getBackgroundsList() {
+        if (backgrounds == null) {
+            getBackgroundsFromFile();
+        }
+
+        String backgroundsList = "Available backgrounds: ";
+        final String[] backgroundsArr = backgrounds.keySet().toArray(new String[backgrounds.size()]);
+
+        for (int i = 0; i < backgroundsArr.length; i++) {
+            backgroundsList += backgroundsArr[i];
+
+            if (i < backgroundsArr.length - 1) {
+                backgroundsList += ", ";
+            }
+        }
+
+        return backgroundsList;
     }
 
 
@@ -176,38 +210,14 @@ public class Background {
     }
 
 
-    public static String getBackgroundsList() {
-        if (backgrounds == null) {
-            getBackgroundsFromFile();
+    private static class BackgroundsSetUpDeserializer implements JsonDeserializer<Background> {
+        public Background deserialize(JsonElement json, Type typeOfT,
+                                      JsonDeserializationContext context) throws JsonParseException
+        {
+            return new Background(json.getAsJsonObject().get("backgrounds").getAsJsonArray());
         }
-
-        String backgroundsList = "Available backgrounds: ";
-        final String[] backgroundsArr = backgrounds.keySet().toArray(new String[backgrounds.size()]);
-
-        for (int i = 0; i < backgroundsArr.length; i++) {
-            backgroundsList += backgroundsArr[i];
-
-            if (i < backgroundsArr.length - 1) {
-                backgroundsList += ", ";
-            }
-        }
-
-        return backgroundsList;
     }
 
-
-    private Background(String[] possibilities, Set<CharacterConstants.SkillEnum> proficiencies,
-                      Set<CharacterConstants.Language> languages, String[] traits,
-                      Ideal[] ideals, String[] bonds, String[] flaws)
-    {
-        this.possibilities = possibilities;
-        this.proficiencies = proficiencies;
-        this.languages = languages;
-        this.traits = traits;
-        this.ideals = ideals;
-        this.bonds = bonds;
-        this.flaws = flaws;
-    }
 
 
     public class Ideal {
@@ -245,16 +255,6 @@ public class Background {
 
         public String getDescription() {
             return description;
-        }
-    }
-
-
-
-    private static class BackgroundsSetUpDeserializer implements JsonDeserializer<Background> {
-        public Background deserialize(JsonElement json, Type typeOfT,
-                                      JsonDeserializationContext context) throws JsonParseException
-        {
-            return new Background(json.getAsJsonObject().get("backgrounds").getAsJsonArray());
         }
     }
 }

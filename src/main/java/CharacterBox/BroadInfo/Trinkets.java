@@ -1,6 +1,5 @@
 package CharacterBox.BroadInfo;
 
-import CharacterBox.CharacterConstants;
 import CoreBox.Bot;
 import CoreBox.Roll;
 import ExceptionsBox.BadStateException;
@@ -30,6 +29,15 @@ public class Trinkets {
     }
 
 
+    public static String getTrinket(String author) {
+        try {
+            return author + " comes across " + getTrinketLowerCaseStart();
+        } catch (NullPointerException e) {
+            throw new BadStateException("Trinkets seem to be broken right now");
+        }
+    }
+
+
     public static String getTrinketLowerCaseStart() {
         try {
             initialiseTrinkets();
@@ -37,15 +45,6 @@ public class Trinkets {
             // Change the first letter to lower case
             return String.valueOf(trinket.charAt(0)).toLowerCase() + trinket.substring(1);
         } catch (FileNotFoundException e) {
-            throw new BadStateException("Trinkets seem to be broken right now");
-        }
-    }
-
-
-    public static String getTrinket(String author) {
-        try {
-            return author + " comes across " + getTrinketLowerCaseStart();
-        } catch (NullPointerException e) {
             throw new BadStateException("Trinkets seem to be broken right now");
         }
     }

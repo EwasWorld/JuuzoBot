@@ -10,12 +10,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AddSessionTimeCommand extends AbstractCommand {
     private static final String dateFormatHelp =
-                   "e.g. '16:00 21/8/17 BST' **or** '16:00 21/8/17 GMT + 1' (spaces around '+' are important)";
-
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.DM;
-    }
+            "e.g. '16:00 21/8/17 BST' **or** '16:00 21/8/17 GMT + 1' (spaces around '+' are important)";
 
 
     @Override
@@ -47,5 +42,11 @@ public class AddSessionTimeCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(SessionTimes.addSessionTime(author, args)).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.DM;
     }
 }

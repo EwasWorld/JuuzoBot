@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class RollCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "roll";
     }
@@ -30,6 +24,12 @@ public class RollCommand extends AbstractCommand {
     @Override
     public String getArguments() {
         return "[quantity] d {die size} [modifier] **OR** {skill/ability/initiative}";
+    }
+
+
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
@@ -54,8 +54,8 @@ public class RollCommand extends AbstractCommand {
 
 
     @Override
-    public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 
 

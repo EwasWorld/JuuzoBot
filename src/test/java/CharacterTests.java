@@ -14,7 +14,7 @@ import java.util.List;
 
 public class CharacterTests extends TestCase {
     public void testClassInfoRetrieval() {
-        System.out.println(Class_.getClassInfo(Class_.ClassEnum.ROGUE).getSkillProficiencies().size());
+        Class_.getClassInfo(Class_.ClassEnum.ROGUE);
     }
 
 

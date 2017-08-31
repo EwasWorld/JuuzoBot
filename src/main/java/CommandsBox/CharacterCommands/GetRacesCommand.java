@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GetRacesCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "races";
     }
@@ -25,6 +19,7 @@ public class GetRacesCommand extends AbstractCommand {
     public String getDescription() {
         return "list of possible races";
     }
+
 
     @Override
     public String getArguments() {
@@ -43,5 +38,11 @@ public class GetRacesCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(Race.getRacesList()).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

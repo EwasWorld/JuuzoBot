@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class ChangeWeaponsCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "changeWeapon";
     }
@@ -25,6 +19,7 @@ public class ChangeWeaponsCommand extends AbstractCommand {
     public String getDescription() {
         return "change your character's weapon";
     }
+
 
     @Override
     public String getArguments() {
@@ -44,5 +39,11 @@ public class ChangeWeaponsCommand extends AbstractCommand {
 
         UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
         channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

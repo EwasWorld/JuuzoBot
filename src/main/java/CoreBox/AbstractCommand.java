@@ -29,9 +29,6 @@ public abstract class AbstractCommand {
     }
 
 
-    public abstract Rank getRequiredRank();
-
-
     public abstract String getCommand();
 
 
@@ -62,8 +59,7 @@ public abstract class AbstractCommand {
         for (Role role : member.getRoles()) {
             try {
                 ranks.add(Rank.valueOf(role.getName().toUpperCase()));
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // Not a rank roll, ignore it
             }
         }
@@ -84,4 +80,7 @@ public abstract class AbstractCommand {
             return Rank.USER;
         }
     }
+
+
+    public abstract Rank getRequiredRank();
 }

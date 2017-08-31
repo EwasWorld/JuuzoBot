@@ -8,12 +8,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PingCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "ping";
     }
@@ -42,5 +36,11 @@ public class PingCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage("Pong").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

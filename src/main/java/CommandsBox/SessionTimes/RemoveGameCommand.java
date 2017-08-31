@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class RemoveGameCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
-    @Override
     public String getCommand() {
         return "removeGame";
     }
@@ -45,5 +39,11 @@ public class RemoveGameCommand extends AbstractCommand {
 
         SessionTimes.removeGame(args);
         channel.sendMessage("Game removed").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

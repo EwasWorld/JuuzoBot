@@ -1,8 +1,8 @@
 package Grog;
 
 import CoreBox.Bot;
-import ExceptionsBox.BadStateException;
 import CoreBox.Roll;
+import ExceptionsBox.BadStateException;
 import com.google.gson.*;
 
 import java.io.FileNotFoundException;
@@ -56,7 +56,6 @@ public class GrogList {
         }
         return effects;
     }
-
 
 
     private static class GrogDeserializer implements JsonDeserializer<GrogList> {

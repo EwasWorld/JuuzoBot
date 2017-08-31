@@ -1,6 +1,5 @@
 package CharacterBox.BroadInfo;
 
-import CharacterBox.Abilities;
 import CharacterBox.Alignment;
 import CharacterBox.CharacterConstants;
 import CoreBox.Bot;
@@ -27,13 +26,14 @@ public class Race {
     private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroadInfo/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
-    private Abilities abilityIncreases;
+    private Map<CharacterConstants.AbilityEnum, Integer> abilityIncreases;
     private int ageLowerBound;
     private int ageUpperBound;
     private CharacterConstants.Size size;
     private int speed;
     private Set<CharacterConstants.Language> languages;
-    private List<Alignment> alignments;
+    private List<Alignment.GoodEvilEnum> goodEvilEnums;
+    private List<Alignment.LawChaosEnum> lawChaosEnums;
 
 
     protected Race() {
@@ -57,7 +57,8 @@ public class Race {
                     CharacterConstants.Size.valueOf(object.get("size").getAsString().toUpperCase()),
                     object.get("speed").getAsInt(),
                     CharacterConstants.createLanguages(object.getAsJsonArray("languages")),
-                    createAlignments(alignments)
+                    createGoodEvilAlignments(alignments.getAsJsonArray("goodEvil")),
+                    createLawChaosAlignments(alignments.getAsJsonArray("lawChaos"))
             ));
         }
 
@@ -74,7 +75,7 @@ public class Race {
     }
 
 
-    private static Abilities createAbilityIncreases(JsonObject abilityIncreases) {
+    private static Map<CharacterConstants.AbilityEnum, Integer> createAbilityIncreases(JsonObject abilityIncreases) {
         final Map<CharacterConstants.AbilityEnum, Integer> abilityIncreasesMap = new HashMap<>();
         abilityIncreasesMap.put(CharacterConstants.AbilityEnum.STRENGTH, abilityIncreases.get("str").getAsInt());
         abilityIncreasesMap.put(CharacterConstants.AbilityEnum.DEXTERITY, abilityIncreases.get("dex").getAsInt());
@@ -82,32 +83,30 @@ public class Race {
         abilityIncreasesMap.put(CharacterConstants.AbilityEnum.INTELLIGENCE, abilityIncreases.get("int").getAsInt());
         abilityIncreasesMap.put(CharacterConstants.AbilityEnum.WISDOM, abilityIncreases.get("wis").getAsInt());
         abilityIncreasesMap.put(CharacterConstants.AbilityEnum.CHARISMA, abilityIncreases.get("cha").getAsInt());
-        return new Abilities(abilityIncreasesMap);
+        return abilityIncreasesMap;
     }
 
 
-    private List<Alignment> createAlignments(JsonObject alignments) {
+    private static List<Alignment.GoodEvilEnum> createGoodEvilAlignments(JsonArray alignments) {
         final List<Alignment.GoodEvilEnum> goodEvils = new ArrayList<>();
-        for (JsonElement element : alignments.getAsJsonArray("goodEvil")) {
+        for (JsonElement element : alignments) {
             goodEvils.add(Alignment.GoodEvilEnum.valueOf(element.getAsString().toUpperCase()));
         }
+        return goodEvils;
+    }
 
-        final List<Alignment> alignmentSet = new ArrayList<>();
-        for (JsonElement element : alignments.getAsJsonArray("lawChaos")) {
-            Alignment.LawChaosEnum lawChaos = Alignment.LawChaosEnum.valueOf(element.getAsString().toUpperCase());
-
-            for (Alignment.GoodEvilEnum goodEvil : goodEvils) {
-                alignmentSet.add(new Alignment(lawChaos, goodEvil));
-            }
+    private static List<Alignment.LawChaosEnum> createLawChaosAlignments(JsonArray lawChaos) {
+        final List<Alignment.LawChaosEnum> lawChaoses = new ArrayList<>();
+        for (JsonElement element : lawChaos) {
+            lawChaoses.add(Alignment.LawChaosEnum.valueOf(element.getAsString().toUpperCase()));
         }
-
-        return alignmentSet;
+        return lawChaoses;
     }
 
 
-    private Race(Abilities abilityIncreases, int ageLowerBound, int ageUpperBound,
+    private Race(Map<CharacterConstants.AbilityEnum, Integer> abilityIncreases, int ageLowerBound, int ageUpperBound,
                  CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages,
-                 List<Alignment> alignments)
+                 List<Alignment.GoodEvilEnum> goodEvilEnums, List<Alignment.LawChaosEnum> lawChaosEnums)
     {
         if (ageLowerBound >= ageUpperBound) {
             throw new BadUserInputException("Lower bound age must be larger than upper bound");
@@ -119,7 +118,8 @@ public class Race {
         this.size = size;
         this.speed = speed;
         this.languages = languages;
-        this.alignments = alignments;
+        this.goodEvilEnums = goodEvilEnums;
+        this.lawChaosEnums = lawChaosEnums;
     }
 
 
@@ -184,8 +184,8 @@ public class Race {
     }
 
 
-    public int getAbilityIncreases(CharacterConstants.AbilityEnum ability) {
-        return abilityIncreases.getStat(ability);
+    public Map<CharacterConstants.AbilityEnum, Integer> getAbilityIncreases() {
+        return abilityIncreases;
     }
 
 
@@ -210,7 +210,10 @@ public class Race {
 
 
     public Alignment getRandomAlignment() {
-        return alignments.get(new Random().nextInt(alignments.size()));
+        return new Alignment(
+                lawChaosEnums.get(new Random().nextInt(lawChaosEnums.size())),
+                goodEvilEnums.get(new Random().nextInt(lawChaosEnums.size()))
+        );
     }
 
 

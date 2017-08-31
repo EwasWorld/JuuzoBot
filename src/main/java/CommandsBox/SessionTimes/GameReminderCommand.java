@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GameReminderCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.DM;
-    }
-
-
-    @Override
     public String getCommand() {
         return "gameReminder";
     }
@@ -44,5 +38,11 @@ public class GameReminderCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(SessionTimes.getSessionReminder(author)).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.DM;
     }
 }

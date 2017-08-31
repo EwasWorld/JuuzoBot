@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GetBackgroundsCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "backgrounds";
     }
@@ -44,5 +38,11 @@ public class GetBackgroundsCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(Background.getBackgroundsList()).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

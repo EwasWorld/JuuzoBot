@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AttackCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "attack";
     }
@@ -44,5 +38,11 @@ public class AttackCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(UserCharacter.attack(author.getUser(), args)).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

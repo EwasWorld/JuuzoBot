@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class TrinketCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "trinket";
     }
@@ -43,5 +37,11 @@ public class TrinketCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(Trinkets.getTrinket(author.getUser().getName())).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

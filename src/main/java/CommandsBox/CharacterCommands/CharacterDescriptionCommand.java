@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class CharacterDescriptionCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "description";
     }
@@ -25,6 +19,7 @@ public class CharacterDescriptionCommand extends AbstractCommand {
     public String getDescription() {
         return "shows the details of your current character";
     }
+
 
     @Override
     public String getArguments() {
@@ -45,5 +40,11 @@ public class CharacterDescriptionCommand extends AbstractCommand {
         channel.sendMessage(
                 UserCharacter.getCharacterDescription(author.getUser().getIdLong())
         ).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

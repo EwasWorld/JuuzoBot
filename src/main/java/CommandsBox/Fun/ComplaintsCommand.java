@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class ComplaintsCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "complaints";
     }
@@ -46,5 +40,11 @@ public class ComplaintsCommand extends AbstractCommand {
                 "You may kindly take your complaints and insert them into your anal cavity "
                         + "making sure to use plenty of lube."
         ).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

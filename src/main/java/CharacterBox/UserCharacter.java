@@ -4,10 +4,10 @@ package CharacterBox;
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.BroadInfo.*;
+import CoreBox.Roll;
 import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
-import CoreBox.Roll;
 import net.dv8tion.jda.core.entities.User;
 
 import java.io.Serializable;
@@ -67,17 +67,35 @@ public class UserCharacter implements Serializable {
         languages.addAll(backgroundInfo.getLanguages());
         removeLanguageWildcards();
 
-        abilities = new Abilities(createAbilitiesMap(classInfo, raceInfo, subRaceInfo));
-        addSkillProficiencies(backgroundInfo, race, classInfo.getSkillProficiencies(), classInfo.getSkillQuantity());
+        abilities = new Abilities(classInfo.getAbilityOrder());
+        abilities.addIncreases(raceInfo.getAbilityIncreases());
+        abilities.addIncreases(subRaceInfo.getAbilityIncreases());
+        addSkillProficiencies(backgroundInfo, race, classInfo);
 
         savingThrows = classInfo.getSavingThrows();
         weaponProficiencies = classInfo.getWeaponProficiencies();
         weapon = classInfo.getStartWeapon();
         funds = classInfo.rollFunds();
-        hp = classInfo.getHitDie() + abilities.getModifier(CharacterConstants.AbilityEnum.CONSTITUTION);
+        hp = classInfo.getStartHP(abilities.getModifier(CharacterConstants.AbilityEnum.CONSTITUTION));
 
         addSubraceSubtleties(subRace);
         trinket = Trinkets.getTrinketLowerCaseStart();
+    }
+
+
+    private SubRace getSubraceInfo(SubRace.SubRaceEnum subRaceEnum) {
+        if (subRaceEnum != null) {
+            final SubRace subRace = Race.getRaceInfo(subRaceEnum);
+            if (race != subRace.getMainRace()) {
+                throw new BadUserInputException("Invalid subrace");
+            }
+            else {
+                return subRace;
+            }
+        }
+        else {
+            return new SubRace();
+        }
     }
 
 
@@ -92,16 +110,61 @@ public class UserCharacter implements Serializable {
         }
     }
 
-    private Map<CharacterConstants.AbilityEnum, Integer> createAbilitiesMap(Class_ classInfo, Race raceInfo, SubRace subRaceInfo) {
-        final Map<CharacterConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
-        for (int i = 0; i < classInfo.getAbilityOrder().length; i++) {
-            CharacterConstants.AbilityEnum ability = classInfo.getAbilityOrder()[i];
-            int score = CharacterConstants.startingAbilityScores[i]
-                    + raceInfo.getAbilityIncreases(ability)
-                    + subRaceInfo.getExtraAbilityIncreases(ability);
-            abilitiesMap.put(ability, score);
+
+    /*
+     * Half elves get 2 extra random skill proficiencies
+     * Half orcs get proficiency in intimidation
+     */
+    private void addSkillProficiencies(Background backgroundInfo, Race.RaceEnum race, Class_ classInfo) {
+        skillProficiencies = backgroundInfo.getProficiencies();
+        // TODO: Given passing by reference do I need to return?
+        skillProficiencies = classInfo.getAddSkillProficiencies(skillProficiencies);
+
+        switch (race) {
+            case HALFELF:
+                final CharacterConstants.SkillEnum[] skillEnums = CharacterConstants.SkillEnum.values();
+                for (int i = 0; i < 2; i++) {
+                    CharacterConstants.SkillEnum skill;
+                    // Find a skill that the character doesn't yet have proficiency in
+                    do {
+                        skill = skillEnums[new Random().nextInt(skillEnums.length)];
+                    } while (skillProficiencies.contains(skill));
+                    skillProficiencies.add(skill);
+                }
+                break;
+            case HALFORC:
+                skillProficiencies.add(CharacterConstants.SkillEnum.INTIMIDATION);
+                break;
         }
-        return abilitiesMap;
+    }
+
+
+    private void addSubraceSubtleties(SubRace.SubRaceEnum subRace) {
+        if (subRace != null) {
+            switch (subRace) {
+                case HIGH:
+                    languages.add(CharacterConstants.getRandomLanguage(languages));
+                    break;
+                case DARK:
+                    weaponProficiencies.add(Weapon.WeaponsEnum.RAPIER);
+                    weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
+                    weaponProficiencies.add(Weapon.WeaponsEnum.CROSSBOW);
+                    break;
+                case HILL:
+                    hp++;
+                    break;
+                case WOOD:
+                    speed = 35;
+                    break;
+            }
+
+            if (subRace == SubRace.SubRaceEnum.HIGH || subRace == SubRace.SubRaceEnum.WOOD) {
+                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
+                weaponProficiencies.add(Weapon.WeaponsEnum.LONGSWORD);
+                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTBOW);
+                weaponProficiencies.add(Weapon.WeaponsEnum.LONGBOW);
+            }
+        }
     }
 
 
@@ -199,6 +262,15 @@ public class UserCharacter implements Serializable {
     }
 
 
+    private void changeWeapons(String newWeapon) {
+        try {
+            weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException("Weapon not recognised, you can see a list of weapons using !weapons");
+        }
+    }
+
+
     /*
      * The attacker will be the character of the author
      */
@@ -257,151 +329,6 @@ public class UserCharacter implements Serializable {
     }
 
 
-    /*
-     * Roll a specific stat, saving throw, or initiative
-     */
-    public static String roll(long id, String message) {
-        message = message.toUpperCase();
-
-        if (userCharacters.containsKey(id)) {
-            final UserCharacter character = userCharacters.get(id);
-            final String characterName = character.getName();
-
-            if (message.equals("INITIATIVE")) {
-                return characterName + " " + character.rollInitiative();
-            }
-
-            try {
-                final CharacterConstants.AbilityEnum ability = CharacterConstants.AbilityEnum.valueOf(message);
-                return characterName + " " + character.rollSavingThrow(ability);
-            } catch (IllegalArgumentException e) {
-                // It may have been a skill check
-            }
-
-            try {
-                final CharacterConstants.SkillEnum skill = CharacterConstants.SkillEnum.valueOf(message);
-                return characterName + " " + character.rollSkillCheck(skill);
-            } catch (IllegalArgumentException e) {
-                throw new BadUserInputException("You can only roll abilities, skills, or initiative");
-            }
-        }
-        else {
-            throw new BadStateException("You don't seem to have a character yet. Make one using !NewCommand");
-        }
-    }
-
-
-    public static void save() {
-        try {
-            DataPersistence.save(fileName, userCharacters);
-        } catch (IllegalStateException e) {
-            System.out.println("Character save failed");
-        }
-    }
-
-
-    public static void load() {
-        try {
-            userCharacters = (Map<Long, UserCharacter>) DataPersistence.loadFirstObject(fileName);
-        } catch (IllegalStateException e) {
-            System.out.println("Character load failed");
-        }
-    }
-
-
-    private SubRace getSubraceInfo(SubRace.SubRaceEnum subRaceEnum) {
-        if (subRaceEnum != null) {
-            final SubRace subRace = Race.getRaceInfo(subRaceEnum);
-            if (race != subRace.getMainRace()) {
-                throw new BadUserInputException("Invalid subrace");
-            }
-            else {
-                return subRace;
-            }
-        }
-        else {
-            return new SubRace();
-        }
-    }
-
-
-    /*
-     * Half elves get 2 extra random skill proficiencies
-     * Half orcs get proficiency in intimidation
-     */
-    private void addSkillProficiencies(Background backgroundInfo, Race.RaceEnum race,
-                                       Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity)
-    {
-        // clone possible proficiencies
-        Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>();
-        for (CharacterConstants.SkillEnum skill : possibleProficiencies) {
-            possibleProficienciesClone.add(skill);
-        }
-
-        skillProficiencies = backgroundInfo.getProficiencies();
-        addSkillProficiencies(possibleProficienciesClone, quantity);
-        switch (race) {
-            case HALFELF:
-                final CharacterConstants.SkillEnum[] skillEnums = CharacterConstants.SkillEnum.values();
-                for (int i = 0; i < 2; i++) {
-                    CharacterConstants.SkillEnum skill;
-                    // Find a skill that the character doesn't yet have proficiency in
-                    do {
-                        skill = skillEnums[new Random().nextInt(skillEnums.length)];
-                    } while (skillProficiencies.contains(skill));
-                    skillProficiencies.add(skill);
-                }
-                break;
-            case HALFORC:
-                skillProficiencies.add(CharacterConstants.SkillEnum.INTIMIDATION);
-                break;
-        }
-    }
-
-
-    private void addSubraceSubtleties(SubRace.SubRaceEnum subRace) {
-        if (subRace != null) {
-            switch (subRace) {
-                case HIGH:
-                    languages.add(CharacterConstants.getRandomLanguage(languages));
-                    break;
-                case DARK:
-                    weaponProficiencies.add(Weapon.WeaponsEnum.RAPIER);
-                    weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
-                    weaponProficiencies.add(Weapon.WeaponsEnum.CROSSBOW);
-                    break;
-                case HILL:
-                    hp++;
-                    break;
-                case WOOD:
-                    speed = 35;
-                    break;
-            }
-
-            if (subRace == SubRace.SubRaceEnum.HIGH || subRace == SubRace.SubRaceEnum.WOOD) {
-                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTSWORD);
-                weaponProficiencies.add(Weapon.WeaponsEnum.LONGSWORD);
-                weaponProficiencies.add(Weapon.WeaponsEnum.SHORTBOW);
-                weaponProficiencies.add(Weapon.WeaponsEnum.LONGBOW);
-            }
-        }
-    }
-
-
-    /*
-     * Choose a specified number of proficiencies from the given set
-     */
-    private void addSkillProficiencies(Set<CharacterConstants.SkillEnum> possibleProficiencies, int quantity) {
-        for (int i = 0; i < quantity; i++) {
-            int size = possibleProficiencies.size();
-            final CharacterConstants.SkillEnum chosenSkill = possibleProficiencies
-                    .toArray(new CharacterConstants.SkillEnum[size])[new Random().nextInt(size)];
-            skillProficiencies.add(chosenSkill);
-            possibleProficiencies.remove(chosenSkill);
-        }
-    }
-
-
     public String getDescription() {
         String subraceString = "";
         if (subRace != null) {
@@ -427,7 +354,8 @@ public class UserCharacter implements Serializable {
         string += String.format("Weapon Proficiencies: %s\n", weaponProficiencies.toString());
         string += String.format("Weapon: %s\n\n", weapon.toString());
         string += String.format("Background: %s\n%s\n\n", background.getName().toUpperCase(),
-                                background.getDescription());
+                                background.getDescription()
+        );
         string += String.format("For as long as I can remember I've had %s", trinket);
 
         return string;
@@ -470,8 +398,88 @@ public class UserCharacter implements Serializable {
     }
 
 
+    /*
+     * Roll a specific stat, saving throw, or initiative
+     */
+    public static String roll(long id, String message) {
+        message = message.toUpperCase();
+
+        if (userCharacters.containsKey(id)) {
+            final UserCharacter character = userCharacters.get(id);
+            final String characterName = character.getName();
+
+            if (message.equals("INITIATIVE")) {
+                return characterName + " " + character.rollInitiative();
+            }
+
+            try {
+                final CharacterConstants.AbilityEnum ability = CharacterConstants.AbilityEnum.valueOf(message);
+                return characterName + " " + character.rollSavingThrow(ability);
+            } catch (IllegalArgumentException e) {
+                // It may have been a skill check
+            }
+
+            try {
+                final CharacterConstants.SkillEnum skill = CharacterConstants.SkillEnum.valueOf(message);
+                return characterName + " " + character.rollSkillCheck(skill);
+            } catch (IllegalArgumentException e) {
+                throw new BadUserInputException("You can only roll abilities, skills, or initiative");
+            }
+        }
+        else {
+            throw new BadStateException("You don't seem to have a character yet. Make one using !NewCommand");
+        }
+    }
+
+
     public String getName() {
         return name;
+    }
+
+
+    private String rollInitiative() {
+        final int modifier = abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
+
+
+    private String rollSavingThrow(CharacterConstants.AbilityEnum ability) {
+        int modifier = abilities.getModifier(ability);
+
+        if (savingThrows.contains(ability)) {
+            modifier += CharacterConstants.getProficiencyBonus(level);
+        }
+
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
+
+
+    private String rollSkillCheck(CharacterConstants.SkillEnum skill) {
+        int modifier = abilities.getModifier(skill.getMainAbility());
+
+        if (skillProficiencies.contains(skill)) {
+            modifier += CharacterConstants.getProficiencyBonus(level);
+        }
+
+        return new Roll(1, 20, modifier).getStringForRoll();
+    }
+
+
+    public static void save() {
+        try {
+            DataPersistence.save(fileName, userCharacters);
+        } catch (IllegalStateException e) {
+            System.out.println("Character save failed");
+        }
+    }
+
+
+    public static void load() {
+        try {
+            userCharacters = (Map<Long, UserCharacter>) DataPersistence.loadFirstObject(fileName);
+        } catch (IllegalStateException e) {
+            System.out.println("Character load failed");
+        }
     }
 
 
@@ -548,42 +556,5 @@ public class UserCharacter implements Serializable {
             damage += getWeaponInfo().rollOneDamageDie();
         }
         return damage;
-    }
-
-
-    private void changeWeapons(String newWeapon) {
-        try {
-            weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException("Weapon not recognised, you can see a list of weapons using !weapons");
-        }
-    }
-
-
-    private String rollInitiative() {
-        final int modifier = abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
-        return new Roll(1, 20, modifier).getStringForRoll();
-    }
-
-
-    private String rollSavingThrow(CharacterConstants.AbilityEnum ability) {
-        int modifier = abilities.getModifier(ability);
-
-        if (savingThrows.contains(ability)) {
-            modifier += CharacterConstants.getProficiencyBonus(level);
-        }
-
-        return new Roll(1, 20, modifier).getStringForRoll();
-    }
-
-
-    private String rollSkillCheck(CharacterConstants.SkillEnum skill) {
-        int modifier = abilities.getModifier(skill.getMainAbility());
-
-        if (skillProficiencies.contains(skill)) {
-            modifier += CharacterConstants.getProficiencyBonus(level);
-        }
-
-        return new Roll(1, 20, modifier).getStringForRoll();
     }
 }

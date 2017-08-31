@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AddQuoteCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "addQuote";
     }
@@ -45,5 +39,11 @@ public class AddQuoteCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(Quotes.addQuote(args)).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

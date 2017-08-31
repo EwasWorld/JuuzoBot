@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GetClassesCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "classes";
     }
@@ -25,6 +19,7 @@ public class GetClassesCommand extends AbstractCommand {
     public String getDescription() {
         return "list of possible classes";
     }
+
 
     @Override
     public String getArguments() {
@@ -42,6 +37,12 @@ public class GetClassesCommand extends AbstractCommand {
     public void execute(String args, MessageChannel channel, Member author) {
         checkPermission(author);
 
-        channel.sendMessage(Class_.getClassesList()).queue();
+        channel.sendMessage("Available classes: " + Class_.getClassesList()).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

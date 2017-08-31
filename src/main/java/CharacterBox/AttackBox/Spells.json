@@ -50,7 +50,7 @@
       "level": "1st-level",
       "school": "Abjuration",
       "class": "Druid, Ranger, Wizard",
-      "spellType":"Buff"
+      "spellType": "Buff"
     },
     {
       "name": "Acid Splash",
@@ -65,7 +65,7 @@
       "level": "Cantrip",
       "school": "Conjuration",
       "class": "Sorcerer, Wizard",
-      "spellType":"Attack",
+      "spellType": "Attack",
       "effect": [
         {
           "quantity": 1,
@@ -92,7 +92,7 @@
       "level": "2nd-level",
       "school": "Evocation",
       "class": "Sorcerer, Wizard",
-      "spellType":"Attack",
+      "spellType": "Attack",
       "effect": [
         {
           "quantity": 3,

@@ -1,6 +1,5 @@
 package CharacterBox.BroadInfo;
 
-import CharacterBox.Abilities;
 import CharacterBox.CharacterConstants;
 
 import java.util.HashMap;
@@ -14,19 +13,18 @@ public class SubRace extends Race {
 
 
     private RaceEnum mainRace;
-    private Abilities extraAbilityIncreases;
+    private Map<CharacterConstants.AbilityEnum, Integer> extraAbilityIncreases;
 
 
     public SubRace() {
-        final Map<CharacterConstants.AbilityEnum, Integer> abilities = new HashMap<>();
+        extraAbilityIncreases = new HashMap<>();
         for (CharacterConstants.AbilityEnum abilityEnum : CharacterConstants.AbilityEnum.values()) {
-            abilities.put(abilityEnum, 0);
+            extraAbilityIncreases.put(abilityEnum, 0);
         }
-        extraAbilityIncreases = new Abilities(abilities);
     }
 
 
-    public SubRace(RaceEnum mainRace, Abilities extraAbilityIncreases)
+    public SubRace(RaceEnum mainRace, Map<CharacterConstants.AbilityEnum, Integer> extraAbilityIncreases)
     {
         this.mainRace = mainRace;
         this.extraAbilityIncreases = extraAbilityIncreases;
@@ -38,7 +36,9 @@ public class SubRace extends Race {
     }
 
 
-    public int getExtraAbilityIncreases(CharacterConstants.AbilityEnum ability) {
-        return extraAbilityIncreases.getStat(ability);
+    public Map<CharacterConstants.AbilityEnum, Integer> getExtraAbilityIncreases(
+            CharacterConstants.AbilityEnum ability)
+    {
+        return extraAbilityIncreases;
     }
 }

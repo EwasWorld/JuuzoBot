@@ -43,16 +43,6 @@ public class Alignment {
     }
 
 
-    public String getAlignment() {
-        if (lawChaos == LawChaosEnum.NEUTRAL && goodEvil == GoodEvilEnum.NEUTRAL) {
-            return "TRUE NEUTRAL";
-        }
-        else {
-            return lawChaos.toString() + " " + goodEvil.toString();
-        }
-    }
-
-
     public String getAlignmentInitials() {
         final String[] alignment = getAlignment().split(" ");
         final String alignmentInitials = alignment[0].substring(0, 1) + alignment[1].substring(0, 1);
@@ -62,6 +52,16 @@ public class Alignment {
         }
         else {
             return alignmentInitials;
+        }
+    }
+
+
+    public String getAlignment() {
+        if (lawChaos == LawChaosEnum.NEUTRAL && goodEvil == GoodEvilEnum.NEUTRAL) {
+            return "TRUE NEUTRAL";
+        }
+        else {
+            return lawChaos.toString() + " " + goodEvil.toString();
         }
     }
 

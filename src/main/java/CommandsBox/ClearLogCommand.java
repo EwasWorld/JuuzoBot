@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class ClearLogCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.CREATOR;
-    }
-
-
-    @Override
     public String getCommand() {
         return "clearLog";
     }
@@ -44,5 +38,11 @@ public class ClearLogCommand extends AbstractCommand {
 
         Logger.clearLog();
         channel.sendMessage("Log cleared").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.CREATOR;
     }
 }

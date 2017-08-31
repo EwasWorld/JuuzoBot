@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class RemoveQuoteCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
-    @Override
     public String getCommand() {
         return "removeQuote";
     }
@@ -49,5 +43,11 @@ public class RemoveQuoteCommand extends AbstractCommand {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
         }
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

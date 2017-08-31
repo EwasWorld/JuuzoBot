@@ -1,19 +1,13 @@
 package CommandsBox;
 
-import DataPersistenceBox.DataPersistence;
 import CoreBox.AbstractCommand;
+import DataPersistenceBox.DataPersistence;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 
 
 public class SaveCommand extends AbstractCommand {
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
     @Override
     public String getCommand() {
         return "save";
@@ -44,5 +38,11 @@ public class SaveCommand extends AbstractCommand {
 
         DataPersistence.saveData();
         channel.sendMessage("Saved").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

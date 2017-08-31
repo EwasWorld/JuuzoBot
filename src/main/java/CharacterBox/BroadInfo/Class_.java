@@ -9,10 +9,7 @@ import com.google.gson.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.nio.file.Files.readAllBytes;
 
@@ -144,12 +141,15 @@ public class Class_ {
     }
 
 
+    /*
+     * Returns a list of classes in the bot
+     */
     public static String getClassesList() {
         if (classes == null) {
             getClassesFromFile();
         }
 
-        String classes = "Available classes: ";
+        String classes = "";
         final ClassEnum[] classEnums = ClassEnum.values();
 
         for (int i = 0; i < classEnums.length; i++) {
@@ -164,8 +164,8 @@ public class Class_ {
     }
 
 
-    public int getHitDie() {
-        return hitDie;
+    public int getStartHP(int constitutionModifier) {
+        return hitDie + constitutionModifier;
     }
 
 
@@ -179,13 +179,25 @@ public class Class_ {
     }
 
 
-    public int getSkillQuantity() {
-        return skillQuantity;
-    }
+    /*
+     * Adds class proficiencies that are not already being used
+     */
+    public Set<CharacterConstants.SkillEnum> getAddSkillProficiencies(Set<CharacterConstants.SkillEnum> currentProficiencies) {
+        // clone possible proficiencies
+        final Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>();
+        for (CharacterConstants.SkillEnum skill : skillProficiencies) {
+            possibleProficienciesClone.add(skill);
+        }
 
+        for (int i = 0; i < skillQuantity; i++) {
+            int size = possibleProficienciesClone.size();
+            final CharacterConstants.SkillEnum chosenSkill = possibleProficienciesClone
+                    .toArray(new CharacterConstants.SkillEnum[size])[new Random().nextInt(size)];
+            currentProficiencies.add(chosenSkill);
+            possibleProficienciesClone.remove(chosenSkill);
+        }
 
-    public Set<CharacterConstants.SkillEnum> getSkillProficiencies() {
-        return skillProficiencies;
+        return currentProficiencies;
     }
 
 

@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class GetNextGameCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "nextGame";
     }
@@ -46,5 +40,11 @@ public class GetNextGameCommand extends AbstractCommand {
         channel.sendMessage(
                 SessionTimes.getNextSessionAsString(author)
         ).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

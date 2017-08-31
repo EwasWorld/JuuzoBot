@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class AddGameCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
-    @Override
     public String getCommand() {
         return "addGame";
     }
@@ -45,5 +39,11 @@ public class AddGameCommand extends AbstractCommand {
 
         SessionTimes.addGame(args);
         channel.sendMessage("Game added").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

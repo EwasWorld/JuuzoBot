@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PotionCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "potion";
     }
@@ -43,5 +37,11 @@ public class PotionCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage(GrogList.drinkGrog(author.getUser().getName())).queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

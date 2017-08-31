@@ -10,7 +10,6 @@ import java.util.*;
 public class CharacterConstants {
 
 
-
     public enum Size {TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN}
 
 

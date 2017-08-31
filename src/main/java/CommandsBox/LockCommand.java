@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class LockCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.ADMIN;
-    }
-
-
-    @Override
     public String getCommand() {
         return "lock";
     }
@@ -44,5 +38,11 @@ public class LockCommand extends AbstractCommand {
 
         Bot.setIsLocked(true);
         channel.sendMessage("Locked").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.ADMIN;
     }
 }

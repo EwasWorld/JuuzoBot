@@ -1,6 +1,9 @@
 package CoreBox;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,18 +19,6 @@ public class Logger {
     private static final Path mainLogFileLocation = Paths.get(Bot.mainFilePath + "CoreBox/Log.txt");
     private static final Path outputLogFileLocation = Paths.get(Bot.mainFilePath + "CoreBox/LogReport.json");
     private static final Charset charset = StandardCharsets.UTF_8;
-
-
-    private static boolean init() throws IOException {
-        final File file = new File(mainLogFileLocation.toString());
-        if (!file.exists()) {
-            file.createNewFile();
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 
 
     // TODO Better if this is called when a custom exception is thrown
@@ -61,6 +52,27 @@ public class Logger {
     }
 
 
+    private static boolean init() throws IOException {
+        final File file = new File(mainLogFileLocation.toString());
+        if (!file.exists()) {
+            file.createNewFile();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+
+    private static void appendToFile(Path outFile, List<String> lines) {
+        try {
+            Files.write(outFile, lines, charset, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static File getLoggedEventsToSend() {
         try {
             final List<String> lines = new ArrayList<>();
@@ -74,15 +86,6 @@ public class Logger {
         }
 
         return new File(outputLogFileLocation.toString());
-    }
-
-
-    private static void appendToFile(Path outFile, List<String> lines) {
-        try {
-            Files.write(outFile, lines, charset, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 

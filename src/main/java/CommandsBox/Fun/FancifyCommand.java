@@ -9,12 +9,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class FancifyCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "fancify";
     }
@@ -43,5 +37,11 @@ public class FancifyCommand extends AbstractCommand {
         checkPermission(author);
 
         channel.sendMessage("But... but... I'm already fancy af").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

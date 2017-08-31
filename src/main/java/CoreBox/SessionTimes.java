@@ -182,6 +182,7 @@ public class SessionTimes implements Serializable {
         gameTimes = new HashMap<>();
     }
 
+
     public static int size() {
         return gameTimes.size();
     }

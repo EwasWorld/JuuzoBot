@@ -10,12 +10,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class DeleteCharacterCommand extends AbstractCommand {
     @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
-    @Override
     public String getCommand() {
         return "deleteChar";
     }
@@ -45,5 +39,11 @@ public class DeleteCharacterCommand extends AbstractCommand {
 
         UserCharacter.deleteCharacter(author.getUser().getIdLong());
         channel.sendMessage("Character deleted").queue();
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }
