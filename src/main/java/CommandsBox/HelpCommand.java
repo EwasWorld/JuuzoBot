@@ -5,6 +5,9 @@ import CoreBox.Bot;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
+
+import java.util.List;
 
 
 
@@ -38,7 +41,8 @@ public class HelpCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author) {
+    public void execute(String args, MessageChannel channel, Member author,
+                        List<User> mentions) {
         checkPermission(author);
         Rank rank = getRank(author);
         HelpVisibility helpVisibility = getExecuteHelpVisibility(args);

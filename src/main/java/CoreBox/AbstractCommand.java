@@ -6,8 +6,10 @@ import ExceptionsBox.IncorrectPermissionsException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -41,7 +43,7 @@ public abstract class AbstractCommand {
     public abstract HelpCommand.HelpVisibility getHelpVisibility();
 
 
-    public abstract void execute(String args, MessageChannel channel, Member author);
+    public abstract void execute(String args, MessageChannel channel, Member author, List<User> mentions);
 
 
     protected void checkPermission(Member member) {

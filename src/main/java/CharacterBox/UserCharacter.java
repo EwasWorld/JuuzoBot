@@ -69,7 +69,7 @@ public class UserCharacter implements Serializable {
 
         abilities = new Abilities(classInfo.getAbilityOrder());
         abilities.addIncreases(raceInfo.getAbilityIncreases());
-        abilities.addIncreases(subRaceInfo.getAbilityIncreases());
+        abilities.addIncreases(subRaceInfo.getExtraAbilityIncreases());
         addSkillProficiencies(backgroundInfo, race, classInfo);
 
         savingThrows = classInfo.getSavingThrows();

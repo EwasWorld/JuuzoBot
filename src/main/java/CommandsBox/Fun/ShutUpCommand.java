@@ -1,6 +1,5 @@
-package CommandsBox.CharacterCommands;
+package CommandsBox.Fun;
 
-import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
@@ -11,28 +10,28 @@ import java.util.List;
 
 
 
-public class ChangeWeaponsCommand extends AbstractCommand {
+public class ShutUpCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "changeWeapon";
+        return "shutUpFiktio";
     }
 
 
     @Override
     public String getDescription() {
-        return "change your character's weapon";
+        return "for when Fiktio does dumb shit";
     }
 
 
     @Override
     public String getArguments() {
-        return "{weapon}";
+        return "";
     }
 
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
+        return HelpCommand.HelpVisibility.NONE;
     }
 
 
@@ -41,13 +40,12 @@ public class ChangeWeaponsCommand extends AbstractCommand {
                         List<User> mentions) {
         checkPermission(author);
 
-        UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
-        channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+        channel.sendMessage("Sheddep Mesvas, you don't know shit").queue();
     }
 
 
     @Override
     public Rank getRequiredRank() {
-        return Rank.USER;
+        return Rank.ADMIN;
     }
 }

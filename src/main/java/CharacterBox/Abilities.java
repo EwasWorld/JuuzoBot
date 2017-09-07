@@ -7,7 +7,7 @@ import java.util.Map;
 
 
 public class Abilities implements Serializable {
-    private Map<CharacterConstants.AbilityEnum, Integer> abilities;
+    private Map<CharacterConstants.AbilityEnum, Integer> abilities = new HashMap<>();
 
 
     public Abilities(CharacterConstants.AbilityEnum[] abilityOrder) {

@@ -36,9 +36,7 @@ public class SubRace extends Race {
     }
 
 
-    public Map<CharacterConstants.AbilityEnum, Integer> getExtraAbilityIncreases(
-            CharacterConstants.AbilityEnum ability)
-    {
+    public Map<CharacterConstants.AbilityEnum, Integer> getExtraAbilityIncreases() {
         return extraAbilityIncreases;
     }
 }

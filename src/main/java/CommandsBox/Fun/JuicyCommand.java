@@ -1,6 +1,5 @@
-package CommandsBox.CharacterCommands;
+package CommandsBox.Fun;
 
-import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
@@ -11,28 +10,28 @@ import java.util.List;
 
 
 
-public class ChangeWeaponsCommand extends AbstractCommand {
+public class JuicyCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "changeWeapon";
+        return "juicy";
     }
 
 
     @Override
     public String getDescription() {
-        return "change your character's weapon";
+        return "makes things extra juicy";
     }
 
 
     @Override
     public String getArguments() {
-        return "{weapon}";
+        return "";
     }
 
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
+        return HelpCommand.HelpVisibility.NONE;
     }
 
 
@@ -41,8 +40,7 @@ public class ChangeWeaponsCommand extends AbstractCommand {
                         List<User> mentions) {
         checkPermission(author);
 
-        UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
-        channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+        channel.sendMessage("How about a smoothie?  :tangerine:  :tangerine: ").queue();
     }
 
 

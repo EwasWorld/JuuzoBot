@@ -1,6 +1,5 @@
-package CommandsBox.CharacterCommands;
+package CommandsBox.Fun;
 
-import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.entities.Member;
@@ -11,28 +10,34 @@ import java.util.List;
 
 
 
-public class ChangeWeaponsCommand extends AbstractCommand {
+public class ExecuteOrder66 extends AbstractCommand {
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
+    }
+
+
     @Override
     public String getCommand() {
-        return "changeWeapon";
+        return "executeOrder66";
     }
 
 
     @Override
     public String getDescription() {
-        return "change your character's weapon";
+        return "execute the order";
     }
 
 
     @Override
     public String getArguments() {
-        return "{weapon}";
+        return "";
     }
 
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
+        return HelpCommand.HelpVisibility.NONE;
     }
 
 
@@ -41,13 +46,6 @@ public class ChangeWeaponsCommand extends AbstractCommand {
                         List<User> mentions) {
         checkPermission(author);
 
-        UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
-        channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
-    }
-
-
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
+        channel.sendMessage("The time has come, the jedi will be destroyed").queue();
     }
 }

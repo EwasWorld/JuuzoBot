@@ -110,7 +110,7 @@ public class Bot {
             try {
                 if (commands.size() != 0) {
                     if (commands.containsKey(command)) {
-                        commands.get(command).execute(args, event.getChannel(), event.getMember());
+                        commands.get(command).execute(args, event.getChannel(), event.getMember(), null);
                         // TODO: Note to self command
                     }
                     else {
