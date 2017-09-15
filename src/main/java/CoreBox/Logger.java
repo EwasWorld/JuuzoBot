@@ -16,15 +16,15 @@ import java.util.List;
 
 
 public class Logger {
-    private static final Path mainLogFileLocation = Paths.get(Bot.mainFilePath + "CoreBox/Log.txt");
-    private static final Path outputLogFileLocation = Paths.get(Bot.mainFilePath + "CoreBox/LogReport.json");
+    private static final Path mainLogFileLocation = Paths.get(Bot.getPathToJuuzoBot() + "LogBox/Log.txt");
+    private static final Path outputLogFileLocation = Paths.get(Bot.getPathToJuuzoBot() + "LogBox/LogReport.json");
     private static final Charset charset = StandardCharsets.UTF_8;
 
 
     // TODO Better if this is called when a custom exception is thrown
     public static void logEvent(String command, Exception e) {
         try {
-            final boolean isFirstLog = init();
+            final boolean isFirstLog = init(mainLogFileLocation);
 
             final List<String> lines = new ArrayList<>();
             if (!isFirstLog) {
@@ -52,9 +52,10 @@ public class Logger {
     }
 
 
-    private static boolean init() throws IOException {
-        final File file = new File(mainLogFileLocation.toString());
+    private static boolean init(Path path) throws IOException {
+        final File file = new File(path.toString());
         if (!file.exists()) {
+            file.getParentFile().mkdirs();
             file.createNewFile();
             return true;
         }
@@ -66,6 +67,7 @@ public class Logger {
 
     private static void appendToFile(Path outFile, List<String> lines) {
         try {
+            init(outFile);
             Files.write(outFile, lines, charset, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,6 +77,9 @@ public class Logger {
 
     public static File getLoggedEventsToSend() {
         try {
+            if (!new File(mainLogFileLocation.toString()).exists()) {
+                throw new IllegalStateException("No errors to report");
+            }
             final List<String> lines = new ArrayList<>();
             lines.add("{\n\"log\": [\n");
             lines.addAll(Files.readAllLines(mainLogFileLocation, charset));
@@ -92,7 +97,7 @@ public class Logger {
     public static void clearLog() {
         new File(mainLogFileLocation.toString()).delete();
         try {
-            init();
+            init(mainLogFileLocation);
         } catch (IOException e) {
             e.printStackTrace();
         }

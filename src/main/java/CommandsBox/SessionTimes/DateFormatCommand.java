@@ -1,21 +1,21 @@
-package CommandsBox;
+package CommandsBox.SessionTimes;
 
+import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.Bot;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
-public class UnlockCommand extends AbstractCommand {
+public class DateFormatCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "unlock";
+        return "dateFormat";
     }
 
 
     @Override
     public String getDescription() {
-        return "unlock the bot";
+        return "shows the format dates must be entered in";
     }
 
 
@@ -35,13 +35,12 @@ public class UnlockCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        Bot.setIsLocked(false);
-        sendMessage(event.getChannel(), "Unlocked");
+        sendMessage(event.getChannel(), "HH:mm dd/M/yy z");
     }
 
 
     @Override
     public Rank getRequiredRank() {
-        return Rank.ADMIN;
+        return Rank.DM;
     }
 }

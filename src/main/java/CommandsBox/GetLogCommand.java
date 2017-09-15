@@ -3,13 +3,10 @@ package CommandsBox;
 import CoreBox.AbstractCommand;
 import CoreBox.Logger;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.IOException;
-import java.util.List;
 
 
 
@@ -39,16 +36,15 @@ public class GetLogCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        Message message = new MessageBuilder().append("").build();
+        final Message message = new MessageBuilder().append("Log").build();
         try {
             // TODO: PM this rather than dumping it in the channel
-            channel.sendFile(Logger.getLoggedEventsToSend(), message).queue();
+            event.getChannel().sendFile(Logger.getLoggedEventsToSend(), message).queue();
         } catch (IOException e) {
-            channel.sendMessage("Bzzt bzzt broken command").queue();
+            sendMessage(event.getChannel(), "Bzzt bzzt broken command");
             e.printStackTrace();
         }
     }

@@ -17,7 +17,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class Trinkets {
-    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroadInfo/Trinkets.json";
+    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Trinkets.json";
     private static List<String> trinkets;
 
 

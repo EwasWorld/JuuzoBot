@@ -2,21 +2,11 @@ package CommandsBox.Fun;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
 public class ExecuteOrder66 extends AbstractCommand {
-    @Override
-    public Rank getRequiredRank() {
-        return Rank.USER;
-    }
-
-
     @Override
     public String getCommand() {
         return "executeOrder66";
@@ -42,10 +32,15 @@ public class ExecuteOrder66 extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        channel.sendMessage("The time has come, the jedi will be destroyed").queue();
+        sendMessage(event.getChannel(), "The time has come, the jedi will be destroyed");
+    }
+
+
+    @Override
+    public Rank getRequiredRank() {
+        return Rank.USER;
     }
 }

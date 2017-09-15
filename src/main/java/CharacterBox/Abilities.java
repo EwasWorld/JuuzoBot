@@ -26,6 +26,7 @@ public class Abilities implements Serializable {
         return CharacterConstants.getModifier(abilities.get(ability));
     }
 
+
     public void addIncreases(Map<CharacterConstants.AbilityEnum, Integer> increases) {
         for (CharacterConstants.AbilityEnum ability : CharacterConstants.AbilityEnum.values()) {
             abilities.put(ability, abilities.get(ability) + increases.get(ability));

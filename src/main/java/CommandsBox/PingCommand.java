@@ -1,11 +1,7 @@
 package CommandsBox;
 
 import CoreBox.AbstractCommand;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
@@ -35,11 +31,10 @@ public class PingCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        channel.sendMessage("Pong").queue();
+        sendMessage(event.getChannel(), "Pong");
     }
 
 

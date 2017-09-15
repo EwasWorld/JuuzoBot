@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 
 public class TxtListToJSON {
-    private static final String fileNameNoExtention = Bot.mainFilePath + "CharacterBox/BroadInfo/Trinkets";
+    private static final String fileNameNoExtention = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Trinkets";
 
 
     public static void main(String[] args) {

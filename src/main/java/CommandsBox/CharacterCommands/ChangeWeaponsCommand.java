@@ -3,11 +3,7 @@ package CommandsBox.CharacterCommands;
 import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
@@ -37,12 +33,11 @@ public class ChangeWeaponsCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        UserCharacter.changeCharacterWeapon(author.getUser().getIdLong(), args);
-        channel.sendMessage("Weapon change successful, enjoy your new toy.").queue();
+        UserCharacter.changeCharacterWeapon(event.getAuthor().getIdLong(), args);
+        sendMessage(event.getChannel(), "Weapon change successful, enjoy your new toy.");
     }
 
 

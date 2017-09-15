@@ -1,7 +1,6 @@
 package CoreBox;
 
 
-import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.IncorrectPermissionsException;
@@ -11,7 +10,6 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
@@ -26,13 +24,21 @@ import java.util.*;
 
 
 public class Bot {
-    public static final String mainFilePath = IDs.pathToJuuzoBot + "src/main/java/";
+    private static String localFilePath = "src/main/java/";
+    private static String pathToJuuzoBot = IDs.pathToJuuzoBot;
+    private static String mainFilePath = pathToJuuzoBot + localFilePath;
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = false;
+    private static boolean isSessionReminderThreadStarted = false;
 
 
     public static void main(String[] args) {
+        if (args.length != 0) {
+            pathToJuuzoBot = args[0];
+        }
+
+
         final JDABuilder builder = new JDABuilder(AccountType.BOT);
         builder.setToken(IDs.botToken);
         builder.setAutoReconnect(true);
@@ -48,11 +54,41 @@ public class Bot {
         jda.addEventListener(new CommandListener());
         DataPersistence.loadData();
         new Thread(new DataPersistence()).start();
-        CommandListener.loadCommands();
+        loadCommands();
     }
 
 
-    public static boolean isIsLocked() {
+    private static void loadCommands() {
+        Reflections reflections = new Reflections("CommandsBox");
+        Set<Class<? extends AbstractCommand>> classes = reflections.getSubTypesOf(AbstractCommand.class);
+        for (Class<? extends AbstractCommand> s : classes) {
+            try {
+                if (Modifier.isAbstract(s.getModifiers())) {
+                    continue;
+                }
+                AbstractCommand c = s.getConstructor().newInstance();
+                if (!commands.containsKey(c.getCommand())) {
+                    commands.put(c.getCommand().toUpperCase(), c);
+                }
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                    NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public static String getMainFilePath() {
+        return mainFilePath;
+    }
+
+
+    public static String getPathToJuuzoBot() {
+        return pathToJuuzoBot;
+    }
+
+
+    static boolean isIsLocked() {
         return isLocked;
     }
 
@@ -62,55 +98,36 @@ public class Bot {
     }
 
 
-    public static List<AbstractCommand> getCommands() {
-        return new ArrayList<>(commands.values());
+    public static Set<AbstractCommand> getCommands() {
+        return new HashSet<>(commands.values());
     }
 
 
+
     private static class CommandListener extends ListenerAdapter {
-        private static void loadCommands() {
-            Reflections reflections = new Reflections("CommandsBox");
-            Set<Class<? extends AbstractCommand>> classes = reflections.getSubTypesOf(AbstractCommand.class);
-            for (Class<? extends AbstractCommand> s : classes) {
-                try {
-                    if (Modifier.isAbstract(s.getModifiers())) {
-                        continue;
-                    }
-                    AbstractCommand c = s.getConstructor().newInstance();
-                    if (!commands.containsKey(c.getCommand())) {
-                        commands.put(c.getCommand().toUpperCase(), c);
-                    }
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                        NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
 
+//            if (!isSessionReminderThreadStarted) {
+//                new Thread(new SessionReminder(event.getGuild())).start();
+//                isSessionReminderThreadStarted = true;
+//            }
+
             String args = event.getMessage().getContent();
-            if (!args.startsWith("!")) {
-                Quotes.addMessage(event.getAuthor().getName(), args);
+            Quotes.addMessage(event.getAuthor().getName(), args);
+
+            if (!args.startsWith("!") || event.getAuthor().isBot()) {
                 return;
             }
             String command = args.substring(1).split(" ")[0].toUpperCase();
             args = getRemainingMessage(command, args);
 
 
-            User user = event.getAuthor();
-            if (user.isBot()) {
-                return;
-            }
-
-
             try {
                 if (commands.size() != 0) {
                     if (commands.containsKey(command)) {
-                        commands.get(command).execute(args, event.getChannel(), event.getMember(), null);
+                        commands.get(command).execute(args, event);
                         // TODO: Note to self command
                     }
                     else {

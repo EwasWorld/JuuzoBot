@@ -1,6 +1,5 @@
 package CoreBox;
 
-import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 
@@ -47,7 +46,7 @@ public class Quotes implements Serializable {
         Quotes quoteToAdd = null;
         for (Quotes quote : channelMessages) {
             if (quote != null && quote.message.startsWith(searchMessage)) {
-                if (quoteToAdd == null) {
+                if (quoteToAdd == null || quoteToAdd.message.equalsIgnoreCase(quote.message)) {
                     quoteToAdd = quote;
                 }
                 else {
@@ -78,9 +77,18 @@ public class Quotes implements Serializable {
         }
         else {
             final Quotes quote = quotes.get(index);
+            final String message;
+
+            if (quote.message.startsWith("*") || quote.message.endsWith("*")) {
+                message = quote.message;
+            }
+            else {
+                message = String.format("*%s*", quote.message);
+            }
+
             return String.format(
                     "Quote number %d\n**%s** - %s\n*%s*", index,
-                    quote.author, dateTimeFormatter.format(quote.date), quote.message
+                    quote.author, dateTimeFormatter.format(quote.date), message
             );
         }
     }

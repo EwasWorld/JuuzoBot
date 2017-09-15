@@ -24,7 +24,7 @@ public class Class_ {
 
 
 
-    private static final String fileLocation = Bot.mainFilePath + "CharacterBox/BroadInfo/Classes.json";
+    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Classes.json";
     private static Map<ClassEnum, Class_> classes;
     private int hitDie;
     // [0] will be the highest stat
@@ -182,7 +182,9 @@ public class Class_ {
     /*
      * Adds class proficiencies that are not already being used
      */
-    public Set<CharacterConstants.SkillEnum> getAddSkillProficiencies(Set<CharacterConstants.SkillEnum> currentProficiencies) {
+    public Set<CharacterConstants.SkillEnum> getAddSkillProficiencies(
+            Set<CharacterConstants.SkillEnum> currentProficiencies)
+    {
         // clone possible proficiencies
         final Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>();
         for (CharacterConstants.SkillEnum skill : skillProficiencies) {

@@ -1,6 +1,5 @@
 package CoreBox;
 
-import DataPersistenceBox.DataPersistence;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
@@ -13,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 
@@ -24,29 +24,43 @@ public class SessionTimes implements Serializable {
     private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
 
 
+    private String roleName;
     private String fullName;
     private Date gameTime;
+    private boolean reminderHappened;
 
 
-    private SessionTimes(String fullName) {
+    protected SessionTimes() {
+    }
+
+
+    private SessionTimes(String roleName, String fullName) {
+        this.roleName = roleName;
         this.fullName = fullName;
+        reminderHappened = true;
+    }
+
+
+    static Map<String, SessionTimes> getGameTimes() {
+        return gameTimes;
     }
 
 
     /*
-     * Add the time/date to the database under the session role the member is assigned to
-     * Game must have already been added to the Map using addGame())
-     * date should be the same format as setDateFormat
-     */
+                 * Add the time/date to the database under the session role the member is assigned to
+                 * Game must have already been added to the Map using addGame())
+                 * date should be the same format as setDateFormat
+                 */
     public static String addSessionTime(Member author, String date) {
-        String gameName = getRoleName(getSessionRole(author));
+        final SessionTimes gameName = gameTimes.get(getRoleName(getSessionRole(author)));
 
         try {
-            gameTimes.get(gameName).gameTime = setDateFormat.parse(date);
+            gameName.gameTime = setDateFormat.parse(date);
+            gameName.reminderHappened = false;
             return String.format(
                     "New session time for %s added %s",
-                    gameTimes.get(gameName).fullName,
-                    printDateFormat.format(gameTimes.get(gameName).gameTime)
+                    gameName.fullName,
+                    printDateFormat.format(gameName.gameTime)
             );
         } catch (ParseException e) {
             throw new BadUserInputException(
@@ -86,7 +100,7 @@ public class SessionTimes implements Serializable {
             gameTimes.remove(game.toUpperCase());
         }
         else {
-            throw new BadUserInputException("Game doesn't exist therefore wasn't removed");
+            throw new BadUserInputException("Game does not exist");
         }
     }
 
@@ -104,7 +118,7 @@ public class SessionTimes implements Serializable {
                 throw new BadUserInputException("Game with the name " + roleName + " already exists");
             }
 
-            gameTimes.put(roleName, new SessionTimes(fullName));
+            gameTimes.put(roleName, new SessionTimes(roleName, fullName));
         }
         else {
             throw new BadUserInputException("Incorrect format. Please provide a role name and a date");
@@ -116,9 +130,18 @@ public class SessionTimes implements Serializable {
      * Returns a string containing the next session time and a countdown until the session
      */
     public static String getNextSessionAsString(Member author) {
+        return getNextSessionAsString(TimeZone.getDefault(), author);
+    }
+
+
+    /*
+     * Returns a string containing the next session time and a countdown until the session
+     */
+    public static String getNextSessionAsString(TimeZone timezone, Member author) {
         final String sessionName = getRoleName(getSessionRole(author));
         final Date gameTime = getNextSessionTime(sessionName);
 
+        printDateFormat.setTimeZone(timezone);
         return String.format(
                 "Next session for %s is %s. That's in %s",
                 gameTimes.get(sessionName).fullName, printDateFormat.format(gameTime),
@@ -134,8 +157,14 @@ public class SessionTimes implements Serializable {
         if (gameTimes.containsKey(sessionName)) {
             final Date gameTime = gameTimes.get(sessionName).gameTime;
 
-            if (gameTime != null && gameTime.getTime() > System.currentTimeMillis()) {
-                return gameTime;
+            if (gameTime != null) {
+                // Check the session is not in the past
+                if (gameTime.after(new Date())) {
+                    return gameTime;
+                }
+                else {
+                    gameTimes.get(sessionName).gameTime = null;
+                }
             }
         }
 
@@ -168,7 +197,14 @@ public class SessionTimes implements Serializable {
      * Returns string containing a mention to all players and a countdown to the next session
      */
     public static String getSessionReminder(Member author) {
-        final Role sessionRole = getSessionRole(author);
+        return getSessionReminder(getSessionRole(author));
+    }
+
+
+    /*
+     * Returns string containing a mention to all players and a countdown to the next session
+     */
+    public static String getSessionReminder(Role sessionRole) {
         final Date gameTime = getNextSessionTime(getRoleName(sessionRole));
 
         return String.format(
@@ -203,5 +239,25 @@ public class SessionTimes implements Serializable {
         } catch (IllegalStateException e) {
             System.out.println("Session times load failed");
         }
+    }
+
+
+    String getRoleName() {
+        return roleName;
+    }
+
+
+    Date getGameTime() {
+        return gameTime;
+    }
+
+
+    boolean isReminderHappened() {
+        return reminderHappened;
+    }
+
+
+    void setReminderHappened(boolean reminderHappened) {
+        this.reminderHappened = reminderHappened;
     }
 }

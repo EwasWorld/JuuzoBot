@@ -3,11 +3,7 @@ package CommandsBox.CharacterCommands;
 import CharacterBox.UserCharacter;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
@@ -37,12 +33,11 @@ public class DeleteCharacterCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        UserCharacter.deleteCharacter(author.getUser().getIdLong());
-        channel.sendMessage("Character deleted").queue();
+        UserCharacter.deleteCharacter(event.getAuthor().getIdLong());
+        sendMessage(event.getChannel(), "Character deleted");
     }
 
 

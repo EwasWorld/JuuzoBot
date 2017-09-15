@@ -1,9 +1,6 @@
-package DataPersistenceBox;
+package CoreBox;
 
 import CharacterBox.UserCharacter;
-import CoreBox.Bot;
-import CoreBox.Quotes;
-import CoreBox.SessionTimes;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -16,7 +13,7 @@ import java.util.List;
  * Thread which backs up the data at regular time intervals
  */
 public class DataPersistence implements Runnable {
-    private static final String fileLocation = Bot.mainFilePath + "DataPersistenceBox/";
+    private static final String fileLocation = Bot.getPathToJuuzoBot() + "DataPersistenceBox/";
     // TODO: Different location for currently working on vs .jar
     private static final int backupIntervalMins = 180;
     private static final int minsToMillisecondsConversion = 60 * 1000;
@@ -30,10 +27,16 @@ public class DataPersistence implements Runnable {
     private static void save(String fileName, List<Object> objects) {
         final File saveFile = new File(fileLocation + fileName);
 
+        try {
+            saveFile.getParentFile().mkdirs();
+            saveFile.createNewFile();
+        } catch (IOException e) {
+            throw new IllegalStateException("Save Failed");
+        }
+
         try (final FileOutputStream fos = new FileOutputStream(saveFile);
              final ObjectOutputStream oos = new ObjectOutputStream(fos))
         {
-            saveFile.createNewFile();
             oos.writeObject(objects);
 
             oos.flush();

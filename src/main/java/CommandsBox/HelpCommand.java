@@ -3,16 +3,15 @@ package CommandsBox;
 import CoreBox.AbstractCommand;
 import CoreBox.Bot;
 import ExceptionsBox.BadUserInputException;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
 public class HelpCommand extends AbstractCommand {
     public enum HelpVisibility {NONE, CHARACTER, NORMAL}
+
+
+
     private static final String start = "\t:carrot: !";
 
 
@@ -41,11 +40,11 @@ public class HelpCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
-        Rank rank = getRank(author);
-        HelpVisibility helpVisibility = getExecuteHelpVisibility(args);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
+
+        final Rank rank = getRank(event.getMember());
+        final HelpVisibility helpVisibility = getExecuteHelpVisibility(args);
         String help = "Working commands {required} [optional]:\n";
 
         for (AbstractCommand command : Bot.getCommands()) {
@@ -55,7 +54,7 @@ public class HelpCommand extends AbstractCommand {
             }
         }
 
-        channel.sendMessage(help).queue();
+        sendMessage(event.getChannel(), help);
     }
 
 
@@ -65,7 +64,7 @@ public class HelpCommand extends AbstractCommand {
     }
 
 
-    private HelpVisibility getExecuteHelpVisibility(String args) {
+    static HelpVisibility getExecuteHelpVisibility(String args) {
         if (args.equalsIgnoreCase("")) {
             return HelpVisibility.NORMAL;
         }
@@ -78,7 +77,7 @@ public class HelpCommand extends AbstractCommand {
     }
 
 
-    private String getCommandArguments(AbstractCommand command) {
+    private static String getCommandArguments(AbstractCommand command) {
         String arguments = command.getArguments();
         if (arguments.equalsIgnoreCase("")) {
             return arguments;

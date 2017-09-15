@@ -17,7 +17,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class GrogList {
-    private static final String fileLocation = Bot.mainFilePath + "Grog/GrogEffects.json";
+    private static final String fileLocation = Bot.getMainFilePath() + "Grog/GrogEffects.json";
     private static List<String> effects;
 
 

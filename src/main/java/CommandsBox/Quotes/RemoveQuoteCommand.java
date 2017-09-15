@@ -3,11 +3,7 @@ package CommandsBox.Quotes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.Quotes;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-
-import java.util.List;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
@@ -37,13 +33,12 @@ public class RemoveQuoteCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
         try {
             Quotes.removeQuote(Integer.parseInt(args));
-            channel.sendMessage("Quote removed").queue();
+            sendMessage(event.getChannel(), "Quote removed");
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Incorrect quote number - it needs to be an integer");
         }

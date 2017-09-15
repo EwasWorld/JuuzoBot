@@ -16,9 +16,9 @@ import static java.nio.file.Files.readAllBytes;
 
 public class SpellsFormatter {
     private static final String fileInLocation
-            = Bot.mainFilePath + "CharacterBox/AttackBox/SpellsOriginal.json";
+            = Bot.getMainFilePath() + "CharacterBox/AttackBox/SpellsOriginal.json";
     private static final String fileOutLocation
-            = Bot.mainFilePath + "CharacterBox/AttackBox/SpellsFirstFormatWithType.json";
+            = Bot.getMainFilePath() + "CharacterBox/AttackBox/SpellsFirstFormatWithType.json";
 
 
     public SpellsFormatter(JsonArray rawData) {

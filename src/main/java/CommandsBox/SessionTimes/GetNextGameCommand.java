@@ -3,11 +3,9 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionTimes;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-import java.util.List;
+import java.util.TimeZone;
 
 
 
@@ -26,7 +24,7 @@ public class GetNextGameCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "";
+        return "[timezone]";
     }
 
 
@@ -37,13 +35,18 @@ public class GetNextGameCommand extends AbstractCommand {
 
 
     @Override
-    public void execute(String args, MessageChannel channel, Member author,
-                        List<User> mentions) {
-        checkPermission(author);
+    public void execute(String args, MessageReceivedEvent event) {
+        checkPermission(event.getMember());
 
-        channel.sendMessage(
-                SessionTimes.getNextSessionAsString(author)
-        ).queue();
+        if (args.equals("")) {
+            sendMessage(event.getChannel(), SessionTimes.getNextSessionAsString(event.getMember()));
+        }
+        else {
+            sendMessage(
+                    event.getChannel(),
+                    SessionTimes.getNextSessionAsString(TimeZone.getTimeZone(args), event.getMember())
+            );
+        }
     }
 
 
