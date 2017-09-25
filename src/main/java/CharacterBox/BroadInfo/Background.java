@@ -45,7 +45,7 @@ public class Background {
 
 
 
-    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Backgrounds.json";
+    private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Backgrounds.json";
     private static Map<String, Background> backgrounds;
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;

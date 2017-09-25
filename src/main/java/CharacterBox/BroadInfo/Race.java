@@ -23,7 +23,7 @@ public class Race {
 
 
 
-    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Races.json";
+    private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Races.json";
     private static Map<RaceEnum, Race> races;
     private static Map<SubRace.SubRaceEnum, SubRace> subRaces;
     private Map<CharacterConstants.AbilityEnum, Integer> abilityIncreases;

@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class DataPersistence implements Runnable {
     private static final String fileLocation = Bot.getPathToJuuzoBot() + "DataPersistenceBox/";
-    // TODO: Different location for currently working on vs .jar
     private static final int backupIntervalMins = 180;
     private static final int minsToMillisecondsConversion = 60 * 1000;
 
@@ -87,7 +86,7 @@ public class DataPersistence implements Runnable {
     }
 
 
-    // TODO: Different backup versions
+    // TODO: Different backup versions (grandfather, father, son)
     @Override
     public void run() {
         while (true) {

@@ -28,12 +28,12 @@ public class WeaponProficiencies implements Serializable {
 
 
     public String toString() {
-        String string = "";
+        StringBuilder string = new StringBuilder();
         for (Weapon.WeaponProficiencyEnum weaponProficiency : typeProficiencies) {
-            string += weaponProficiency.toString() + ", ";
+            string.append(weaponProficiency.toString()).append(", ");
         }
         for (Weapon.WeaponsEnum weapon : specificProficiencies) {
-            string += weapon.toString() + ", ";
+            string.append(weapon.toString()).append(", ");
         }
 
         return string.substring(0, string.length() - 2);

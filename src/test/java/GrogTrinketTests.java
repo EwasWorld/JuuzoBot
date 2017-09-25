@@ -1,5 +1,5 @@
 import CharacterBox.BroadInfo.Trinkets;
-import Grog.GrogList;
+import CoreBox.GrogList;
 import junit.framework.TestCase;
 
 

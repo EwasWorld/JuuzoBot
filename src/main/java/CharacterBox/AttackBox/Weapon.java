@@ -68,7 +68,7 @@ public class Weapon {
 
 
 
-    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/AttackBox/Weapons.json";
+    private static final String fileLocation = Bot.getResourceFilePath() + "Attacking/Weapons.json";
     private static Map<WeaponsEnum, Weapon> weapons;
     private AttackTypeEnum weaponTypeEnum;
     private int damageQuantity;

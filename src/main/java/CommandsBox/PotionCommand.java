@@ -1,7 +1,7 @@
 package CommandsBox;
 
 import CoreBox.AbstractCommand;
-import Grog.GrogList;
+import CoreBox.GrogList;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 

@@ -26,7 +26,7 @@ import java.util.*;
 public class Bot {
     private static String localFilePath = "src/main/java/";
     private static String pathToJuuzoBot = IDs.pathToJuuzoBot;
-    private static String mainFilePath = pathToJuuzoBot + localFilePath;
+    private static String resourceFilePath = pathToJuuzoBot + "src/main/resources/";
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = false;
@@ -78,13 +78,13 @@ public class Bot {
     }
 
 
-    public static String getMainFilePath() {
-        return mainFilePath;
+    public static String getPathToJuuzoBot() {
+        return pathToJuuzoBot;
     }
 
 
-    public static String getPathToJuuzoBot() {
-        return pathToJuuzoBot;
+    public static String getResourceFilePath() {
+        return resourceFilePath;
     }
 
 
@@ -101,7 +101,6 @@ public class Bot {
     public static Set<AbstractCommand> getCommands() {
         return new HashSet<>(commands.values());
     }
-
 
 
     private static class CommandListener extends ListenerAdapter {

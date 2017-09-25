@@ -24,7 +24,7 @@ public class Class_ {
 
 
 
-    private static final String fileLocation = Bot.getMainFilePath() + "CharacterBox/BroadInfo/Classes.json";
+    private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Classes.json";
     private static Map<ClassEnum, Class_> classes;
     private int hitDie;
     // [0] will be the highest stat

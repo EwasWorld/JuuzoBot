@@ -47,10 +47,10 @@ public class SessionTimes implements Serializable {
 
 
     /*
-                 * Add the time/date to the database under the session role the member is assigned to
-                 * Game must have already been added to the Map using addGame())
-                 * date should be the same format as setDateFormat
-                 */
+     * Add the time/date to the database under the session role the member is assigned to
+     * Game must have already been added to the Map using addGame())
+     * date should be the same format as setDateFormat
+     */
     public static String addSessionTime(Member author, String date) {
         final SessionTimes gameName = gameTimes.get(getRoleName(getSessionRole(author)));
 

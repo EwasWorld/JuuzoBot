@@ -1,5 +1,7 @@
 package CoreBox;
 
+import ExceptionsBox.BadStateException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -78,7 +80,7 @@ public class Logger {
     public static File getLoggedEventsToSend() {
         try {
             if (!new File(mainLogFileLocation.toString()).exists()) {
-                throw new IllegalStateException("No errors to report");
+                throw new BadStateException("No errors to report");
             }
             final List<String> lines = new ArrayList<>();
             lines.add("{\n\"log\": [\n");
@@ -96,10 +98,6 @@ public class Logger {
 
     public static void clearLog() {
         new File(mainLogFileLocation.toString()).delete();
-        try {
-            init(mainLogFileLocation);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new File(outputLogFileLocation.toString()).delete();
     }
 }
