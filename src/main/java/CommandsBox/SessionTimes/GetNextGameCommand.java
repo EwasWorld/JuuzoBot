@@ -2,9 +2,13 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
+import CoreBox.SessionDatabase;
 import CoreBox.SessionTimes;
+import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 
@@ -34,19 +38,37 @@ public class GetNextGameCommand extends AbstractCommand {
     }
 
 
+    // TODO Add countdown for nearest game
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
+        Map<String, Date> map = SessionDatabase.getNextSessionTime(event.getAuthor().getId());
+
+        StringBuilder stringBuilder = new StringBuilder("");
         if (args.equals("")) {
-            sendMessage(event.getChannel(), SessionTimes.getNextSessionAsString(event.getMember()));
+            while (map.size() > 0) {
+                String stringForDate = null;
+                Date nearestFutureDate = null;
+                for (String shortName : map.keySet()) {
+                    if (nearestFutureDate == null || nearestFutureDate.after(map.get(shortName))) {
+                        stringForDate = shortName;
+                        nearestFutureDate = map.get(shortName);
+                    }
+                }
+                stringBuilder.append(stringForDate + " " + SessionTimes.printDateFormat.format(nearestFutureDate) + "\n");
+            }
         }
         else {
-            sendMessage(
-                    event.getChannel(),
-                    SessionTimes.getNextSessionAsString(TimeZone.getTimeZone(args), event.getMember())
-            );
+            if (map.containsKey(args.toUpperCase())) {
+                stringBuilder.append(map.get(args.toUpperCase()));
+            }
+            else {
+                throw new BadUserInputException("Invalid short game name");
+            }
         }
+
+        sendMessage(event.getChannel(), stringBuilder.toString());
     }
 
 

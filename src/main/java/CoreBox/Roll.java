@@ -2,13 +2,14 @@ package CoreBox;
 
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
+import jdk.nashorn.internal.runtime.ParserException;
 
 import java.util.Random;
 
 
 
 public class Roll {
-    public static final String invalidFormat
+    private static final String invalidFormat
             = "Invalid input. Use '!roll [adv/dis] [quantity] d {size} [modifier]' e.g. '!roll adv 1d20+2'";
     private int quantity;
     private int dieSize;
@@ -59,16 +60,20 @@ public class Roll {
             message = messageParts[1];
 
             try {
-                messageParts = splitDieAndModifierStrings(message);
+                try {
+                    messageParts = splitDieAndModifierStrings(message);
 
-                if (messageParts.length != 2) {
-                    throw new BadUserInputException("Incorrect die size or modifier");
+                    if (messageParts.length != 2) {
+                        throw new BadUserInputException("Incorrect die size or modifier");
+                    }
+                    dieSize = Integer.parseInt(messageParts[0]);
+                    modifier = Integer.parseInt(messageParts[1]);
+                } catch (IllegalStateException e) {
+                    dieSize = Integer.parseInt(message);
+                    modifier = 0;
                 }
-                dieSize = Integer.parseInt(messageParts[0]);
-                modifier = Integer.parseInt(messageParts[1]);
-            } catch (IllegalStateException e) {
-                dieSize = Integer.parseInt(message);
-                modifier = 0;
+            } catch (ParserException e) {
+                throw new BadUserInputException("Incorrect die size or modifier");
             }
 
             return author + " " + new Roll(quantity, dieSize, modifier).getStringForRoll(rollType);

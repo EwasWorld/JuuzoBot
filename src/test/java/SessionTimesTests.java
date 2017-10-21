@@ -12,6 +12,7 @@ public class SessionTimesTests extends TestCase {
     }
 
 
+/*
     public void testAddGame() {
         SessionTimes.addGame("TG Test Game");
         assertEquals(1, SessionTimes.size());
@@ -33,6 +34,7 @@ public class SessionTimesTests extends TestCase {
 
         // TODO How to test without passing a member object?
     }
+*/
 
 
     public void testGetSession() {

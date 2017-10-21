@@ -4,15 +4,13 @@ import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -20,8 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class SessionTimes implements Serializable {
     private static final String fileName = "SessionTimes.txt";
     private static Map<String, SessionTimes> gameTimes = new HashMap<>();
-    private static DateFormat setDateFormat = new SimpleDateFormat("HH:mm dd/M/yy z");
-    private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
+    public static String setDateFormatStr = "HH:mm dd/M/yy z";
+    public static DateFormat setDateFormat = new SimpleDateFormat(setDateFormatStr);
+    public static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
 
 
     private String roleName;
@@ -51,12 +50,15 @@ public class SessionTimes implements Serializable {
      * Game must have already been added to the Map using addGame())
      * date should be the same format as setDateFormat
      */
-    public static String addSessionTime(Member author, String date) {
+    public static String addSessionTime(Member author, String date, String roleName) {
         final SessionTimes gameName = gameTimes.get(getRoleName(getSessionRole(author)));
 
         try {
             gameName.gameTime = setDateFormat.parse(date);
             gameName.reminderHappened = false;
+
+            SessionDatabase.addSessionTime(roleName, setDateFormat.parse(date));
+
             return String.format(
                     "New session time for %s added %s",
                     gameName.fullName,
@@ -68,6 +70,13 @@ public class SessionTimes implements Serializable {
                             + "e.g. '16:00 21/8/17 BST'\n"
                             + "  or '16:00 21/8/17 GMT + 1' (spaces around '+' are important)"
             );
+        }
+    }
+
+
+    public static void addPlayer(String roleName, List<User> players) {
+        for (User player : players) {
+            SessionDatabase.addPlayer(roleName.toUpperCase(), player.getId());
         }
     }
 
@@ -109,7 +118,7 @@ public class SessionTimes implements Serializable {
      * Adds a game to the map so that session times can be added
      * message should contain the short game name first then the full name of the game
      */
-    public static void addGame(String message) {
+    public static void addGame(String message, String dmID) {
         if (message.split(" ").length >= 2) {
             final String roleName = message.split(" ")[0].toUpperCase();
             final String fullName = message.substring(roleName.length() + 1);
@@ -119,6 +128,8 @@ public class SessionTimes implements Serializable {
             }
 
             gameTimes.put(roleName, new SessionTimes(roleName, fullName));
+
+            SessionDatabase.addGameToDatabase(roleName, fullName, dmID);
         }
         else {
             throw new BadUserInputException("Incorrect format. Please provide a role name and a date");

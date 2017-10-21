@@ -2,21 +2,26 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.SessionTimes;
+import CoreBox.SessionDatabase;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.util.List;
 
 
-public class GameReminderCommand extends AbstractCommand {
+
+public class ShowDatabaseCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "gameReminder";
+        return "showDB";
     }
 
 
     @Override
     public String getDescription() {
-        return "@ mentions the game role and displays the countdown";
+        return null;
     }
 
 
@@ -36,13 +41,12 @@ public class GameReminderCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        // TODO SessionDatabase
-        sendMessage(event.getChannel(), SessionTimes.getSessionReminder(event.getMember()));
+        sendMessage(event.getChannel(), SessionDatabase.showDatabase());
     }
 
 
     @Override
     public Rank getRequiredRank() {
-        return Rank.DM;
+        return Rank.CREATOR;
     }
 }

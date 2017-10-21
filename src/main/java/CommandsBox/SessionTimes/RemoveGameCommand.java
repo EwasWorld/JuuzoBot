@@ -36,6 +36,7 @@ public class RemoveGameCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
+        // TODO SessionDatabase
         SessionTimes.removeGame(args);
         sendMessage(event.getChannel(), "Game removed");
     }

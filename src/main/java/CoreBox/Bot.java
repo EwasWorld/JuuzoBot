@@ -29,7 +29,7 @@ public class Bot {
     private static String resourceFilePath = pathToJuuzoBot + "src/main/resources/";
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
-    private static boolean isLocked = false;
+    private static boolean isLocked = true;
     private static boolean isSessionReminderThreadStarted = false;
 
 
