@@ -3,13 +3,11 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionDatabase;
-import CoreBox.SessionTimes;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.TimeZone;
 
 
 
@@ -56,7 +54,8 @@ public class GetNextGameCommand extends AbstractCommand {
                         nearestFutureDate = map.get(shortName);
                     }
                 }
-                stringBuilder.append(stringForDate + " " + SessionTimes.printDateFormat.format(nearestFutureDate) + "\n");
+                stringBuilder
+                        .append(stringForDate + " " + SessionDatabase.printDateFormat.format(nearestFutureDate) + "\n");
             }
         }
         else {

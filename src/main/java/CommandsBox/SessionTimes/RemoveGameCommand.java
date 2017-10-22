@@ -2,7 +2,7 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.SessionTimes;
+import CoreBox.SessionDatabase;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
@@ -22,7 +22,7 @@ public class RemoveGameCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{game}";
+        return "{shortName}";
     }
 
 
@@ -36,8 +36,7 @@ public class RemoveGameCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        // TODO SessionDatabase
-        SessionTimes.removeGame(args);
+        SessionDatabase.removeGame(args);
         sendMessage(event.getChannel(), "Game removed");
     }
 

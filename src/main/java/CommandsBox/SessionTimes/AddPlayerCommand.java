@@ -3,10 +3,7 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionDatabase;
-import CoreBox.SessionTimes;
 import ExceptionsBox.BadUserInputException;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -29,7 +26,7 @@ public class AddPlayerCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{roleName @player}";
+        return "{roleName @player} [@player]*";
     }
 
 
@@ -43,11 +40,14 @@ public class AddPlayerCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        String[] splitArgs = args.split(" ");
-        List<User> mentionedUsers = event.getMessage().getMentionedUsers();
+        final String[] splitArgs = args.split(" ");
+        final List<User> mentionedUsers = event.getMessage().getMentionedUsers();
 
         if (splitArgs.length != mentionedUsers.size() + 1) {
             throw new BadUserInputException("No game name provided");
+        }
+        if (mentionedUsers.size() == 0) {
+            throw new BadUserInputException("No players provided - make sure to @mention them");
         }
 
         for (User player : mentionedUsers) {

@@ -7,16 +7,16 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
-public class ShowDatabaseCommand extends AbstractCommand {
+public class GamesListCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "showDB";
+        return "gamesList";
     }
 
 
     @Override
     public String getDescription() {
-        return null;
+        return "get a list of all games";
     }
 
 
@@ -36,17 +36,18 @@ public class ShowDatabaseCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        String showDBString = SessionDatabase.showDatabase();
-        if (showDBString.equals("")) {
-            showDBString = "There are no games in the database";
+        String gamesList = SessionDatabase.getGamesList();
+
+        if (gamesList.equals("")) {
+            gamesList = "No games currently in the database";
         }
 
-        sendMessage(event.getChannel(), showDBString);
+        sendMessage(event.getChannel(), gamesList);
     }
 
 
     @Override
     public Rank getRequiredRank() {
-        return Rank.CREATOR;
+        return Rank.USER;
     }
 }

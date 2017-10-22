@@ -2,7 +2,7 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.SessionTimes;
+import CoreBox.SessionDatabase;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
@@ -36,7 +36,7 @@ public class DateFormatCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        sendMessage(event.getChannel(), SessionTimes.setDateFormatStr);
+        sendMessage(event.getChannel(), SessionDatabase.setDateFormatStr);
     }
 
 
