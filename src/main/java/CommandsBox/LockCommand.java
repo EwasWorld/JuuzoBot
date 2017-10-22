@@ -27,7 +27,7 @@ public class LockCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
+        return HelpCommand.HelpVisibility.ADMIN;
     }
 
 

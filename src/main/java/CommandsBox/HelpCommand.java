@@ -8,7 +8,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 public class HelpCommand extends AbstractCommand {
-    public enum HelpVisibility {NONE, CHARACTER, NORMAL}
+    public enum HelpVisibility {NONE, CHARACTER, GAMEINFO, NORMAL, ADMIN}
 
 
 
@@ -29,7 +29,7 @@ public class HelpCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "[char]";
+        return "[admin/character/gameInfo]";
     }
 
 
@@ -68,11 +68,12 @@ public class HelpCommand extends AbstractCommand {
         if (args.equalsIgnoreCase("")) {
             return HelpVisibility.NORMAL;
         }
-        else if (args.equalsIgnoreCase("char")) {
-            return HelpVisibility.CHARACTER;
-        }
         else {
-            throw new BadUserInputException("Incorrect arguments for !help, try using none");
+            try {
+                return HelpVisibility.valueOf(args.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadUserInputException("Incorrect arguments for !help, try using none");
+            }
         }
     }
 

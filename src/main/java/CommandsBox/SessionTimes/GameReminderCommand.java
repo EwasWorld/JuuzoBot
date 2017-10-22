@@ -28,7 +28,7 @@ public class GameReminderCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
+        return HelpCommand.HelpVisibility.GAMEINFO;
     }
 
 

@@ -27,7 +27,7 @@ public class UnlockCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
+        return HelpCommand.HelpVisibility.ADMIN;
     }
 
 
