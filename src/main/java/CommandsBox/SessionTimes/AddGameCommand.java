@@ -3,11 +3,10 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionDatabase;
+import CoreBox.SessionTimes;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-
-import java.util.List;
 
 
 
@@ -26,7 +25,7 @@ public class AddGameCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{role} {full name} {@dm}";
+        return "{role} {full name}";
     }
 
 
@@ -45,12 +44,8 @@ public class AddGameCommand extends AbstractCommand {
         }
         final int charactersInMention = argsParts[argsParts.length - 1].length();
 
-        final List<User> mentions = event.getMessage().getMentionedUsers();
-        if (mentions.size() != 1) {
-            throw new BadUserInputException("A single dm must be provided as an @mention");
-        }
 
-        final String dmID = mentions.get(0).getId();
+        final String dmID = event.getMessage().getMentionedUsers().get(0).getId();
         final String shortName = argsParts[0];
         final String fullName = args.substring(shortName.length() + 1, args.length() - charactersInMention - 1);
 

@@ -3,7 +3,12 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionDatabase;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+
+import java.util.List;
 
 
 
@@ -36,12 +41,7 @@ public class ShowDatabaseCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        String showDBString = SessionDatabase.showDatabase();
-        if (showDBString.equals("")) {
-            showDBString = "There are no games in the database";
-        }
-
-        sendMessage(event.getChannel(), showDBString);
+        sendMessage(event.getChannel(), SessionDatabase.showDatabase());
     }
 
 

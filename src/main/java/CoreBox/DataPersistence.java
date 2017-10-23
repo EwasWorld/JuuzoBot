@@ -79,6 +79,7 @@ public class DataPersistence implements Runnable {
      */
     public static void loadData() {
         UserCharacter.load();
+        SessionTimes.load();
         Quotes.load();
 
         System.out.println("Load complete");
@@ -104,6 +105,7 @@ public class DataPersistence implements Runnable {
      */
     public static void saveData() {
         UserCharacter.save();
+        SessionTimes.save();
         Quotes.save();
 
         System.out.println("Saves complete");

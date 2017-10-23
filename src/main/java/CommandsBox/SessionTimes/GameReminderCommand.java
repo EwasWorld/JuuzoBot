@@ -2,7 +2,7 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.SessionDatabase;
+import CoreBox.SessionTimes;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
@@ -36,8 +36,8 @@ public class GameReminderCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        sendMessage(
-                event.getChannel(), SessionDatabase.getSessionReminder(event.getAuthor().getId(), event.getGuild()));
+        // TODO SessionDatabase
+        sendMessage(event.getChannel(), SessionTimes.getSessionReminder(event.getMember()));
     }
 
 
