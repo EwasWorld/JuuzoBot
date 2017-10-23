@@ -1,9 +1,12 @@
 package CoreBox;
 
 
+import CommandsBox.HelpCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.IncorrectPermissionsException;
+import com.google.api.client.util.IOUtils;
+import com.google.common.base.Charsets;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -17,14 +20,22 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+
+import static java.nio.file.Files.readAllBytes;
 
 
 
 public class Bot {
-    private static String localFilePath = "src/main/java/";
     private static String pathToJuuzoBot = IDs.pathToJuuzoBot;
     private static String resourceFilePath = pathToJuuzoBot + "src/main/resources/";
     private static Map<String, AbstractCommand> commands = new HashMap<>();
@@ -36,6 +47,7 @@ public class Bot {
     public static void main(String[] args) {
         if (args.length != 0) {
             pathToJuuzoBot = args[0];
+            resourceFilePath = "";
         }
 
 
@@ -108,10 +120,7 @@ public class Bot {
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
 
-//            if (!isSessionReminderThreadStarted) {
-//                new Thread(new SessionReminder(event.getGuild())).start();
-//                isSessionReminderThreadStarted = true;
-//            }
+            // TODO start Auto Session reminder
 
             String args = event.getMessage().getContent();
             Quotes.addMessage(event.getAuthor().getName(), args);
@@ -126,7 +135,13 @@ public class Bot {
             try {
                 if (commands.size() != 0) {
                     if (commands.containsKey(command)) {
-                        commands.get(command).execute(args, event);
+                        // TODO: Remove when fixed char commands
+                        if (!event.getGuild().getId().equals(IDs.junkYardID) && commands.get(command).getHelpVisibility() == HelpCommand.HelpVisibility.CHARACTER) {
+                            event.getTextChannel().sendMessage("Booo! Character commands are currently disabled. There's a bug that I can't fix").queue();
+                        }
+                        else {
+                            commands.get(command).execute(args, event);
+                        }
                         // TODO: Note to self command
                     }
                     else {
@@ -137,8 +152,10 @@ public class Bot {
                     throw new BadStateException("I'm so broken right now I just can't even");
                 }
             } catch (BadUserInputException | BadStateException | IncorrectPermissionsException e) {
-                Logger.logEvent(event.getMessage().getContent(), e);
                 event.getChannel().sendMessage(e.getMessage()).queue();
+            } catch (Exception e) {
+                Logger.logEvent(event.getMessage().getContent(), e);
+                e.printStackTrace();
             }
         }
 
