@@ -2,16 +2,20 @@ package CoreBox;
 
 
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.TextChannel;
+
+import java.util.Date;
+import java.util.Map;
 
 
 
-// TODO: This
-public class AutoSessionReminder implements Runnable {
+public class SessionReminder extends SessionTimes implements Runnable {
     private Guild guild;
     private boolean isWithinAnHour = false;
 
 
-    public AutoSessionReminder(Guild guild) {
+    public SessionReminder(Guild guild) {
         if (guild.getId().equals(IDs.teenTitansGoID)) {
             this.guild = guild;
         }
@@ -23,9 +27,6 @@ public class AutoSessionReminder implements Runnable {
 
     @Override
     public void run() {
-        // Not updated when session times was updated
-        throw new IllegalStateException("Write this before using it");
-/*
         while (true) {
             final Map<String, SessionTimes> gameTimes = SessionTimes.getGameTimes();
             for (SessionTimes sessionTimes : gameTimes.values()) {
@@ -46,6 +47,5 @@ public class AutoSessionReminder implements Runnable {
             } catch (InterruptedException e) {
             }
         }
-*/
     }
 }
