@@ -26,7 +26,10 @@ import java.util.*;
 public class Bot {
     private static String localFilePath = "src/main/java/";
     private static String pathToJuuzoBot = IDs.pathToJuuzoBot;
-    private static String resourceFilePath = pathToJuuzoBot + "src/main/resources/";
+    // Temporary file path while I figure out how to get the ideal one working
+    private static String resourceFilePath = "resources/";
+    // Ideal file path
+//    private static String resourceFilePath = pathToJuuzoBot + "src/main/resources/";
     private static Map<String, AbstractCommand> commands = new HashMap<>();
     private static JDA jda;
     private static boolean isLocked = true;
@@ -36,6 +39,7 @@ public class Bot {
     public static void main(String[] args) {
         if (args.length != 0) {
             pathToJuuzoBot = args[0];
+            resourceFilePath = pathToJuuzoBot + resourceFilePath;
         }
 
 

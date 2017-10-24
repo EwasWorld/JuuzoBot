@@ -28,7 +28,7 @@ public class BlackJackCommand extends AbstractCommand {
 
     @Override
     public String getDescription() {
-        return "";
+        return "create a game, have whoever you want join, then start it (cards are displayed as value-suit)";
     }
 
 
