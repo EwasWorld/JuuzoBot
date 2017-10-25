@@ -3,6 +3,7 @@ package BlackJackBox;
 import CommandsBox.BlackJackCommand;
 import ExceptionsBox.BadStateException;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +12,18 @@ import java.util.List;
 
 /*
  * Not at all thread safe
+ * // TODO Make change turn a method
  */
 public class GameInstance {
     private Table currentGame;
     private List<Member> players;
     private int turn;
     private boolean canJoin = true;
+    private TextChannel gameChannel;
 
 
-    public GameInstance(Member player) {
+    public GameInstance(TextChannel gameChannel, Member player) {
+        this.gameChannel = gameChannel;
         players = new ArrayList<>();
         players.add(player);
     }
@@ -69,15 +73,15 @@ public class GameInstance {
         canJoin = false;
         turn = 0;
         currentGame = new Table(players.size(), 1);
-        StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
+        new Thread(new Timeout(turn)).start();
 
+        StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
         stringBuilder.append(String.format("Dealer: %s\n", currentGame.getDealersInitialHand()));
         for (Member member : players) {
             stringBuilder.append(String.format("%s: %s\n", getName(member), getHand(member)));
         }
-
         stringBuilder.append("\n");
-        stringBuilder.append(getTurn());
+        stringBuilder.append(getTurnAsString());
 
         return stringBuilder.toString();
     }
@@ -86,12 +90,20 @@ public class GameInstance {
     /*
      * Returns who's turn it is
      */
-    public String getTurn() {
+    public String getTurnAsString() {
         if (canJoin) {
             throw new BadStateException("Game hasn't started yet");
         }
 
         return String.format("It's %s's turn", getName(players.get(turn)));
+    }
+
+
+    /*
+     * 50% chance this is thread-safe
+     */
+    int getTurnAsInt() {
+        return turn;
     }
 
 
@@ -192,10 +204,10 @@ public class GameInstance {
 
         if (Table.isBust(hand)) {
             turn++;
-
             final String bustStr = String.format(
                     "%s - **BUST** (%s)\n\n", getCardString(drawnCard), getHandString(hand));
             if (turn < players.size()) {
+                new Thread(new Timeout(turn));
                 return bustStr + String.format("%s, you're up next!", players.get(turn));
             }
             else {
@@ -228,10 +240,29 @@ public class GameInstance {
 
         turn++;
         if (turn < players.size()) {
+            new Thread(new Timeout(turn));
             return String.format("%s, you're up next!", players.get(turn));
         }
         else {
             return end();
+        }
+    }
+
+
+    String timeoutStand() {
+        if (canJoin) {
+            throw new BadStateException("Game hasn't started yet");
+        }
+
+        turn++;
+
+        final String timeoutString = "Bzzt, you took too long\n";
+        if (turn < players.size()) {
+            new Thread(new Timeout(turn));
+            return timeoutString + String.format("%s, you're up next!", players.get(turn));
+        }
+        else {
+            return timeoutString + end();
         }
     }
 
@@ -268,5 +299,32 @@ public class GameInstance {
 
     static String getName(Member member) {
         return member.getUser().getName();
+    }
+
+
+    /*
+     * If a player takes too long it automatically makes them stand
+     */
+    public class Timeout implements Runnable {
+        private static final int timeoutTime = 90 * 1000;
+        private int turn;
+
+
+        Timeout(int turn) {
+            this.turn = turn;
+        }
+
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(timeoutTime);
+            } catch (InterruptedException e) {
+            }
+
+            if (getTurnAsInt() == turn) {
+                gameChannel.sendMessage(timeoutStand()).queue();
+            }
+        }
     }
 }

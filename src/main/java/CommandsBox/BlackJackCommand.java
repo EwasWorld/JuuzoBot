@@ -77,7 +77,7 @@ public class BlackJackCommand extends AbstractCommand {
                         sendMessage(channel, gameInstance.split(player));
                         break;
                     case TURN:
-                        sendMessage(channel, gameInstance.getTurn());
+                        sendMessage(channel, gameInstance.getTurnAsString());
                         break;
                     case HAND:
                         sendMessage(channel, gameInstance.getHand(player));
@@ -97,7 +97,7 @@ public class BlackJackCommand extends AbstractCommand {
     private void newGame(Member player, TextChannel channel) {
         if (!gameRunning) {
             gameRunning = true;
-            gameInstance = new GameInstance(player);
+            gameInstance = new GameInstance(channel, player);
             sendMessage(channel, "Game created");
         }
         else {
