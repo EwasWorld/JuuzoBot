@@ -45,29 +45,38 @@ public class Results {
 
         stringBuilder.append("Dealer: ");
         stringBuilder.append(GameInstance.getHandString(dealer));
+        stringBuilder.append("\n");
 
-        stringBuilder.append("\n\nWinners: ");
-        for (Member member : winners) {
-            stringBuilder.append(GameInstance.getName(member));
-            stringBuilder.append(" ");
+        if (winners.size() > 0) {
+            stringBuilder.append("\nWinners: ");
+            for (Member member : winners) {
+                stringBuilder.append(GameInstance.getName(member));
+                stringBuilder.append(" ");
+            }
         }
 
-        stringBuilder.append("\nTies: ");
-        for (Member member : ties) {
-            stringBuilder.append(GameInstance.getName(member));
-            stringBuilder.append(" ");
+        if (ties.size() > 0) {
+            stringBuilder.append("\nTies: ");
+            for (Member member : ties) {
+                stringBuilder.append(GameInstance.getName(member));
+                stringBuilder.append(" ");
+            }
         }
 
-        stringBuilder.append("\nLosers: ");
-        for (Member member : ties) {
-            stringBuilder.append(GameInstance.getName(member));
-            stringBuilder.append(" ");
+        if (losers.size() > 0) {
+            stringBuilder.append("\nLosers: ");
+            for (Member member : losers) {
+                stringBuilder.append(GameInstance.getName(member));
+                stringBuilder.append(" ");
+            }
         }
 
-        stringBuilder.append("\nBusts: ");
-        for (Member member : busts) {
-            stringBuilder.append(GameInstance.getName(member));
-            stringBuilder.append(" ");
+        if (busts.size() > 0) {
+            stringBuilder.append("\nBusts: ");
+            for (Member member : busts) {
+                stringBuilder.append(GameInstance.getName(member));
+                stringBuilder.append(" ");
+            }
         }
 
         return stringBuilder.toString();

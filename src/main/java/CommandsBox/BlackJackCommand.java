@@ -12,7 +12,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class BlackJackCommand extends AbstractCommand {
     private static boolean gameRunning = false;
-    private static GameInstance gameInstance;
+    private static GameInstance gameInstance = null;
 
 
     public static void setGameRunningFalse() {
@@ -34,7 +34,7 @@ public class BlackJackCommand extends AbstractCommand {
 
     @Override
     public String getArguments() {
-        return "{new/join/start/hit/stand/turn/hand/dealer}";
+        return "{new/join/start/hit/stand/split/turn/hand/dealer}";
     }
 
 
@@ -57,20 +57,24 @@ public class BlackJackCommand extends AbstractCommand {
         if (argument == BlackJackArguments.NEW) {
             newGame(player, channel);
         }
+        else if (argument == BlackJackArguments.START && (gameRunning || gameInstance != null)) {
+            sendMessage(channel, gameInstance.startGame());
+            gameRunning = true;
+        }
         else {
             if (gameRunning) {
                 switch (argument) {
                     case JOIN:
                         sendMessage(channel, gameInstance.addPlayer(player));
                         break;
-                    case START:
-                        sendMessage(channel, gameInstance.startGame());
-                        break;
                     case HIT:
                         sendMessage(channel, gameInstance.hitMe(player));
                         break;
                     case STAND:
                         sendMessage(channel, gameInstance.stand(player));
+                        break;
+                    case SPLIT: // banana
+                        sendMessage(channel, gameInstance.split(player));
                         break;
                     case TURN:
                         sendMessage(channel, gameInstance.getTurn());
@@ -118,5 +122,5 @@ public class BlackJackCommand extends AbstractCommand {
     
     
 
-    private enum BlackJackArguments {NEW, JOIN, START, HIT, STAND, TURN, HAND, DEALER}
+    private enum BlackJackArguments {NEW, JOIN, START, HIT, STAND, SPLIT, TURN, HAND, DEALER}
 }

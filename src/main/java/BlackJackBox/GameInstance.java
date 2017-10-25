@@ -2,7 +2,6 @@ package BlackJackBox;
 
 import CommandsBox.BlackJackCommand;
 import ExceptionsBox.BadStateException;
-import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.List;
  * Not at all thread safe
  */
 public class GameInstance {
-    private Board currentGame;
+    private Table currentGame;
     private List<Member> players;
     private int turn;
     private boolean canJoin = true;
@@ -58,7 +57,6 @@ public class GameInstance {
     }
 
 
-
     /*
      * Creates the board and prevents more players from joining
      * Returns who the first player is
@@ -70,7 +68,7 @@ public class GameInstance {
 
         canJoin = false;
         turn = 0;
-        currentGame = new Board(players.size(), 1);
+        currentGame = new Table(players.size(), 1);
         StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
 
         stringBuilder.append(String.format("Dealer: %s\n", currentGame.getDealersInitialHand()));
@@ -83,6 +81,7 @@ public class GameInstance {
 
         return stringBuilder.toString();
     }
+
 
     /*
      * Returns who's turn it is
@@ -191,13 +190,16 @@ public class GameInstance {
         final Card drawnCard = currentGame.hitMe(turn);
         final List<Card> hand = currentGame.getHand(turn);
 
-        if (Board.isBust(hand)) {
+        if (Table.isBust(hand)) {
             turn++;
+
+            final String bustStr = String.format(
+                    "%s - **BUST** (%s)\n\n", getCardString(drawnCard), getHandString(hand));
             if (turn < players.size()) {
-                return String.format("%s - BUST\n%s", getCardString(drawnCard), getHandString(hand));
+                return bustStr + String.format("%s, you're up next!", players.get(turn));
             }
             else {
-                return end();
+                return bustStr + end();
             }
         }
 
@@ -234,11 +236,28 @@ public class GameInstance {
     }
 
 
+    public String split(Member player) {
+        if (canJoin) {
+            throw new BadStateException("Game hasn't started yet");
+        }
+        if (!isPlayersTurn(player)) {
+            throw new BadStateException("It's not your turn");
+        }
+
+        currentGame.split(turn);
+        players.add(player);
+
+        return getHand(player) + "\nSplit complete, "
+                + "continue your turn and you can play your other hand at the end.";
+    }
+
+
     /*
      * Ends the game
      */
     private String end() {
-        final String endStr = currentGame.finishRound(players).getAsString() + "\nGame has ended and new players can join. Start again or make a new game";
+        final String endStr = currentGame.finishRound(players).getAsString()
+                + "\n\nGame has ended and new players can join. Start again or make a new game";
         BlackJackCommand.setGameRunningFalse();
         canJoin = true;
         turn = 0;

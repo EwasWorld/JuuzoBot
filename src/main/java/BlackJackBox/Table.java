@@ -1,5 +1,6 @@
 package BlackJackBox;
 
+import ExceptionsBox.BadStateException;
 import net.dv8tion.jda.core.entities.Member;
 
 import java.util.ArrayList;
@@ -11,20 +12,21 @@ import java.util.Map;
 
 /*
  * TODO Time out
- * TODO Play again
- * TODO Split
- * TODO Insurance
  * TODO Bets
+ * TODO Insurance
  */
-class Board {
+class Table {
     private Map<Integer, List<Card>> players = new HashMap<>();
-    private List<Card> dealer = new ArrayList<>();
+    private List<Card> dealer;
+
+
     private Deck deck;
 
 
-    Board(int numberOfPlayers, int numberOfDecks) {
+    Table(int numberOfPlayers, int numberOfDecks) {
         deck = new Deck(numberOfDecks);
 
+        dealer = new ArrayList<>();
         for (int i = 0; i < numberOfPlayers; i++) {
             players.put(i, new ArrayList<>());
         }
@@ -105,8 +107,8 @@ class Board {
 
 
     Results finishRound(List<Member> members) {
-        Results results = new Results(dealer);
-        int dealerTotal = dealerPlays();
+        final Results results = new Results(dealer);
+        final int dealerTotal = dealerPlays();
 
         for (int player : players.keySet()) {
             final List<Card> hand = players.get(player);
@@ -136,5 +138,21 @@ class Board {
             dealer.add(deck.drawCard());
         }
         return handTotal(dealer);
+    }
+
+
+    public void split(int player) {
+        final List<Card> hand = players.get(player);
+        if (hand.size() != 2 || hand.get(0).getValue() != hand.get(1).getValue()) {
+            throw new BadStateException("Can't split this hand");
+        }
+
+        final List<Card> newHand = new ArrayList<>();
+        newHand.add(hand.get(1));
+        hand.remove(1);
+        players.put(players.size(), newHand);
+
+        hand.add(deck.drawCard());
+        newHand.add(deck.drawCard());
     }
 }
