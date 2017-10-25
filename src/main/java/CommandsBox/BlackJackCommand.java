@@ -20,6 +20,11 @@ public class BlackJackCommand extends AbstractCommand {
     }
 
 
+    public static void setGameInstanceToNull() {
+        gameInstance = null;
+    }
+
+
     @Override
     public String getCommand() {
         return "blackjack";
@@ -51,8 +56,17 @@ public class BlackJackCommand extends AbstractCommand {
         final BlackJackArguments argument = getArgument(args);
         argumentSwitcher(event.getTextChannel(), argument, event.getMember());
     }
-    
-    
+
+
+    private BlackJackArguments getArgument(String args) {
+        try {
+            return BlackJackArguments.valueOf(args.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException("I don't understand that argument. Use one of " + getArguments());
+        }
+    }
+
+
     private void argumentSwitcher(TextChannel channel, BlackJackArguments argument, Member player) {
         if (argument == BlackJackArguments.NEW) {
             newGame(player, channel);
@@ -65,7 +79,8 @@ public class BlackJackCommand extends AbstractCommand {
             if (gameRunning) {
                 switch (argument) {
                     case JOIN:
-                        sendMessage(channel, gameInstance.addPlayer(player));
+                        gameInstance.join(player);
+                        sendMessage(channel, "You have been added to the game");
                         break;
                     case HIT:
                         sendMessage(channel, gameInstance.hitMe(player));
@@ -104,23 +119,13 @@ public class BlackJackCommand extends AbstractCommand {
             throw new BadStateException("Game already created, try joining it");
         }
     }
-    
-    
-    private BlackJackArguments getArgument(String args) {
-        try {
-            return BlackJackArguments.valueOf(args.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException("I don't understand that argument. Use one of " + getArguments());
-        }
-    }
-    
-    
+
+
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
     }
-    
-    
+
 
     private enum BlackJackArguments {NEW, JOIN, START, HIT, STAND, SPLIT, TURN, HAND, DEALER}
 }

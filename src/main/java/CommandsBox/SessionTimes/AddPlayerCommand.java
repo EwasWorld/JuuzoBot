@@ -14,7 +14,7 @@ import java.util.List;
 public class AddPlayerCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "addPlayer";
+        return "join";
     }
 
 

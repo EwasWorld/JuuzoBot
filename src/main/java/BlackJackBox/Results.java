@@ -12,10 +12,10 @@ public class Results {
     private List<Member> ties = new ArrayList<>();
     private List<Member> busts = new ArrayList<>();
     private List<Member> losers = new ArrayList<>();
-    private List<Card> dealer;
+    private Hand dealer;
 
 
-    Results(List<Card> dealer) {
+    Results(Hand dealer) {
         this.dealer = dealer;
     }
 
@@ -40,11 +40,11 @@ public class Results {
     }
 
 
-    public String getAsString() {
+    public String toString() {
         StringBuilder stringBuilder = new StringBuilder("");
 
         stringBuilder.append("Dealer: ");
-        stringBuilder.append(GameInstance.getHandString(dealer));
+        stringBuilder.append(dealer.toString());
         stringBuilder.append("\n");
 
         if (winners.size() > 0) {

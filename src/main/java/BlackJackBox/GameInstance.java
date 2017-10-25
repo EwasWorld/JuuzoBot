@@ -12,46 +12,48 @@ import java.util.List;
 
 /*
  * Not at all thread safe
- * // TODO Make change turn a method
+ * TODO Implement Bets
+ * TODO Implement Insurance
  */
 public class GameInstance {
-    private Table currentGame;
+    private Table table;
     private List<Member> players;
     private int turn;
-    private boolean canJoin = true;
+    private boolean gameStarted;
     private TextChannel gameChannel;
+    private boolean hasPlayerTimedOut = false;
 
 
+    /*
+     * Sets up a new game with an initial player and allows others to join it
+     */
     public GameInstance(TextChannel gameChannel, Member player) {
         this.gameChannel = gameChannel;
         players = new ArrayList<>();
         players.add(player);
+        gameStarted = false;
     }
 
 
     /*
      * Adds a player to the game (game must not have started)
-     * Returns false if the player is already in the game or if the game has already started
      */
-    public String addPlayer(Member player) {
-        if (!canJoin) {
+    public void join(Member player) {
+        if (gameStarted) {
             throw new BadStateException("This game is already running");
         }
-
-        if (!isPlayerInList(player)) {
-            players.add(player);
-            return "You have been added to the game";
-        }
-        else {
+        if (isPlayerInGame(player)) {
             throw new BadStateException("You're already in the game!!!");
         }
+
+        players.add(player);
     }
 
 
     /*
      * Returns whether a player has already joined the game
      */
-    private boolean isPlayerInList(Member player) {
+    private boolean isPlayerInGame(Member player) {
         for (Member member : players) {
             if (member.getUser().getIdLong() == player.getUser().getIdLong()) {
                 return true;
@@ -62,21 +64,29 @@ public class GameInstance {
 
 
     /*
-     * Creates the board and prevents more players from joining
-     * Returns who the first player is
+     * Creates the board, sets the first player's turn, and prevents more players from joining
+     * Returns initial hands and who the first player is as a string
      */
     public String startGame() {
-        if (!canJoin) {
+        if (gameStarted) {
             throw new BadStateException("Game has already started");
         }
 
-        canJoin = false;
+        gameStarted = true;
         turn = 0;
-        currentGame = new Table(players.size(), 1);
+        table = new Table(players, 1);
         new Thread(new Timeout(turn)).start();
 
+        return buildStartGameString();
+    }
+
+
+    /*
+     * Returns a string of the hand of the dealer and each player and who the first player is
+     */
+    private String buildStartGameString() {
         StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
-        stringBuilder.append(String.format("Dealer: %s\n", currentGame.getDealersInitialHand()));
+        stringBuilder.append(String.format("Dealer: %s\n", table.getDealersInitialHand()));
         for (Member member : players) {
             stringBuilder.append(String.format("%s: %s\n", getName(member), getHand(member)));
         }
@@ -87,11 +97,33 @@ public class GameInstance {
     }
 
 
+    static String getName(Member member) {
+        return member.getUser().getName();
+    }
+
+
+    /*
+     * Returns the hand of the specified member
+     */
+    public String getHand(Member player) {
+        if (!gameStarted) {
+            throw new BadStateException("Game hasn't started yet");
+        }
+
+        for (int i = 0; i < players.size(); i++) {
+            if (playersEqualIDs(players.get(i), player)) {
+                return table.getHand(i).toString();
+            }
+        }
+        throw new BadStateException("You don't seem to have a hand");
+    }
+
+
     /*
      * Returns who's turn it is
      */
     public String getTurnAsString() {
-        if (canJoin) {
+        if (!gameStarted) {
             throw new BadStateException("Game hasn't started yet");
         }
 
@@ -100,144 +132,62 @@ public class GameInstance {
 
 
     /*
-     * 50% chance this is thread-safe
-     */
-    int getTurnAsInt() {
-        return turn;
-    }
-
-
-    public String getDealerHand() {
-        if (canJoin) {
-            throw new BadStateException("Game hasn't started yet");
-        }
-
-        return "Dealer: " + currentGame.getDealersInitialHand();
-    }
-
-
-    /*
-     * Returns the hand of the specified member
-     */
-    public String getHand(Member player) {
-        if (canJoin) {
-            throw new BadStateException("Game hasn't started yet");
-        }
-
-        for (int i = 0; i < players.size(); i++) {
-            if (playersEqualIDs(players.get(i), player)) {
-                return getHandString(currentGame.getHand(i));
-            }
-        }
-        throw new BadStateException("You don't seem to have a hand");
-    }
-
-
-    /*
      * Check whether the IDs of two members are equal
-     * TODO: Is this necessary?
+     * TODO: Is this necessary? - run tests
      */
     private boolean playersEqualIDs(Member one, Member two) {
+        boolean test = one == two;
+        boolean test2 = one.getUser() == two.getUser();
         return one.getUser().getIdLong() == two.getUser().getIdLong();
     }
 
 
     /*
-     * Returns a hand as a string
+     * Returns the dealer's hand as one face up one face down card
      */
-    static String getHandString(List<Card> hand) {
-        StringBuilder stringBuilder = new StringBuilder("");
-
-        for (Card card : hand) {
-            stringBuilder.append(getCardString(card));
-            stringBuilder.append(" ");
+    public String getDealerHand() {
+        if (!gameStarted) {
+            throw new BadStateException("Game hasn't started yet");
         }
 
-        return stringBuilder.toString();
+        return "Dealer: " + table.getDealersInitialHand();
     }
 
 
     /*
-     * Returns the card's value and suit as a string
-     */
-    static String getCardString(Card card) {
-        StringBuilder stringBuilder = new StringBuilder("");
-
-        switch (card.getValue()) {
-            case 1:
-                stringBuilder.append("A");
-                break;
-            case 11:
-                stringBuilder.append("J");
-                break;
-            case 12:
-                stringBuilder.append("Q");
-                break;
-            case 13:
-                stringBuilder.append("K");
-                break;
-            default:
-                stringBuilder.append(card.getValue());
-                break;
-        }
-
-        stringBuilder.append(card.getSuit().toString().charAt(0));
-
-        return stringBuilder.toString();
-    }
-
-
-    /*
-     * The current player draws another card
+     * The current player draws another card (calls stand() if they bust)
      * Returns the drawn card and the new hand
      */
     public String hitMe(Member player) {
-        if (canJoin) {
+        if (!gameStarted) {
             throw new BadStateException("Game hasn't started yet");
         }
         if (!isPlayersTurn(player)) {
             throw new BadStateException("It's not your turn");
         }
 
-        final Card drawnCard = currentGame.hitMe(turn);
-        final List<Card> hand = currentGame.getHand(turn);
+        final Card drawnCard = table.hitMe(turn);
+        final Hand hand = table.getHand(turn);
 
-        if (Table.isBust(hand)) {
-            turn++;
+        if (hand.isBust()) {
             final String bustStr = String.format(
-                    "%s - **BUST** (%s)\n\n", getCardString(drawnCard), getHandString(hand));
-            if (turn < players.size()) {
-                new Thread(new Timeout(turn));
-                return bustStr + String.format("%s, you're up next!", players.get(turn));
-            }
-            else {
-                return bustStr + end();
-            }
+                    "%s - **BUST** (%s)\n\n", drawnCard.toString(), hand.toString());
+            return bustStr + stand();
         }
 
-        return String.format("%s\nYour current hand: %s", getCardString(drawnCard), getHandString(hand));
+        return String.format("%s\nYour current hand: %s", drawnCard.toString(), hand.toString());
     }
 
 
-    /*
-     * Checks if it is the given player's turn
-     */
     private boolean isPlayersTurn(Member player) {
         return playersEqualIDs(players.get(turn), player);
     }
 
 
     /*
-     * Ends the players turn. If all players have had a turn it ends the game
+     * Ends the current turn. If all players have had a turn it ends the game
      */
-    public String stand(Member player) {
-        if (canJoin) {
-            throw new BadStateException("Game hasn't started yet");
-        }
-        if (!isPlayersTurn(player)) {
-            throw new BadStateException("It's not your turn");
-        }
-
+    private String stand() {
         turn++;
         if (turn < players.size()) {
             new Thread(new Timeout(turn));
@@ -249,81 +199,89 @@ public class GameInstance {
     }
 
 
-    String timeoutStand() {
-        if (canJoin) {
-            throw new BadStateException("Game hasn't started yet");
+    /*
+     * Runs the finish method (plays dealer and calculates which players won and lost)
+     * Sets the game running and game started to false
+     * Returns the dealer's final hand, which players won/lost/tied/bust, and instructions
+     */
+    private String end() {
+        final String endStr = table.finishRound(players).toString()
+                + "\n\nGame has ended and new players can join. Start again or make a new game";
+        gameStarted = false;
+
+        BlackJackCommand.setGameRunningFalse();
+        if (hasPlayerTimedOut) {
+            BlackJackCommand.setGameInstanceToNull();
         }
 
-        turn++;
-
-        final String timeoutString = "Bzzt, you took too long\n";
-        if (turn < players.size()) {
-            new Thread(new Timeout(turn));
-            return timeoutString + String.format("%s, you're up next!", players.get(turn));
-        }
-        else {
-            return timeoutString + end();
-        }
+        return endStr;
     }
 
 
-    public String split(Member player) {
-        if (canJoin) {
+    /*
+     * Checks that it's the given player's turn then ends the current turn
+     */
+    public String stand(Member player) {
+        if (!gameStarted) {
             throw new BadStateException("Game hasn't started yet");
         }
         if (!isPlayersTurn(player)) {
             throw new BadStateException("It's not your turn");
         }
 
-        currentGame.split(turn);
-        players.add(player);
+        return stand();
+    }
 
+
+    /*
+     * Splits the hand in two
+     * Returns the current hand (other one is played later in the turn order) and instructions
+     */
+    public String split(Member player) {
+        if (!gameStarted) {
+            throw new BadStateException("Game hasn't started yet");
+        }
+        if (!isPlayersTurn(player)) {
+            throw new BadStateException("It's not your turn");
+        }
+
+        table.split(turn);
         return getHand(player) + "\nSplit complete, "
                 + "continue your turn and you can play your other hand at the end.";
     }
 
 
-    /*
-     * Ends the game
-     */
-    private String end() {
-        final String endStr = currentGame.finishRound(players).getAsString()
-                + "\n\nGame has ended and new players can join. Start again or make a new game";
-        BlackJackCommand.setGameRunningFalse();
-        canJoin = true;
-        turn = 0;
-
-        return endStr;
-    }
-
-
-    static String getName(Member member) {
-        return member.getUser().getName();
-    }
-
 
     /*
      * If a player takes too long it automatically makes them stand
+     * TODO Make a way to terminate these threads if a turn is completed without timing out
      */
     public class Timeout implements Runnable {
-        private static final int timeoutTime = 90 * 1000;
-        private int turn;
+        private static final int waitTime = 90 * 1000;
+        private static final String timeoutMessage = "Bzzt, you took too long\n\n";
+        private int initialPlayerTurn;
 
 
-        Timeout(int turn) {
-            this.turn = turn;
+        Timeout(int initialPlayerTurn) {
+            this.initialPlayerTurn = initialPlayerTurn;
         }
 
 
+        /*
+         * Waits for a period of time. If it's still the same player's turn they are forced to stand
+         * Also sets a flag which prevents the game from being started over again
+         *      (removing them could be confusing if the others started over again)
+         */
         @Override
         public void run() {
             try {
-                Thread.sleep(timeoutTime);
+                Thread.sleep(waitTime);
             } catch (InterruptedException e) {
             }
 
-            if (getTurnAsInt() == turn) {
-                gameChannel.sendMessage(timeoutStand()).queue();
+            if (turn == initialPlayerTurn) {
+                hasPlayerTimedOut = true;
+                gameChannel.sendMessage(timeoutMessage + stand()).queue();
             }
         }
     }
