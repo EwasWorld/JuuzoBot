@@ -36,7 +36,7 @@ public class ClearTablesCommand extends AbstractCommand {
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        SessionDatabase.clearTables();
+        SessionDatabase.deleteTables();
         sendMessage(event.getChannel(), "Tables cleared");
     }
 

@@ -2,7 +2,7 @@ package CharacterBox.AttackBox;
 
 import CharacterBox.CharacterConstants;
 import CoreBox.Bot;
-import CoreBox.Roll;
+import CoreBox.Die;
 import com.google.gson.*;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class Weapon {
 
 
 
-    // TODO: Breath Weapons
+    // TODO Implement Breath Weapons
     public enum WeaponProficiencyEnum {
         SIMPLE, MARTIAL
     }
@@ -161,18 +161,18 @@ public class Weapon {
 
 
     /*
-     * Roll the weapon's damage die and return the result (no modifier)
+     * Die the weapon's damage die and return the result (no modifier)
      */
     public int rollDamage() {
-        return new Roll(damageQuantity, damageDie, 0).roll().getResult();
+        return new Die(damageQuantity, damageDie, 0).roll().getTotal();
     }
 
 
     /*
-     * Roll the weapon's critical damage die and return the result (no modifier)
+     * Die the weapon's critical damage die and return the result (no modifier)
      */
     public int rollCriticalDamage() {
-        return new Roll(damageQuantity + 1, damageDie, 0).roll().getResult();
+        return new Die(damageQuantity + 1, damageDie, 0).roll().getTotal();
     }
 
 
@@ -201,7 +201,7 @@ public class Weapon {
 
 
     public int rollOneDamageDie() {
-        return Roll.quickRoll(damageDie);
+        return Die.quickRoll(damageDie);
     }
 
 

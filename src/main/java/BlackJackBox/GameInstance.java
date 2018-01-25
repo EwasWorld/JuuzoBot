@@ -22,6 +22,7 @@ public class GameInstance {
     private boolean gameStarted;
     private TextChannel gameChannel;
     private boolean hasPlayerTimedOut = false;
+    private Thread timeoutThread;
 
 
     /*
@@ -75,9 +76,15 @@ public class GameInstance {
         gameStarted = true;
         turn = 0;
         table = new Table(players, 1);
-        new Thread(new Timeout(turn)).start();
+        startTimeoutThread();
 
         return buildStartGameString();
+    }
+
+
+    private void startTimeoutThread() {
+        timeoutThread = new Thread(new Timeout(turn));
+        timeoutThread.start();
     }
 
 
@@ -85,7 +92,7 @@ public class GameInstance {
      * Returns a string of the hand of the dealer and each player and who the first player is
      */
     private String buildStartGameString() {
-        StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
+        final StringBuilder stringBuilder = new StringBuilder("Game started\n\n");
         stringBuilder.append(String.format("Dealer: %s\n", table.getDealersInitialHand()));
         for (Member member : players) {
             stringBuilder.append(String.format("%s: %s\n", getName(member), getHand(member)));
@@ -133,7 +140,7 @@ public class GameInstance {
 
     /*
      * Check whether the IDs of two members are equal
-     * TODO: Is this necessary? - run tests
+     * TODO Optimisation Is this necessary? - run tests
      */
     private boolean playersEqualIDs(Member one, Member two) {
         boolean test = one == two;
@@ -188,9 +195,15 @@ public class GameInstance {
      * Ends the current turn. If all players have had a turn it ends the game
      */
     private String stand() {
+        timeoutThread.interrupt();
+
         turn++;
         if (turn < players.size()) {
-            new Thread(new Timeout(turn));
+            startTimeoutThread();
+
+            if (!table.getHand(turn).canHit()) {
+                return stand();
+            }
             return String.format("%s, you're up next!", players.get(turn));
         }
         else {
@@ -254,7 +267,6 @@ public class GameInstance {
 
     /*
      * If a player takes too long it automatically makes them stand
-     * TODO Make a way to terminate these threads if a turn is completed without timing out
      */
     public class Timeout implements Runnable {
         private static final int waitTime = 90 * 1000;
@@ -277,6 +289,8 @@ public class GameInstance {
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException e) {
+                // Sets an impossible term so that the thread will terminate
+                turn = -1;
             }
 
             if (turn == initialPlayerTurn) {

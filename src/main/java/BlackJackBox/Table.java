@@ -1,5 +1,6 @@
 package BlackJackBox;
 
+import ExceptionsBox.BadStateException;
 import net.dv8tion.jda.core.entities.Member;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Map;
 class Table {
     // Players are modelled as integers because they can have multiple times turns (when a hand is split)
     // Integers correspond to the indexes in playerObjects
+    //      (players with multiple turns are stored multiple times in playerObjects)
     private Map<Integer, Hand> players = new HashMap<>();
     private List<Member> playerObjects;
     private Hand dealer;
@@ -72,8 +74,11 @@ class Table {
         final Card card;
         final Hand hand = players.get(player);
 
-        if (hand.isBust() || !hand.is5CardHand()) {
+        if (hand.isBust() || hand.is5CardHand()) {
             throw new IllegalStateException("Player cannot hit");
+        }
+        if (!hand.canHit()) {
+            throw new BadStateException("Cannot hit when aces have been split");
         }
 
         card = deck.drawCard();
@@ -85,6 +90,8 @@ class Table {
     /*
      * Players the dealer then checks whether each player won/lost/tied/bust
      * Returns player's results
+     * TODO Fix check that players who split show up twice (or however many times they took a turn)
+     * TODO Implement add an overall winner(s) for who got the highest without going bust
      */
     Results finishRound(List<Member> members) {
         final Results results = new Results(dealer);
@@ -111,6 +118,7 @@ class Table {
             }
         }
 
+        deck.gatherCards();
         return results;
     }
 
@@ -119,7 +127,7 @@ class Table {
      * Dealer draws cards until their total is at least 17, they go bust, or they have 5 cards
      */
     private int dealerPlays() {
-        while (!dealer.isBust() && dealer.total() < 17) {
+        while (!dealer.isBust() && dealer.total() < 17 && !dealer.is5CardHand()) {
             dealer.add(deck.drawCard());
         }
         return dealer.total();
@@ -129,6 +137,8 @@ class Table {
     /*
      * Splits the hand into two then adds another card to each hand,
      *      adds the new hand to the end of the turns list (also adds the corresponding Member to playerObjects)
+     * TODO Implement after splitting aces the player can only draw one card
+     * TODO Implement maximum number of splits: 3
      */
     public void split(int player) {
         final Hand hand = players.get(player);

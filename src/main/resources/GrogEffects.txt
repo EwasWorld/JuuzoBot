@@ -25,7 +25,7 @@ When PC is angry, their hair erupts into a cold flame.
 PC gains a grog addiction, if they don't consume one once per week, they take -1 to all ability scores, increasing by one each day without grog.
 PC can exist comfortably in harsh environments for 10 minutes/day
 Every week, the PC must sacrifice an enemy or gain a -1 penalty to all ability scores and saves, increasing by 1 every day that an enemy isn't sacrificed. A special sacrificial dagger appears in the PC's inventory and cannot be used for anything but a killing blow. It is also bound to the PC.
-At the start of every encounter the PC must succeed a DC 10 Will save or roll for a new alignment.
+At the start of every encounter the PC must succeed a DC 10 Will save or die for a new alignment.
 PC’s organs will never fail, even if removed.
 Roll again, the next living thing the PC touches also receives the affect.
 PC's dream semi-manifest in reality. (Like warped trees, or obscurely built buildings. At DMs discretion)
@@ -33,10 +33,10 @@ PC gains Thaumaphilia, an intense fascination with magic.
 Flowers grow out of the spots where the PC walks.
 PC seemingly ‘walks on air’ and is permanently 5 inches above all solid surfaces.
 PC becomes pregnant. Does not matter what sex, if any, the PC is. 01-49% = boy, 50-98% girl, 99-100% other. Will be a clone of the PC & a normal nine month pregnancy. Morning sickness & other symptoms apply as DM sees fit.
-One of the PC's permanent effects or injuries are cured! If they don't have one, re-roll for one.
+One of the PC's permanent effects or injuries are cured! If they don't have one, re-die for one.
 PC's bones turn to wood, and can live off sunlight. When they go up an age group, they go up a size category as well as receiving the penalties of aging.
 PC can cast a random cantrip spell at will.
-Can Rage 1/day (effect does not stack, roll again). PC turns green and extremely muscle-y. PC will rip through their armour making it worthless unless they get it repaired.
+Can Rage 1/day (effect does not stack, die again). PC turns green and extremely muscle-y. PC will rip through their armour making it worthless unless they get it repaired.
 PC’s body becomes an orangutan. (no stat change)
 PC forgets a random language.
 PC realizes the meaning of life, but is unable to tell anyone else. They are also hunted by cults (and maybe gods) who want to know.
@@ -92,7 +92,7 @@ PC realizes that the universe was born in a huge explosion. Is allowed to start 
 PC can juggle anything they can lift.
 PC becomes addicted to casting the last spell they casted, and really enjoys casting it whenever they get the chance, or an excuse.
 PC cannot enter a building without being invited.
-Deludes PC into believing the grog functions as indicated by a second die roll (no save).
+Deludes PC into believing the grog functions as indicated by a second die die (no save).
 PC no longer has muscles. (But can do everything without them.)
 Everyday when the PC enters combat, PC's sweat becomes a minor water elemental. 3d6 rounds, 50% chance of being hostile. Dissipates at midnight.
 Any liquid consumed now produces the effect of the grog to the PC.
@@ -126,7 +126,7 @@ PC gains a grog addiction, if they don't consume one once per week, they take -1
 The PC slowly, painlessly, and inconveniently turns to stone from the fingers and toes inwards. 1 limb per minute turn to stone. Can be removed by a remove curse. (Or reversed with a stone to flesh.)
 The PC suddenly becomes aware of a nearby dragon treasure horde, the only problem is that the dragon knows that the PC knows.
 PC gains once per day use of a spell equal to Cha modifier. (Use modifier for DC)
-PC gains another personality that presents itself when the PC sleeps. (roll for alignment of other personality.)
+PC gains another personality that presents itself when the PC sleeps. (die for alignment of other personality.)
 Roll again, the next living thing the PC touches also receives the affect.
 PC becomes a were-farmer.
 PC grows a beard, 2 ft long, permanent. If it's removed in anyway, it grows back overnight.
@@ -138,8 +138,8 @@ PC becomes an animated object version of themselves. (Takes damage normally)
 PC gains reoccurring amnesia for 1d6 hours at the same time each day as the time when the grog was consumed.
 PC realizes the exact location of a particular flower that becomes the PC's newest obsession. (The flower can be magical or not.)
 PC’s body becomes an ostrich. (no stat change, can manipulate things with feathers)
-PC becomes a rock and roll enthusiast, and always tries to get the nearest bard to play Freebird.
-PC becomes a hermaphroditic version of their race. (if already so, re-roll.)
+PC becomes a rock and die enthusiast, and always tries to get the nearest bard to play Freebird.
+PC becomes a hermaphroditic version of their race. (if already so, re-die.)
 Whenever the PC is alone, they painfully transform into an strange bird-like thing. The PC instantaneously reverts to normal if another person or creature goes near them or sees them.
 PC slowly remembers their time at war each night, and is forthcoming about telling old war stories at the campfire.
 PC’s esophagus can function as a scabbard that wouldn’t prevent movement, eating, talking, or breathing.
@@ -289,10 +289,10 @@ PC develops an intense fear of trees; they might be treants.
 PC can run up walls and other flat surfaces, but if they stop or change direction, they will fall.
 PC has a remarkable knack for teaching monkeys sign language.
 PC gains sylvan as a language.
-Whenever the PC witnesses a spell being casted, they must succeed a DC 10 + spell level Will save or roll for a new alignment.
+Whenever the PC witnesses a spell being casted, they must succeed a DC 10 + spell level Will save or die for a new alignment.
 PC becomes addicted to casting the last spell they casted, and really enjoys casting it whenever they get the chance, or an excuse.
 PC can summon doors that when opened, lead to a random plane. They, however, cannot summon the doors when in a plane other than the material plane.
-At the start of every encounter the PC must succeed a DC 10 Will save or roll for a new alignment.
+At the start of every encounter the PC must succeed a DC 10 Will save or die for a new alignment.
 PC's bones can be played like a xylophone.
 Relatively shallow bodies of water split in a dry path whenever the PC walks through them.
 PC enjoys a good meal of brains. They also gain very small memories from the brains they consume, and can make a Knowledge brains check (+10 normal DC) instead of any normal knowledge check.
@@ -331,7 +331,7 @@ Roll again, the next living thing the PC touches also receives the affect.
 PC becomes irrationally prejudice of a random base race.
 PC and someone who looks exactly like the PC are suddenly aware of each other.
 PC becomes a were-tax collector.
-Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or roll for a new alignment.
+Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or die for a new alignment.
 Within 5 ft of the PC is always 10 degrees hotter.
 PC can whistle obnoxiously loudly.
 When the PC snaps their fingers, a small scale resonance cascade occurs and summons an extra-planar creature (friendly or not) every hour for 1d4 days.
@@ -531,7 +531,7 @@ Roll again, the next living thing the PC touches also receives the effect.
 PC can only communicate by saying their name over and over, and the party are the only ones who understand them. This includes past and future party members.
 No matter what the PC says, anyone who hears them will think they are attempting to seduce them.
 PC is intensely afraid of prostitutes.
-Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or roll for a new alignment.
+Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or die for a new alignment.
 PC is extremely flexible, to an inhuman point.
 PC gains a permanent twitch.
 PC can use weapons as musical instruments.
@@ -685,7 +685,7 @@ PC grows an extra finger and toe on each hand and foot. (No effect if PC lacks h
 Roll again, the effect is twice as strong. (Twice as long, twice as much, etc.)
 PC can speak the language of the next mundane animal they meet.
 PC is able to shove their foot up any butt, regardless if it fits or not. It deals pride damage.
-PC only requires sleep 1d8 hours of sleep a night. (Re-roll every night)
+PC only requires sleep 1d8 hours of sleep a night. (Re-die every night)
 Anything the PC wears turns to wood permanently, but retains all stats.
 PC has an unusually good talent for trout tickling. (May be illegal in some areas.)
 PC knows the Int score of any creature they encounter.
@@ -731,7 +731,7 @@ Roll again, the next living thing the PC touches also receives the effect.
 Any fruit the PC touches becomes dried and preserved.
 PC gains very dramatic looking battle scars and gains a +10 on all bluff checks if only relating to them.
 PC becomes a ghost when they are in the rain.
-Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or roll for a new alignment.
+Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or die for a new alignment.
 PC goes insane. They are convinced that they are nothing but constructs in a game played by unseen beings who determine their every move. They will babble incessantly about things like "stats" and "hit points". On the bright side, they gain an uncanny insight into the vulnerabilities and strengths of creatures they encounter. Effect lasts until the next time the PC sleeps. This experience stays with them forever.
 PC gains 1d4 more eyes.
 A talking rainbow unicorn offers to be the PC's steed. (Unicorn is Neutral Good)
@@ -792,7 +792,7 @@ PC goes down one size category.
 When PC is submerged in the ocean, they transform into a blue whale. They must beach themselves to turn back. Their equipment expands to fit them.
 PC's hair becomes as strong as steel.
 PC no longer has a midsection. (Still eats normally)
-At the start of every encounter the PC must succeed a DC 10 Will save or roll for a new alignment.
+At the start of every encounter the PC must succeed a DC 10 Will save or die for a new alignment.
 PC gains their own brain as their familiar. It can exist harmlessly outside of their body.
 PC can breathe beneath only 5 ft. of water.
 PC attracts whatever they are afraid of.
@@ -892,7 +892,7 @@ PC flips a coin to decide whether or not they should tell the truth. (Heads = tr
 PC can only read and write languages they do not know how to speak.
 PC becomes addicted to casting the last spell they casted, and really enjoys casting it whenever they get the chance, or an excuse.
 PC occasionally and inexplicably becomes in possession of random people's underwear.
-At the start of every encounter the PC must succeed a DC 10 Will save or roll for a new alignment.
+At the start of every encounter the PC must succeed a DC 10 Will save or die for a new alignment.
 PC can sheath any type of sword in their forearm, and not be hindered in their movement.
 PC gains a purple thumb that causes non-magical plants to whither and die.
 As long as the PC has throwing knives, they can inexplicably pull them out of any where on their person.
@@ -931,7 +931,7 @@ Roll again, the next living thing the PC touches also receives the effect.
 PC is physically moved to tears whenever they part with any of their money.
 PC is abducted by aliens, probed, surgically implanted with an unknown alien device, and is put back in the same spot about 10 minutes later.
 Beneath the PC's skin, they become entirely robotic. They take damage and die normally, and don't feel any different.
-Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or roll for a new alignment.
+Whenever the PC witnesses a spell being casted, they must succeed a DC 10 Will save or die for a new alignment.
 If the PC breaks a window, it sucks everything through it as though the other side was a vacuum.
 Once per day, the PC can summon a stream of 600 butterflies to swarm themself for 1d4 rounds, blinding everyone including the PC within 40 ft. until they're dispersed.
 PC learns every recipe there is to cooking and serving the slain bodies of their enemies.

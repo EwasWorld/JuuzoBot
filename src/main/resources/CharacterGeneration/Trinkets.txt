@@ -110,7 +110,7 @@ A frost-covered silver locket that's frozen shut.
 A seal which imprints a mysterious, unknown coat of arms into hard rock.
 A small wooden doll that when held brings back fond memories.
 A small handmirror which only reflects inanimate objects.
-A glass eyeball that looks about of its own accordance, and can roll around.
+A glass eyeball that looks about of its own accordance, and can die around.
 A glass orb that replicates yesterday's weather inside itself.
 A drinking cup, that randomly fills with fresh or salt water. Refilling once emptied.
 A deep blue piece of flint, that when struck with steel produces not a spark but a drop of water.
@@ -760,7 +760,7 @@ A teacup full of live, non-venomous spiders.
 A costume mask made from a wolf's skull and pelt.
 A backscratcher, downsized for use by gnomes.
 A tattered blacksmith cap full of red dwarf hair.
-A small roll of leather that's been cured with giant urine.
+A small die of leather that's been cured with giant urine.
 The hollowed-out shell of a large hermit crab.
 A book full of jokes about dragons.
 A lute made out of dry grass.

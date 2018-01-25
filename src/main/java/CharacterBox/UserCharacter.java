@@ -5,7 +5,7 @@ import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.BroadInfo.*;
 import CoreBox.DataPersistence;
-import CoreBox.Roll;
+import CoreBox.Die;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.User;
@@ -117,7 +117,7 @@ public class UserCharacter implements Serializable {
      */
     private void addSkillProficiencies(Background backgroundInfo, Race.RaceEnum race, Class_ classInfo) {
         skillProficiencies = backgroundInfo.getProficiencies();
-        // TODO: Given passing by reference do I need to return?
+        // TODO Optimisation given passing by reference do I need to return?
         skillProficiencies = classInfo.getAddSkillProficiencies(skillProficiencies);
 
         switch (race) {
@@ -283,8 +283,8 @@ public class UserCharacter implements Serializable {
             final Weapon weapon = character.getWeaponInfo();
             String message = weapon.getAttackLine();
 
-            final Roll.RollResult attackRoll = character.attackRoll();
-            if (attackRoll.getResult() >= defenderAC && !attackRoll.isCritFail()) {
+            final Die.RollResult attackRoll = character.attackRoll();
+            if (attackRoll.getTotal() >= defenderAC && !attackRoll.isCritFail()) {
                 message += " " + weapon.getHitLine();
 
                 int damage;
@@ -399,7 +399,7 @@ public class UserCharacter implements Serializable {
 
 
     /*
-     * Roll a specific stat, saving throw, or initiative
+     * Die a specific stat, saving throw, or initiative
      */
     public static String roll(long id, String message) {
         message = message.toUpperCase();
@@ -439,7 +439,7 @@ public class UserCharacter implements Serializable {
 
     private String rollInitiative() {
         final int modifier = abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
-        return new Roll(1, 20, modifier).getStringForRoll();
+        return new Die(1, 20, modifier).getStringForRoll();
     }
 
 
@@ -450,7 +450,7 @@ public class UserCharacter implements Serializable {
             modifier += CharacterConstants.getProficiencyBonus(level);
         }
 
-        return new Roll(1, 20, modifier).getStringForRoll();
+        return new Die(1, 20, modifier).getStringForRoll();
     }
 
 
@@ -461,7 +461,7 @@ public class UserCharacter implements Serializable {
             modifier += CharacterConstants.getProficiencyBonus(level);
         }
 
-        return new Roll(1, 20, modifier).getStringForRoll();
+        return new Die(1, 20, modifier).getStringForRoll();
     }
 
 
@@ -491,8 +491,8 @@ public class UserCharacter implements Serializable {
     /*
      * Returns an attack roll using the current weapon
      */
-    private Roll.RollResult attackRoll() {
-        return new Roll(1, 20, getAttackModifier()).roll();
+    private Die.RollResult attackRoll() {
+        return new Die(1, 20, getAttackModifier()).roll();
     }
 
 

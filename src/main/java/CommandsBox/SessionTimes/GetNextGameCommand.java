@@ -36,7 +36,7 @@ public class GetNextGameCommand extends AbstractCommand {
     }
 
 
-    // TODO Add countdown for nearest game
+    // TODO Implement add countdown for nearest game
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());

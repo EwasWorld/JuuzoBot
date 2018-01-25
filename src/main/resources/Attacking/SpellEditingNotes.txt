@@ -1,7 +1,7 @@
 Spell types enum: attack, buff, utility
 0 targets: AOE around char
 Higherlevel: When cast with a higher level spell slot an extra damage die can be rolled
-dmgincreaselevels: 5, 11, 17 roll extra die
+dmgincreaselevels: 5, 11, 17 die extra die
 
 Trap the Soul spell is a mistake (effects are merged into other spells)
 

@@ -12,11 +12,18 @@ import java.util.List;
  */
 public class Hand {
     private List<Card> hand = new ArrayList<>();
+    // If a hand is made from splitting aces the player cannot hit on it again
+    private boolean canHit = true;
+
+
+    public boolean canHit() {
+        return canHit;
+    }
 
 
     /*
-     * Blanks out the first cards and displays the second as a string
-     */
+         * Blanks out the first cards and displays the second as a string
+         */
     String oneFaceUpOneFaceDownString() {
         if (hand.size() != 2) {
             throw new IllegalStateException("Can't do one up one down unless there're exactly 2 cards");
@@ -86,10 +93,12 @@ public class Hand {
 
     /*
      * Splits a hand (of 2 identically valued cards) into 2 hands of a single card
+     * Cards with a value of 10 can be split (e.g. 10 and K, or J and Q)
      * Returns the new hand
      */
     Hand split() {
-        if (hand.size() != 2 || hand.get(0).getValue() != hand.get(1).getValue()) {
+        if (hand.size() != 2 || hand.get(0).getValue() != hand.get(1).getValue()
+                || (hand.get(0).getValue() >= 10 && hand.get(1).getValue() >= 10)) {
             throw new BadStateException("Can't split this hand - it must be a hand of 2 cards with the same value");
         }
 
@@ -97,13 +106,13 @@ public class Hand {
         newHand.add(hand.get(1));
         hand.remove(1);
 
+        canHit = false;
+        newHand.canHit = false;
+
         return newHand;
     }
 
 
-    /*
-     * Adds a card to the hand
-     */
     void add(Card card) {
         hand.add(card);
     }

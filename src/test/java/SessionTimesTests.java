@@ -2,6 +2,7 @@ import junit.framework.TestCase;
 
 
 
+// TODO
 public class SessionTimesTests extends TestCase {
     @Override
     public void tearDown() throws Exception {
@@ -29,22 +30,18 @@ public class SessionTimesTests extends TestCase {
         SessionTimes.addGame("TG Test Game");
         assertEquals(1, SessionTimes.size());
 
-        // TODO How to test without passing a member object?
     }
 */
 
 
     public void testGetSession() {
-        // TODO
     }
 
 
     public void testGetSessionReminder() {
-        // TODO
     }
 
 
     public void testRemoveGame() {
-        // TODO
     }
 }

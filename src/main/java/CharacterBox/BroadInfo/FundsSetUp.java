@@ -1,6 +1,6 @@
 package CharacterBox.BroadInfo;
 
-import CoreBox.Roll;
+import CoreBox.Die;
 
 
 
@@ -8,7 +8,7 @@ import CoreBox.Roll;
  * Calculates starting funds for a character
  */
 class FundsSetUp {
-    // number of d4 to rollDieFromChatEvent
+    // number of d4 to roll
     private int quantity;
     // true: multiply by 10
     private boolean multiply;
@@ -21,7 +21,7 @@ class FundsSetUp {
 
 
     int rollFunds() {
-        int roll = new Roll(quantity, 4, 0).roll().getResult();
+        int roll = new Die(quantity, 4, 0).roll().getTotal();
 
         if (multiply) {
             roll *= 10;

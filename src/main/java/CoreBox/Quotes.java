@@ -12,12 +12,15 @@ import java.util.Random;
 
 
 
+/*
+ * Preserve the beautiful words of those in the server in time immemorial
+ * Allows users to save messages and retrieve saved messages
+ */
 public class Quotes implements Serializable {
     private static final String fileName = "Quotes.txt";
-    private static Quotes[] channelMessages = new Quotes[20];
-    private static List<Quotes> quotes = new ArrayList<>();
-    private static int head = 0;
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm z");
+    private static List<Quotes> savedQuotes = new ArrayList<>();
+    private static final DateTimeFormatter dateTimeFormatter
+            = DateTimeFormatter.ofPattern(SessionDatabase.setDateFormatStr);
     private String author;
     private ZonedDateTime date;
     private String message;
@@ -30,85 +33,47 @@ public class Quotes implements Serializable {
     }
 
 
-    /*
-     * Temporarily stores a channel message
-     */
     public static void addMessage(String author, String contents) {
-        channelMessages[head] = new Quotes(author, ZonedDateTime.now(), contents);
-        head = ++head % channelMessages.length;
+        MesssageHolder.addMessage(author, contents);
     }
 
 
     /*
-     * Finds the specified message and stores for the future
+     * Saves the the specified message
      */
     public static String addQuote(String searchMessage) {
-        Quotes quoteToAdd = null;
-        for (Quotes quote : channelMessages) {
-            if (quote != null && quote.message.startsWith(searchMessage)) {
-                if (quoteToAdd == null || quoteToAdd.message.equalsIgnoreCase(quote.message)) {
-                    quoteToAdd = quote;
-                }
-                else {
-                    throw new BadUserInputException("Quote is ambiguous, please clarify");
-                }
-            }
-        }
-
-        if (quoteToAdd == null) {
-            throw new BadUserInputException("Quote not found");
-        }
-        else {
-            quotes.add(quoteToAdd);
-            return getQuote(quotes.size() - 1);
-        }
+        savedQuotes.add(MesssageHolder.findQuote(searchMessage));
+        return getQuote(savedQuotes.size() - 1);
     }
 
 
     /*
-     * Gets a specific quote
+     * Returns the specific quote as a string of author, time, date
      */
     public static String getQuote(int index) {
-        if (quotes.size() == 0) {
+        if (savedQuotes.size() == 0) {
             throw new BadStateException("There are no saved quotes");
         }
-        else if (index >= quotes.size()) {
+        else if (index >= savedQuotes.size()) {
             throw new BadUserInputException("Quote number is too high");
         }
         else {
-            final Quotes quote = quotes.get(index);
-            final String message;
-
-            if (quote.message.startsWith("*") || quote.message.endsWith("*")) {
-                message = quote.message;
-            }
-            else {
-                message = String.format("*%s*", quote.message);
-            }
-
-            return String.format(
-                    "Quote number %d\n**%s** - %s\n*%s*", index,
-                    quote.author, dateTimeFormatter.format(quote.date), message
-            );
+            final Quotes quote = savedQuotes.get(index);
+            return String.format("Quote number %d\n%s", index, quote.toString());
         }
     }
 
 
-    /*
-     * If a number is given in the string then the quote with the corresponding number is returned
-     * If the string is empty a random quote is returned
-     */
-    public static String getQuote(String index) {
-        if (index.equals("")) {
-            return Quotes.getQuote();
+    public String toString() {
+        final String printString;
+        if (message.startsWith("*") || message.endsWith("*")) {
+            printString = message;
         }
         else {
-            try {
-                return Quotes.getQuote(Integer.parseInt(index));
-            } catch (IllegalArgumentException e) {
-                throw new BadUserInputException("Incorrect quote format, either give no argument or an integer");
-            }
+            printString = String.format("*%s*", message);
         }
+
+        return String.format("**%s** - %s\n*%s*", author, dateTimeFormatter.format(date), printString);
     }
 
 
@@ -116,38 +81,40 @@ public class Quotes implements Serializable {
      * Gets a random quote
      */
     public static String getQuote() {
-        if (quotes.size() != 0) {
-            return getQuote(new Random().nextInt(quotes.size()));
-        }
-        else {
+        if (savedQuotes.size() == 0) {
             throw new BadStateException("There are no saved quotes");
         }
+        return getQuote(new Random().nextInt(savedQuotes.size()));
     }
 
 
     /*
-     * Removes the specified quote from the bot
+     * Deletes the specified saved quote from the bot
      */
     public static void removeQuote(int index) {
         getQuote(index);
-        quotes.remove(index);
+        savedQuotes.remove(index);
     }
 
 
     public static int size() {
-        return quotes.size();
+        return savedQuotes.size();
     }
 
 
+    /*
+     * WARNING: DATA LOSS
+     * Deletes the channelMessages history and all savedQuotes
+     */
     public static void clearMessagesAndQuotes() {
-        channelMessages = new Quotes[20];
-        quotes = new ArrayList<>();
+        MesssageHolder.clearMessages();
+        savedQuotes = new ArrayList<>();
     }
 
 
     public static void save() {
         try {
-            DataPersistence.save(fileName, quotes);
+            DataPersistence.save(fileName, savedQuotes);
         } catch (IllegalStateException e) {
             System.out.println("Quotes save failed");
         }
@@ -156,9 +123,57 @@ public class Quotes implements Serializable {
 
     public static void load() {
         try {
-            quotes = (List<Quotes>) DataPersistence.loadFirstObject(fileName);
+            savedQuotes = (List<Quotes>) DataPersistence.loadFirstObject(fileName);
         } catch (IllegalStateException e) {
             System.out.println("Quotes load failed");
+        }
+    }
+
+
+    private static class MesssageHolder {
+        private static final int numberOfMessagesToHold = 20;
+        // Holds onto a specified number of channel messages which quotes can be saved from
+        // If it runs out of space it overwrites the oldest quote
+        private static Quotes[] channelMessages = new Quotes[numberOfMessagesToHold];
+        // The location in channelMessages which is to be written to next
+        private static int head = 0;
+
+
+        /*
+         * Temporarily stores a given channel message with the current time
+         */
+        static void addMessage(String author, String contents) {
+            channelMessages[head] = new Quotes(author, ZonedDateTime.now(), contents);
+            head = ++head % channelMessages.length;
+        }
+
+
+        /*
+         * Returns the quote that begins with what is given
+         */
+        static Quotes findQuote(String searchMessage) {
+            Quotes quoteToAdd = null;
+            for (Quotes quote : channelMessages) {
+                if (quote != null && quote.message.startsWith(searchMessage)) {
+                    if (quoteToAdd == null || quoteToAdd.message.equalsIgnoreCase(quote.message)) {
+                        quoteToAdd = quote;
+                    }
+                    else {
+                        throw new BadUserInputException("Quote is ambiguous, please clarify");
+                    }
+                }
+            }
+
+            if (quoteToAdd == null) {
+                throw new BadUserInputException("Quote not found");
+            }
+
+            return quoteToAdd;
+        }
+
+
+        static void clearMessages() {
+            channelMessages = new Quotes[numberOfMessagesToHold];
         }
     }
 }

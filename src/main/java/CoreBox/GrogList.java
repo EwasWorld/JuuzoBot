@@ -14,11 +14,17 @@ import static java.nio.file.Files.readAllBytes;
 
 
 
+/*
+ * Users drink a grog potion which has a random effect on them
+ */
 public class GrogList {
     private static final String fileLocation = Bot.getResourceFilePath() + "GrogEffects.json";
     private static List<String> effects;
 
 
+    /*
+     * Initialises the list of effects
+     */
     private GrogList(JsonArray effectsJsonArray) {
         effects = new ArrayList<>();
         for (JsonElement element : effectsJsonArray) {
@@ -27,18 +33,28 @@ public class GrogList {
     }
 
 
+    /*
+     * Returns a random effect with the author's name substituted in where appropriate
+     */
     public static String drinkGrog(String author) {
         try {
-            int roll = Roll.quickRoll(1000) - 1;
+            int roll = Die.quickRoll(1000) - 1;
             String effect = GrogList.getEffects().get(roll);
+
             effect = effect.replaceAll("PC", author);
-            return author + " drinks an Essence of Balthazar potion. " + effect;
+            effect = effect.replaceAll("the PC", author);
+            effect = effect.replaceAll("The PC", author);
+
+            return String.format("%s drinks an Essence of Balthazar potion. %s", author, effect);
         } catch (NullPointerException | FileNotFoundException e) {
             throw new BadStateException("Potions seem to be broken right now");
         }
     }
 
 
+    /*
+     * Used to import the list of effects from a json file
+     */
     private static List<String> getEffects() throws FileNotFoundException {
         if (effects == null) {
             try {
@@ -56,6 +72,9 @@ public class GrogList {
     }
 
 
+    /*
+     * Used to import the list of effects from a json file
+     */
     private static class GrogDeserializer implements JsonDeserializer<GrogList> {
         public GrogList deserialize(JsonElement json, Type typeOfT,
                                     JsonDeserializationContext context) throws JsonParseException

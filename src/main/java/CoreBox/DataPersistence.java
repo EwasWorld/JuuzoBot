@@ -5,12 +5,14 @@ import CharacterBox.UserCharacter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
 
 /*
- * Thread which backs up the data at regular time intervals
+ * Used for reading and writing data to files
+ * Thread backs up the data at regular time intervals
  */
 public class DataPersistence implements Runnable {
     private static final String fileLocation = Bot.getPathToJuuzoBot() + "DataPersistenceBox/";
@@ -48,7 +50,7 @@ public class DataPersistence implements Runnable {
 
 
     public static void save(String fileLocation, Object object) {
-        save(fileLocation, new ArrayList<>(Arrays.asList(new Object[]{object})));
+        save(fileLocation, new ArrayList<>(Collections.singletonList(object)));
     }
 
 
@@ -77,7 +79,7 @@ public class DataPersistence implements Runnable {
     /*
      * Load all data from files
      */
-    public static void loadData() {
+    static void loadData() {
         UserCharacter.load();
         Quotes.load();
 
@@ -85,7 +87,10 @@ public class DataPersistence implements Runnable {
     }
 
 
-    // TODO: Different backup versions (grandfather, father, son)
+    // TODO Implement different backup versions (grandfather, father, son)
+    /*
+     * Runs backups periodically
+     */
     @Override
     public void run() {
         while (true) {
@@ -100,7 +105,7 @@ public class DataPersistence implements Runnable {
 
 
     /*
-     * Save all the data currently stored
+     * Save everything to files
      */
     public static void saveData() {
         UserCharacter.save();

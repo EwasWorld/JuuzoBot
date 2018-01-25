@@ -12,19 +12,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 
 
+/*
+ * Used for logging unexpected exceptions which are thrown
+ * Stores the chat message which caused the exceptions along with other information from Exception
+ */
 public class Logger {
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm z");
     private static final Path mainLogFileLocation = Paths.get(Bot.getPathToJuuzoBot() + "LogBox/Log.txt");
-    private static final Path outputLogFileLocation = Paths.get(Bot.getPathToJuuzoBot() + "LogBox/LogReport.json");
+    private static final Path outputLocation = Paths.get(Bot.getPathToJuuzoBot() + "LogBox/LogReport.json");
     private static final Charset charset = StandardCharsets.UTF_8;
 
 
-    // TODO Better if this is called when a custom exception is thrown
-    public static void logEvent(String command, Exception e) {
+    /*
+     * Writes the given information to a log file
+     * TODO Optimisation separate Exception->String
+     */
+    static void logEvent(String command, Exception e) {
         try {
             final boolean isFirstLog = init(mainLogFileLocation);
 
@@ -33,6 +43,7 @@ public class Logger {
                 lines.add(",\n");
             }
             lines.add("{");
+            lines.add(String.format("\"time\": \"%s\",", dateTimeFormatter.format(ZonedDateTime.now())));
             lines.add(String.format("\"command\": \"%s\",", command));
             lines.add(String.format("\"message\": \"%s\",", e.getMessage()));
             lines.add(String.format("\"cause\": \"%s\",", e.getCause()));
@@ -54,16 +65,19 @@ public class Logger {
     }
 
 
+    /*
+     * Creates a file if it doesn't already exists
+     * Returns true if a new file was created, false if not
+     */
     private static boolean init(Path path) throws IOException {
         final File file = new File(path.toString());
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            return true;
-        }
-        else {
+        if (file.exists()) {
             return false;
         }
+
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        return true;
     }
 
 
@@ -77,6 +91,9 @@ public class Logger {
     }
 
 
+    /*
+     * Formats the log as a json file to be sent to the channel
+     */
     public static File getLoggedEventsToSend() {
         try {
             if (!new File(mainLogFileLocation.toString()).exists()) {
@@ -87,17 +104,17 @@ public class Logger {
             lines.addAll(Files.readAllLines(mainLogFileLocation, charset));
             lines.add("\n]\n}");
 
-            appendToFile(outputLogFileLocation, lines);
+            appendToFile(outputLocation, lines);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new File(outputLogFileLocation.toString());
+        return new File(outputLocation.toString());
     }
 
 
     public static void clearLog() {
         new File(mainLogFileLocation.toString()).delete();
-        new File(outputLogFileLocation.toString()).delete();
+        new File(outputLocation.toString()).delete();
     }
 }

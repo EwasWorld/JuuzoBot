@@ -1,39 +1,40 @@
+import CoreBox.Die;
 import ExceptionsBox.BadUserInputException;
-import CoreBox.Roll;
 import junit.framework.TestCase;
 
 
 
-public class RollTests extends TestCase {
+public class DieTests extends TestCase {
+    /*
     public void testQuickRollDie() {
-        Roll.quickRoll(10);
+        Die.quickRoll(10);
     }
 
 
     public void testStringRollJustSize() {
-        Roll.rollDieFromChatEvent("d8", "TestAuthor");
+        Die.rollDieFromChatEvent("d8", "TestAuthor");
     }
 
 
     public void testStringRollQuantitySize() {
-        Roll.rollDieFromChatEvent("2d8", "TestAuthor");
+        Die.rollDieFromChatEvent("2d8", "TestAuthor");
     }
 
 
     public void testStringRollQuantitySizeModifier() {
-        Roll.rollDieFromChatEvent("2d8+1", "TestAuthor");
+        Die.rollDieFromChatEvent("2d8+1", "TestAuthor");
     }
 
 
     public void testStringRollSizeModifier() {
-        Roll.rollDieFromChatEvent("d8+1", "TestAuthor");
+        Die.rollDieFromChatEvent("d8+1", "TestAuthor");
     }
 
 
     public void testBadStringRolls() {
         boolean exceptionThrown = false;
         try {
-            Roll.rollDieFromChatEvent("", "TestAuthor");
+            Die.rollDieFromChatEvent("", "TestAuthor");
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -42,7 +43,7 @@ public class RollTests extends TestCase {
 
         exceptionThrown = false;
         try {
-            Roll.rollDieFromChatEvent("8", "TestAuthor");
+            Die.rollDieFromChatEvent("8", "TestAuthor");
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -51,7 +52,7 @@ public class RollTests extends TestCase {
 
         exceptionThrown = false;
         try {
-            Roll.rollDieFromChatEvent("d", "TestAuthor");
+            Die.rollDieFromChatEvent("d", "TestAuthor");
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -60,7 +61,7 @@ public class RollTests extends TestCase {
 
         exceptionThrown = false;
         try {
-            Roll.rollDieFromChatEvent("a 2d8+1", "TestAuthor");
+            Die.rollDieFromChatEvent("a 2d8+1", "TestAuthor");
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -69,9 +70,10 @@ public class RollTests extends TestCase {
 
 
     public void testCreateRollAndGetResult() {
-        new Roll(8).roll();
-        new Roll(8).getStringForRoll();
-        new Roll(2, 8, 1).roll();
-        new Roll(2, 8, 1).getStringForRoll();
+        new Die(8).roll();
+        new Die(8).getStringForRoll();
+        new Die(2, 8, 1).roll();
+        new Die(2, 8, 1).getStringForRoll();
     }
+    */
 }

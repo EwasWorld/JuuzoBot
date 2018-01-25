@@ -1,16 +1,20 @@
-package CommandsBox.SessionTimes;
+package CommandsBox;
 
-import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
-import CoreBox.SessionDatabase;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.util.List;
 
 
-public class ShowDatabaseCommand extends AbstractCommand {
+
+// TODO Implement this
+public class NoteToSelfCommand extends AbstractCommand {
     @Override
     public String getCommand() {
-        return "showDB";
+        return "";
     }
 
 
@@ -28,25 +32,18 @@ public class ShowDatabaseCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.GAMEINFO;
+        return HelpCommand.HelpVisibility.NONE;
     }
 
 
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
-        String showDBString = SessionDatabase.databaseToString();
-        if (showDBString.equals("")) {
-            showDBString = "There are no games in the database";
-        }
-
-        sendMessage(event.getChannel(), showDBString);
     }
 
 
     @Override
     public Rank getRequiredRank() {
-        return Rank.CREATOR;
+        return Rank.USER;
     }
 }

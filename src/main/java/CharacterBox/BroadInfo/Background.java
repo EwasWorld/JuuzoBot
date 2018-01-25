@@ -50,7 +50,7 @@ public class Background {
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;
     private Set<CharacterConstants.Language> languages;
-    // TODO: Tools
+    // TODO Implement Tools
     private String[] traits;
     private Ideal[] ideals;
     private String[] bonds;

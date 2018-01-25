@@ -1,7 +1,7 @@
 package CharacterBox.BroadInfo;
 
 import CoreBox.Bot;
-import CoreBox.Roll;
+import CoreBox.Die;
 import ExceptionsBox.BadStateException;
 import com.google.gson.*;
 
@@ -41,7 +41,7 @@ public class Trinkets {
     public static String getTrinketLowerCaseStart() {
         try {
             initialiseTrinkets();
-            String trinket = trinkets.get(Roll.quickRoll(trinkets.size()) - 1);
+            String trinket = trinkets.get(Die.quickRoll(trinkets.size()) - 1);
             // Change the first letter to lower case
             return String.valueOf(trinket.charAt(0)).toLowerCase() + trinket.substring(1);
         } catch (FileNotFoundException e) {

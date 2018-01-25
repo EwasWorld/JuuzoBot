@@ -3,6 +3,7 @@ package CommandsBox.Quotes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.Quotes;
+import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
@@ -32,11 +33,27 @@ public class GetQuoteCommand extends AbstractCommand {
     }
 
 
+    /*
+     * Quote with the corresponding number is returned
+     * If the string is empty a random quote is returned
+     */
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
-        sendMessage(event.getChannel(), Quotes.getQuote(args));
+        String returnMessage;
+        if (args.equals("")) {
+            returnMessage = Quotes.getQuote();
+        }
+        else {
+            try {
+                returnMessage = Quotes.getQuote(Integer.parseInt(args));
+            } catch (IllegalArgumentException e) {
+                throw new BadUserInputException("Incorrect quote format, either give no argument or an integer");
+            }
+        }
+
+        sendMessage(event.getChannel(), returnMessage);
     }
 
 
