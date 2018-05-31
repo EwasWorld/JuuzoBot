@@ -2,6 +2,7 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
+import CoreBox.Database;
 import CoreBox.SessionDatabase;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -55,7 +56,7 @@ public class GetNextGameCommand extends AbstractCommand {
                     }
                 }
                 stringBuilder
-                        .append(stringForDate + " " + SessionDatabase.printDateFormat.format(nearestFutureDate) + "\n");
+                        .append(stringForDate + " " + Database.printDateFormat.format(nearestFutureDate) + "\n");
             }
         }
         else {

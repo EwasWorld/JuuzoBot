@@ -2,6 +2,7 @@ package CommandsBox.SessionTimes;
 
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
+import CoreBox.Database;
 import CoreBox.SessionDatabase;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -48,13 +49,13 @@ public class AddSessionTimeCommand extends AbstractCommand {
         String sessionName;
 
         try {
-            date = SessionDatabase.setDateFormat.parse(args);
+            date = Database.setDateFormat.parse(args);
             sessionName = SessionDatabase.addSessionTime(event.getAuthor().getId(), date);
         } catch (ParseException e) {
             String[] argsParts = args.split(" ");
             sessionName = argsParts[0];
             try {
-                date = SessionDatabase.setDateFormat.parse(args.substring(sessionName.length()));
+                date = Database.setDateFormat.parse(args.substring(sessionName.length()));
                 SessionDatabase.addSessionTimeToSpecificSession(sessionName, date);
             } catch (ParseException e1) {
                 throw new BadUserInputException("Bad input format. It should be [short name] {date}."
@@ -63,7 +64,7 @@ public class AddSessionTimeCommand extends AbstractCommand {
         }
 
         String message = String.format(
-                "New session time for %s added %s", sessionName, SessionDatabase.printDateFormat.format(date)
+                "New session time for %s added %s", sessionName, Database.printDateFormat.format(date)
         );
         sendMessage(event.getChannel(), message);
     }

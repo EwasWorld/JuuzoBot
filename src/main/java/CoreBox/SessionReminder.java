@@ -3,24 +3,24 @@ package CoreBox;
 
 import net.dv8tion.jda.core.entities.Guild;
 
+import java.util.PriorityQueue;
+
 
 
 // TODO Implement this
 // Triggers a reminder 2 hours before the session
 public class SessionReminder implements Runnable {
     private Guild guild;
-    private boolean isWithinAnHour = false;
+    private PriorityQueue<SessionQueueElement> upcomingReminders = new PriorityQueue<>();
 
 
     public SessionReminder(Guild guild) {
-/*
         if (guild.getId().equals(IDs.teenTitansGoID)) {
             this.guild = guild;
         }
         else {
             throw new IllegalArgumentException("Wrong guild ID to start session times thread");
         }
-*/
     }
 
 
@@ -49,5 +49,44 @@ public class SessionReminder implements Runnable {
             }
         }
 */
+    }
+
+
+    private void removeElement() {
+        // TODO call from removeSessionTime in SessionDatabase
+    }
+
+
+    private void addElement(String shortName) {
+        upcomingReminders.add(new SessionQueueElement(shortName));
+    }
+
+
+    private void setAutoReminderSetToFalse() {
+        // TODO
+        removeElement();
+    }
+
+
+    class SessionQueueElement implements Comparable<SessionQueueElement> {
+        private long sessionTime;
+        private String shortName;
+
+
+        public SessionQueueElement(String shortName) {
+            this.shortName = shortName;
+            sessionTime = SessionDatabase.getNextSession(shortName).getTime();
+        }
+
+
+        @Override
+        public int compareTo(SessionQueueElement o) {
+            return Long.compare(o.sessionTime, sessionTime);
+        }
+
+
+        public String getShortName() {
+            return shortName;
+        }
     }
 }

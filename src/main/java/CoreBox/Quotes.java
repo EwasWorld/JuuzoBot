@@ -20,7 +20,7 @@ public class Quotes implements Serializable {
     private static final String fileName = "Quotes.txt";
     private static List<Quotes> savedQuotes = new ArrayList<>();
     private static final DateTimeFormatter dateTimeFormatter
-            = DateTimeFormatter.ofPattern(SessionDatabase.setDateFormatStr);
+            = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
     private String author;
     private ZonedDateTime date;
     private String message;
