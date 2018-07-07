@@ -7,9 +7,13 @@ import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import com.google.gson.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static java.nio.file.Files.readAllBytes;
@@ -45,7 +49,8 @@ public class Background {
 
 
 
-    private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Backgrounds.json";
+    private static final String fileLocation1 = "CharacterGeneration/Backgrounds.json";
+    private static final String fileLocation = "Backgrounds.json";
     private static Map<String, Background> backgrounds;
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;
@@ -55,6 +60,8 @@ public class Background {
     private Ideal[] ideals;
     private String[] bonds;
     private String[] flaws;
+
+    private static File file = new File(fileLocation);
 
 
     public Background(Object rawObj) {
@@ -127,8 +134,23 @@ public class Background {
             final Gson gson = gsonBuilder.registerTypeAdapter(Background.class, new BackgroundsSetUpDeserializer())
                     .create();
 
-            final String backgoundsSetUpJSON = new String(readAllBytes(Paths.get(fileLocation)));
-            gson.fromJson(backgoundsSetUpJSON, Background.class);
+            blah();
+            final String backgroundsSetUpJSON = new String(readAllBytes(file.toPath()));
+            gson.fromJson(backgroundsSetUpJSON, Background.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static void blah() {
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                InputStream inputStream = Background.class.getResourceAsStream(fileLocation1);
+                Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -28,7 +28,7 @@ public class RemoveQuoteCommand extends AbstractCommand {
 
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.ADMIN;
+        return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
