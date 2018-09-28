@@ -24,7 +24,6 @@ import java.util.*;
 
 
 public class Bot {
-    // TODO Git merge/reset head Test
     // Database and other information is stored in this location
     private static String pathToJuuzoBot = IDs.pathToJuuzoBot;
     // Temporary file path while I figure out how to get the ideal one (commented out underneath) working
