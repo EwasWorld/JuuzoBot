@@ -1,24 +1,30 @@
 package CoreBox;
 
+import DatabaseBox.DatabaseFieldArgs;
+import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 
 
-/*
+/**
  * Preserve the beautiful words of those in the server in time immemorial
  * Allows users to save messages and retrieve saved messages
+ * TODO Remove duplicate quotes
+ * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
-    private static final String fileName = "Quotes.txt";
-    private static List<Quotes> savedQuotes = new ArrayList<>();
+    private static DatabaseTable databaseTable = createDatabaseTable();
+    private static final String AUTHOR = "author";
+    private static final String DATE = "date";
+    private static final String MESSAGE = "message";
     private static final DateTimeFormatter dateTimeFormatter
             = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
     private String author;
@@ -33,33 +39,73 @@ public class Quotes implements Serializable {
     }
 
 
-    public static void addMessage(String author, String contents) {
-        MesssageHolder.addMessage(author, contents);
+    /**
+     * Set up the table in which the quotes will be saved
+     */
+    private static DatabaseTable createDatabaseTable() {
+        Map<String, DatabaseFieldArgs> fields = new HashMap<>();
+        fields.put(AUTHOR, new DatabaseFieldArgs(DatabaseTable.SQLType.TEXT, true));
+        fields.put(DATE, new DatabaseFieldArgs(DatabaseTable.SQLType.DATE, true));
+        fields.put(MESSAGE, new DatabaseFieldArgs(DatabaseTable.SQLType.TEXT, true));
+        return new DatabaseTable("Quotes", fields);
     }
 
 
-    /*
-     * Saves the the specified message
+    /**
+     * Add a message to the message queue so that it can be found later if someone tries to quote it
+     */
+    public static void addMessage(String author, String contents) {
+        MessageHolder.addMessage(author, contents);
+    }
+
+
+    /**
+     * Saves the specified message (matched using startsWith)
      */
     public static String addQuote(String searchMessage) {
-        savedQuotes.add(MesssageHolder.findQuote(searchMessage));
-        return getQuote(savedQuotes.size() - 1);
+        Quotes quote = MessageHolder.findQuote(searchMessage);
+
+        Map<String, Object> args = new HashMap<>();
+        args.put(AUTHOR, quote.author);
+        args.put(DATE, quote.date);
+        args.put(MESSAGE, quote.message);
+        databaseTable.insert(args);
+
+        return getQuote(size());
     }
 
 
-    /*
-     * Returns the specific quote as a string of author, time, date
+    /**
+     * @return the specific quote as a string of author, time, date
      */
     public static String getQuote(int index) {
-        if (savedQuotes.size() == 0) {
+        int size = size();
+        if (size == 0) {
             throw new BadStateException("There are no saved quotes");
         }
-        else if (index >= savedQuotes.size()) {
+        // TODO Why the +1?
+        else if (index >= size + 1) {
             throw new BadUserInputException("Quote number is too high");
         }
         else {
-            final Quotes quote = savedQuotes.get(index);
-            return String.format("Quote number %d\n%s", index, quote.toString());
+            Map<String, Object> args = new HashMap<>();
+            args.put(databaseTable.getPrimaryKey(), index);
+            DatabaseTable.ResultsSetAction resultsSetAction = rs -> {
+                if (rs.next()) {
+                    String author = rs.getString(AUTHOR);
+                    ZonedDateTime date = DatabaseTable.getDatabaseDateFromString(rs.getString(DATE));
+                    String message = rs.getString(MESSAGE);
+                    return new Quotes(author, date, message);
+                }
+                return null;
+            };
+            final Quotes quote = (Quotes) databaseTable.selectAND(args, resultsSetAction);
+            if (quote != null) {
+                return String.format("Quote number %d\n%s", index, quote.toString());
+            }
+            else {
+                throw new BadStateException("There is no quote with the id " + index);
+            }
         }
     }
 
@@ -77,60 +123,58 @@ public class Quotes implements Serializable {
     }
 
 
-    /*
-     * Gets a random quote
+    /**
+     * @return a random quote
      */
     public static String getQuote() {
-        if (savedQuotes.size() == 0) {
+        if (size() == 0) {
             throw new BadStateException("There are no saved quotes");
         }
-        return getQuote(new Random().nextInt(savedQuotes.size()));
+        return getQuote(new Random().nextInt(size()));
     }
 
 
-    /*
+    /**
+     * TODO - not refactored
      * Deletes the specified saved quote from the bot
      */
     public static void removeQuote(int index) {
         getQuote(index);
-        savedQuotes.remove(index);
+        //        savedQuotes.remove(index);
     }
 
 
+    /**
+     * @return the number of quotes currently stored
+     */
     public static int size() {
-        return savedQuotes.size();
+        return databaseTable.getRowCount();
     }
 
 
-    /*
+    /**
      * WARNING: DATA LOSS
      * Deletes the channelMessages history and all savedQuotes
      */
     public static void clearMessagesAndQuotes() {
-        MesssageHolder.clearMessages();
-        savedQuotes = new ArrayList<>();
+        MessageHolder.clearMessages();
+        databaseTable.deleteTable();
     }
 
 
-    public static void save() {
-        try {
-            DataPersistence.save(fileName, savedQuotes);
-        } catch (IllegalStateException e) {
-            System.out.println("Quotes save failed");
-        }
+    /**
+     * Resets all the quoteIDs so that they are consecutive stating from 1 again
+     * Used when the quotesIDs become very sparse such that getting a random quote often results in failure
+     */
+    public static void cleanQuoteIDs() {
+        // TODO
     }
 
 
-    public static void load() {
-        try {
-            savedQuotes = (List<Quotes>) DataPersistence.loadFirstObject(fileName);
-        } catch (IllegalStateException e) {
-            System.out.println("Quotes load failed");
-        }
-    }
-
-
-    private static class MesssageHolder {
+    /**
+     * Stores the most recent channel messages the bot has picked up
+     */
+    private static class MessageHolder {
         private static final int numberOfMessagesToHold = 20;
         // Holds onto a specified number of channel messages which quotes can be saved from
         // If it runs out of space it overwrites the oldest quote
@@ -139,7 +183,7 @@ public class Quotes implements Serializable {
         private static int head = 0;
 
 
-        /*
+        /**
          * Temporarily stores a given channel message with the current time
          */
         static void addMessage(String author, String contents) {
@@ -148,7 +192,7 @@ public class Quotes implements Serializable {
         }
 
 
-        /*
+        /**
          * Returns the quote that begins with what is given
          */
         static Quotes findQuote(String searchMessage) {
