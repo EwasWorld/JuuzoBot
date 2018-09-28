@@ -3,7 +3,6 @@ package CommandsBox.SessionTimes;
 import CommandsBox.HelpCommand;
 import CoreBox.AbstractCommand;
 import CoreBox.SessionDatabase;
-import CoreBox.SessionTimes;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;

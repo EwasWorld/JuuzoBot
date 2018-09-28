@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.reflections.Reflections;
@@ -113,6 +114,13 @@ public class Bot {
 
 
     private static class CommandListener extends ListenerAdapter {
+        @Override
+        public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
+            super.onGuildMessageReactionAdd(event);
+            // TODO
+        }
+
+
         /*
          * Logs messages for use with Quotes
          *      then if the message begins with '!' and a known command it executes the command
@@ -145,6 +153,7 @@ public class Bot {
                 event.getChannel().sendMessage(e.getMessage()).queue();
             } catch (Exception e) {
                 // Log unexpected errors
+                e.printStackTrace();
                 Logger.logEvent(event.getMessage().getContent(), e);
             }
         }

@@ -1,5 +1,4 @@
 import ExceptionsBox.BadUserInputException;
-import CoreBox.SessionTimes;
 import junit.framework.TestCase;
 
 
@@ -9,7 +8,7 @@ public class SessionTimesTests extends TestCase {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-        SessionTimes.clearGameInformation();
+//        SessionTimes.clearGameInformation();
     }
 
 
