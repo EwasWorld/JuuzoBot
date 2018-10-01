@@ -139,7 +139,7 @@ public class Die {
         private void calculateTotal() {
             total = 0;
             for (int x : individualRolls) {
-                total += 0;
+                total += x;
 
                 if (x == 1) {
                     critFail = true;
