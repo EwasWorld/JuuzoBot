@@ -40,7 +40,7 @@ public class GetQuoteCommand extends AbstractCommand {
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
+        /* TODO Refactor base method
         String returnMessage;
         if (args.equals("")) {
             returnMessage = Quotes.getQuote();
@@ -53,7 +53,8 @@ public class GetQuoteCommand extends AbstractCommand {
             }
         }
 
-        sendMessage(event.getChannel(), returnMessage);
+        sendMessage(event.getChannel(), returnMessage);*/
+        sendMessage(event.getChannel(), "Function not currently working");
     }
 
 

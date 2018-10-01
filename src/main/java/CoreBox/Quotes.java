@@ -17,7 +17,7 @@ import java.util.Random;
 /**
  * Preserve the beautiful words of those in the server in time immemorial
  * Allows users to save messages and retrieve saved messages
- * TODO Remove duplicate quotes
+ * TODO Implement Remove duplicate quotes
  * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
@@ -135,7 +135,7 @@ public class Quotes implements Serializable {
 
 
     /**
-     * TODO - not refactored
+     * TODO Refactor
      * Deletes the specified saved quote from the bot
      */
     public static void removeQuote(int index) {
