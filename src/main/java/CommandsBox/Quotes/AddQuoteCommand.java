@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
 
+// TODO Optimisation dump Quotes stuff in here as an inner class? And have just one QuotesCommand
 public class AddQuoteCommand extends AbstractCommand {
     @Override
     public String getCommand() {
