@@ -4,7 +4,6 @@ import CharacterBox.UserCharacter;
 import CoreBox.AbstractCommand;
 import CoreBox.Die;
 import ExceptionsBox.BadUserInputException;
-import jdk.nashorn.internal.runtime.ParserException;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -191,10 +190,6 @@ public class RollCommand extends AbstractCommand {
 
 
     private static int parseInt(String intString) {
-        try {
-            return Integer.parseInt(intString);
-        } catch (ParserException e) {
-            throw new BadUserInputException("Incorrect die size or modifier");
-        }
+        return Integer.parseInt(intString);
     }
 }
