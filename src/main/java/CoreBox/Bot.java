@@ -1,6 +1,8 @@
 package CoreBox;
 
 
+import BlackJackBox.GameInstance;
+import CommandsBox.BlackJackCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.IncorrectPermissionsException;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.reflections.Reflections;
@@ -21,7 +24,6 @@ import javax.security.auth.login.LoginException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
-
 
 
 public class Bot {
@@ -117,7 +119,18 @@ public class Bot {
         @Override
         public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
             super.onGuildMessageReactionAdd(event);
-            // TODO
+            if (!event.getMember().getUser().isBot() && BlackJackCommand.isGameMessage(event.getMessageId())) {
+                BlackJackCommand.executeFromAddReaction(event.getReactionEmote().getName(), event.getMember());
+            }
+        }
+
+
+        @Override
+        public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
+            super.onGuildMessageReactionRemove(event);
+            if (!event.getMember().getUser().isBot() && BlackJackCommand.isGameMessage(event.getMessageId())) {
+                BlackJackCommand.executeFromRemoveReaction(event.getReactionEmote().getName(), event.getMember());
+            }
         }
 
 
@@ -128,17 +141,20 @@ public class Bot {
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
-
             String args = event.getMessage().getContent();
             // Logs the message in case it will be quoted later
             Quotes.addMessage(event.getAuthor().getName(), args);
-
-            if (!args.startsWith("!") || event.getAuthor().isBot()) {
+            if (event.getAuthor().isBot()) {
+                if (args.startsWith(GameInstance.blackjackGameMessageTitleString)) {
+                    BlackJackCommand.setCurrentGamesChannelMessage(event.getMessage());
+                }
+                return;
+            }
+            else if (!args.startsWith("!")) {
                 return;
             }
             final String command = args.substring(1).split(" ")[0].toUpperCase();
             args = getRemainingMessage(command, args);
-
 
             try {
                 if (commands == null || commands.size() == 0) {
@@ -147,7 +163,6 @@ public class Bot {
                 if (!commands.containsKey(command)) {
                     throw new BadUserInputException("I have no memory of this command");
                 }
-
                 commands.get(command).execute(args, event);
             } catch (BadUserInputException | BadStateException | IncorrectPermissionsException e) {
                 event.getChannel().sendMessage(e.getMessage()).queue();

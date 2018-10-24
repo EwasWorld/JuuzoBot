@@ -76,7 +76,7 @@ public abstract class AbstractCommand {
      * Returns the rank with the name of the corresponding highest recognised discord role
      * TODO Improve store these in a database rather than relying on roles? Allocate them using commands
      */
-    protected Rank getRank(Member member) {
+    static protected Rank getRank(Member member) {
         final Set<Rank> ranks = new HashSet<>();
         for (Role role : member.getRoles()) {
             try {

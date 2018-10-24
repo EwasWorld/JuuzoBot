@@ -1,7 +1,27 @@
 package BlackJackBox;
 
+import CommandsBox.Emoji;
+
+
+
+/**
+ * refactored: 1/10/18
+ */
 public class Card {
-    public enum Suit {HEARTS, CLUBS, DIAMONDS, SPADES}
+    public enum Suit {
+        HEARTS(Emoji.HEARTS), CLUBS(Emoji.CLUBS), DIAMONDS(Emoji.DIAMONDS), SPADES(Emoji.SPADES);
+        private Emoji emoji;
+
+
+        Suit(Emoji emoji) {
+            this.emoji = emoji;
+        }
+
+
+        public String getEmojiAlias() {
+            return emoji.getDiscordAlias();
+        }
+    }
 
 
 
@@ -25,13 +45,8 @@ public class Card {
     }
 
 
-    /*
-     * Returns a string of ValueSuit e.g. 10C for 10 of Clubs or KS for King of Spades
-     *      Value is A/J/Q/K for Ace, Jack, Queen, King or a number
-     *      Suit is H/C/D/S for Hearts, Clubs, Diamonds, Spades
-     */
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("");
+        StringBuilder stringBuilder = new StringBuilder();
 
         switch (value) {
             case 1:
@@ -51,8 +66,7 @@ public class Card {
                 break;
         }
 
-        stringBuilder.append(suit.toString().charAt(0));
-
+        stringBuilder.append(suit.getEmojiAlias());
         return stringBuilder.toString();
     }
 }
