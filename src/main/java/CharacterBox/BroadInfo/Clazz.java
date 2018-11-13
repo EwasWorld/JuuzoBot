@@ -15,7 +15,7 @@ import static java.nio.file.Files.readAllBytes;
 
 
 
-public class Class_ {
+public class Clazz {
     public enum ClassEnum {
         BARBARIAN, BARD, CLERIC, DRUID, FINESSEFIGHTER,
         FIGHTER, MONK, PALADIN, RANGER, ROGUE,
@@ -25,7 +25,7 @@ public class Class_ {
 
 
     private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Classes.json";
-    private static Map<ClassEnum, Class_> classes;
+    private static Map<ClassEnum, Clazz> classes;
     private int hitDie;
     // [0] will be the highest stat
     private CharacterConstants.AbilityEnum[] abilityOrder;
@@ -39,7 +39,7 @@ public class Class_ {
     private Weapon.WeaponsEnum startWeapon;
 
 
-    private Class_(Object rawObj) {
+    private Clazz(Object rawObj) {
         classes = new HashMap<>();
 
         for (JsonElement element : (JsonArray) rawObj) {
@@ -47,7 +47,7 @@ public class Class_ {
 
             final ClassEnum classEnum = ClassEnum.valueOf(object.get("name").getAsString().toUpperCase());
             final JsonObject funds = object.getAsJsonObject("funds");
-            classes.put(classEnum, new Class_(
+            classes.put(classEnum, new Clazz(
                     object.get("hitDie").getAsInt(),
                     createAbilityOrder(object.getAsJsonObject("abilityOrder")),
                     createSavingThrows(object.getAsJsonArray("savingThrows")),
@@ -104,10 +104,10 @@ public class Class_ {
     }
 
 
-    private Class_(int hitDie, CharacterConstants.AbilityEnum[] abilityOrder,
-                   Set<CharacterConstants.AbilityEnum> savingThrows, int skillQuantity,
-                   Set<CharacterConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
-                   WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
+    private Clazz(int hitDie, CharacterConstants.AbilityEnum[] abilityOrder,
+                  Set<CharacterConstants.AbilityEnum> savingThrows, int skillQuantity,
+                  Set<CharacterConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
+                  WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
     {
         this.hitDie = hitDie;
         this.abilityOrder = abilityOrder;
@@ -120,7 +120,7 @@ public class Class_ {
     }
 
 
-    public static Class_ getClassInfo(ClassEnum classEnum) {
+    public static Clazz getClassInfo(ClassEnum classEnum) {
         if (classes == null) {
             getClassesFromFile();
         }
@@ -131,10 +131,10 @@ public class Class_ {
     private static void getClassesFromFile() {
         try {
             final GsonBuilder gsonBuilder = new GsonBuilder();
-            final Gson gson = gsonBuilder.registerTypeAdapter(Class_.class, new ClassSetUpDeserializer()).create();
+            final Gson gson = gsonBuilder.registerTypeAdapter(Clazz.class, new ClassSetUpDeserializer()).create();
 
             final String classSetUpJSON = new String(readAllBytes(Paths.get(fileLocation)));
-            gson.fromJson(classSetUpJSON, Class_.class);
+            gson.fromJson(classSetUpJSON, Clazz.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -218,11 +218,11 @@ public class Class_ {
     }
 
 
-    private static class ClassSetUpDeserializer implements JsonDeserializer<Class_> {
-        public Class_ deserialize(JsonElement json, Type typeOfT,
-                                  JsonDeserializationContext context) throws JsonParseException
+    private static class ClassSetUpDeserializer implements JsonDeserializer<Clazz> {
+        public Clazz deserialize(JsonElement json, Type typeOfT,
+                                 JsonDeserializationContext context) throws JsonParseException
         {
-            return new Class_(json.getAsJsonObject().get("classes").getAsJsonArray());
+            return new Clazz(json.getAsJsonObject().get("classes").getAsJsonArray());
         }
     }
 }

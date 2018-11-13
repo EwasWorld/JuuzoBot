@@ -1,6 +1,9 @@
 package ExceptionsBox;
 
-public class ContactEwaException extends IllegalStateException {
+/**
+ * created 13/11/18
+ */
+public class ContactEwaException extends BadStateException {
     public ContactEwaException() {
         super();
     }

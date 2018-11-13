@@ -128,7 +128,7 @@ public class DatabaseTable {
 
 
     /**
-     * Primary key will be "tableName + ID"
+     * Primary key: tableName + "ID"
      */
     public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields) {
         this.tableName = tableName;
@@ -191,6 +191,38 @@ public class DatabaseTable {
         values.deleteCharAt(values.length() - 1);
         final String sql = String
                 .format("INSERT INTO %s(%s) VALUES (%s)", tableName, fieldNames.toString(), values.toString());
+
+        getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            setValuesInPreparedStatement(ps, types, objects);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void delete(Map<String, Object> args) {
+        final List<SQLType> types = new ArrayList<>();
+        final List<Object> objects = new ArrayList<>();
+        final StringBuilder where = new StringBuilder();
+        for (String arg : args.keySet()) {
+            if (!fields.keySet().contains(arg)) {
+                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
+            }
+            else {
+                DatabaseFieldArgs databaseFieldArgs = fields.get(arg);
+                SQLType sqlType = databaseFieldArgs.getSqlType();
+                if (!sqlType.getClassName().equals(args.get(arg).getClass().getName())) {
+                    throw new IllegalArgumentException("Invalid argument type for " + arg);
+                }
+                where.append(String.format("%s=? AND ", arg));
+                types.add(sqlType);
+                objects.add(args.get(arg));
+            }
+        }
+        where.delete(where.length() - 5, where.length());
+        final String sql = String.format("DELETE FROM %s WHERE %s", tableName, where.toString());
 
         getConnection();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

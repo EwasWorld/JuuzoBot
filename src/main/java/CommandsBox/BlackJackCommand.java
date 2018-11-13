@@ -36,17 +36,18 @@ public class BlackJackCommand extends AbstractCommand {
      *
      * @param emoji an emoji in the form of a one/two char array
      * @param player the one who invoked the command
+     * @return true if the reaction belonged to this method
      */
-    public static void executeFromRemoveReaction(String messageID, String emoji, Member player) {
-        if (gameInstance == null || currentGamesChannelMessage == null || !messageID.equals(
-                currentGamesChannelMessage.getId())) {
-            return;
+    public static boolean executeFromRemoveReaction(Long messageID, String emoji, Member player) {
+        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage.getIdLong()) {
+            return false;
         }
         final Optional<BlackJackEmojiArgument> argumentOptional = emojiToPlayArgument(emoji);
         if (argumentOptional.isPresent()) {
             argumentOptional.get().removeAction(player);
             currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
         }
+        return true;
     }
 
 
@@ -68,11 +69,11 @@ public class BlackJackCommand extends AbstractCommand {
      *
      * @param messageReaction an emoji in the form of a one/two char array
      * @param player the one who invoked the command
+     * @return true if the reaction belonged to this method
      */
-    public static void executeFromAddReaction(String messageID, MessageReaction messageReaction, Member player) {
-        if (gameInstance == null || currentGamesChannelMessage == null || !messageID.equals(
-                currentGamesChannelMessage.getId())) {
-            return;
+    public static boolean executeFromAddReaction(Long messageID, MessageReaction messageReaction, Member player) {
+        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage.getIdLong()) {
+            return false;
         }
         final Optional<BlackJackEmojiArgument> argument = emojiToPlayArgument(
                 messageReaction.getReactionEmote().getName());
@@ -82,6 +83,7 @@ public class BlackJackCommand extends AbstractCommand {
                 messageReaction.removeReaction(player.getUser()).queue();
             }
         });
+        return true;
     }
 
 
@@ -179,7 +181,7 @@ public class BlackJackCommand extends AbstractCommand {
      */
     @Override
     public String getDescription() {
-        return "create a game, have whoever you want join, then start it";
+        return "Create a game of blackjack, have whoever you want join, then start it";
     }
 
 
@@ -188,7 +190,8 @@ public class BlackJackCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        return "{new/bet/end/reprint}";
+        // TODO Better way of doing this in enum - maybe give each a help string?
+        return "{new / reprint / bet {main} {side} {side} / end}";
     }
 
 
@@ -207,21 +210,7 @@ public class BlackJackCommand extends AbstractCommand {
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
-        getArgument(args.split(" ")[0]).execute(args, event);
-    }
-
-
-    /**
-     * @param args an argument in string form
-     * @return the argument represented by args
-     * @throws BadUserInputException for an invalid argument
-     */
-    private BlackJackArgument getArgument(String args) {
-        try {
-            return BlackJackArgument.valueOf(args.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException("I don't understand that argument. Use one of " + getArguments());
-        }
+        executeSecondaryArgument(BlackJackArgument.class, args, event);
     }
 
 
@@ -255,7 +244,7 @@ public class BlackJackCommand extends AbstractCommand {
     /**
      * Arguments that are triggered from the blackjack command args
      */
-    private enum BlackJackArgument implements StringArgAction {
+    private enum BlackJackArgument implements SecondaryCommandAction {
         NEW {
             /**
              * {@inheritDoc}
@@ -641,11 +630,5 @@ public class BlackJackCommand extends AbstractCommand {
         static BlackJackEmojiArgument[] getGameCommands() {
             return new BlackJackEmojiArgument[]{HIT, STAND, DOUBLE_DOWN, SPLIT, BET_SPLIT, LEAVE, END};
         }
-    }
-
-
-
-    private interface StringArgAction {
-        void execute(String args, MessageReceivedEvent event);
     }
 }

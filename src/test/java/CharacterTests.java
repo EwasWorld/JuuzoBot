@@ -1,7 +1,7 @@
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.BroadInfo.Background;
+import CharacterBox.BroadInfo.Clazz;
 import CharacterBox.UserCharacter;
-import CharacterBox.BroadInfo.Class_;
 import CharacterBox.BroadInfo.Race;
 import CharacterBox.BroadInfo.SubRace;
 import ExceptionsBox.BadUserInputException;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class CharacterTests extends TestCase {
     public void testClassInfoRetrieval() {
-        Class_.getClassInfo(Class_.ClassEnum.ROGUE);
+        Clazz.getClassInfo(Clazz.ClassEnum.ROGUE);
     }
 
 
@@ -34,11 +34,13 @@ public class CharacterTests extends TestCase {
 
 
     public void testCreateCharacter() {
+        /*
         System.out.println(new UserCharacter(
-                "Akatsuki", Race.RaceEnum.ELF, null, Class_.ClassEnum.ROGUE, "Criminal").getDescription());
+                "Akatsuki", Race.RaceEnum.ELF, null, Clazz.ClassEnum.ROGUE, "Criminal").getDescription());
         System.out.println(new UserCharacter(
-                "Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Class_.ClassEnum.ROGUE, "Criminal"
+                "Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Clazz.ClassEnum.ROGUE, "Criminal"
         ).getDescription());
+        */
         System.out.println("\n\n");
 
         List<String> testStrings = new ArrayList<>();
@@ -56,7 +58,7 @@ public class CharacterTests extends TestCase {
         for (String testString : testStrings) {
             System.out.println("\n\nTest String: " + testString);
             try {
-                System.out.println(UserCharacter.createUserCharacter(testString).getDescription());
+//                System.out.println(UserCharacter.createUserCharacter(testString).getDescription());
             } catch (BadUserInputException e) {
                 System.out.println(e.getMessage());
             }

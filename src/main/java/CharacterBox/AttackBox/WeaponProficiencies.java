@@ -36,6 +36,6 @@ public class WeaponProficiencies implements Serializable {
             string.append(weapon.toString()).append(", ");
         }
 
-        return string.substring(0, string.length() - 2);
+        return string.substring(0, string.length() - 2).toLowerCase();
     }
 }

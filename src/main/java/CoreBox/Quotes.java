@@ -4,6 +4,7 @@ import DatabaseBox.DatabaseFieldArgs;
 import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
+import ExceptionsBox.FeatureUnavailableException;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -25,8 +26,7 @@ public class Quotes implements Serializable {
     private static final String AUTHOR = "author";
     private static final String DATE = "date";
     private static final String MESSAGE = "message";
-    private static final DateTimeFormatter dateTimeFormatter
-            = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
     private String author;
     private ZonedDateTime date;
     private String message;
@@ -83,8 +83,7 @@ public class Quotes implements Serializable {
         if (size == 0) {
             throw new BadStateException("There are no saved quotes");
         }
-        // TODO Why the +1?
-        else if (index >= size + 1) {
+        else if (index > size) {
             throw new BadUserInputException("Quote number is too high");
         }
         else {
@@ -130,7 +129,7 @@ public class Quotes implements Serializable {
         if (size() == 0) {
             throw new BadStateException("There are no saved quotes");
         }
-        return getQuote(new Random().nextInt(size()));
+        return getQuote(new Random().nextInt(size()) + 1);
     }
 
 
@@ -140,7 +139,9 @@ public class Quotes implements Serializable {
      */
     public static void removeQuote(int index) {
         getQuote(index);
-        //        savedQuotes.remove(index);
+        Map<String, Object> args = new HashMap<>();
+        args.put(databaseTable.getPrimaryKey(), index);
+        databaseTable.delete(args);
     }
 
 
@@ -167,7 +168,9 @@ public class Quotes implements Serializable {
      * Used when the quotesIDs become very sparse such that getting a random quote often results in failure
      */
     public static void cleanQuoteIDs() {
-        // TODO
+        throw new FeatureUnavailableException(
+                "Reset all the quoteIDs so that they are consecutive stating from 1 (helpful if many quotes have been"
+                        + " deleted and numbers are getting sparse)");
     }
 
 

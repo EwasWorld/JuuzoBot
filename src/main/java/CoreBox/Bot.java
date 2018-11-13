@@ -3,6 +3,7 @@ package CoreBox;
 
 import BlackJackBox.GameInstance;
 import CommandsBox.BlackJackCommand;
+import CommandsBox.CharacterCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.IncorrectPermissionsException;
@@ -120,7 +121,12 @@ public class Bot {
         public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
             super.onGuildMessageReactionAdd(event);
             if (!event.getMember().getUser().isBot()) {
-                BlackJackCommand.executeFromAddReaction(event.getMessageId(), event.getReaction(), event.getMember());
+                if (BlackJackCommand.executeFromAddReaction(event.getMessageIdLong(), event.getReaction(), event.getMember())) {
+                    return;
+                }
+                else if (CharacterCommand.executeFromAddReaction(event.getMessageIdLong(), event.getReaction(), event.getMember())) {
+                    return;
+                }
             }
         }
 
@@ -129,7 +135,9 @@ public class Bot {
         public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
             super.onGuildMessageReactionRemove(event);
             if (!event.getMember().getUser().isBot()) {
-                BlackJackCommand.executeFromRemoveReaction(event.getMessageId(), event.getReactionEmote().getName(), event.getMember());
+                if (BlackJackCommand.executeFromRemoveReaction(event.getMessageIdLong(), event.getReactionEmote().getName(), event.getMember())) {
+                    return;
+                }
             }
         }
 
@@ -151,6 +159,9 @@ public class Bot {
             if (event.getAuthor().isBot()) {
                 if (args.startsWith(GameInstance.blackjackGameMessageTitleString)) {
                     BlackJackCommand.setCurrentGamesChannelMessage(event.getMessage());
+                }
+                else {
+                    CharacterCommand.addMessage(event.getMessage());
                 }
                 return;
             }

@@ -49,8 +49,7 @@ public class Background {
 
 
 
-    private static final String fileLocation1 = "CharacterGeneration/Backgrounds.json";
-    private static final String fileLocation = "Backgrounds.json";
+    private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Backgrounds.json";
     private static Map<String, Background> backgrounds;
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;
@@ -147,7 +146,7 @@ public class Background {
         try {
             if (!file.exists()) {
                 file.createNewFile();
-                InputStream inputStream = Background.class.getResourceAsStream(fileLocation1);
+                InputStream inputStream = Background.class.getResourceAsStream(fileLocation);
                 Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             }
