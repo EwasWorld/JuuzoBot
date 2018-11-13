@@ -10,13 +10,13 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionRemoveEvent;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 
@@ -59,9 +59,9 @@ public class Bot {
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
         try {
-            final JDA jda = builder.buildBlocking();
+            final JDA jda = builder.build();
             jda.addEventListener(new CommandListener());
-        } catch (LoginException | InterruptedException | RateLimitedException e) {
+        } catch (LoginException e) {
             System.err.println(e);
         }
     }
@@ -119,8 +119,8 @@ public class Bot {
         @Override
         public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
             super.onGuildMessageReactionAdd(event);
-            if (!event.getMember().getUser().isBot() && BlackJackCommand.isGameMessage(event.getMessageId())) {
-                BlackJackCommand.executeFromAddReaction(event.getReactionEmote().getName(), event.getMember());
+            if (!event.getMember().getUser().isBot()) {
+                BlackJackCommand.executeFromAddReaction(event.getMessageId(), event.getReaction(), event.getMember());
             }
         }
 
@@ -128,8 +128,8 @@ public class Bot {
         @Override
         public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
             super.onGuildMessageReactionRemove(event);
-            if (!event.getMember().getUser().isBot() && BlackJackCommand.isGameMessage(event.getMessageId())) {
-                BlackJackCommand.executeFromRemoveReaction(event.getReactionEmote().getName(), event.getMember());
+            if (!event.getMember().getUser().isBot()) {
+                BlackJackCommand.executeFromRemoveReaction(event.getMessageId(), event.getReactionEmote().getName(), event.getMember());
             }
         }
 
@@ -141,7 +141,11 @@ public class Bot {
         @Override
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
-            String args = event.getMessage().getContent();
+            if (event.isFromType(ChannelType.PRIVATE)) {
+                // TODO: here are PMs
+            }
+
+            String args = event.getMessage().getContentRaw();
             // Logs the message in case it will be quoted later
             Quotes.addMessage(event.getAuthor().getName(), args);
             if (event.getAuthor().isBot()) {
@@ -169,7 +173,7 @@ public class Bot {
             } catch (Exception e) {
                 // Log unexpected errors
                 e.printStackTrace();
-                Logger.logEvent(event.getMessage().getContent(), e);
+                Logger.logEvent(event.getMessage().getContentRaw(), e);
             }
         }
 

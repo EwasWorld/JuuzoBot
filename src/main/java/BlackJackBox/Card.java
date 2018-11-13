@@ -9,11 +9,13 @@ import CommandsBox.Emoji;
  */
 public class Card {
     public enum Suit {
-        HEARTS(Emoji.HEARTS), CLUBS(Emoji.CLUBS), DIAMONDS(Emoji.DIAMONDS), SPADES(Emoji.SPADES);
+        HEARTS(SuitColour.RED, Emoji.HEARTS), CLUBS(SuitColour.BLACK, Emoji.CLUBS), DIAMONDS(SuitColour.RED, Emoji.DIAMONDS), SPADES(SuitColour.BLACK, Emoji.SPADES);
+        private SuitColour suitColour;
         private Emoji emoji;
 
 
-        Suit(Emoji emoji) {
+        Suit(SuitColour suitColour, Emoji emoji) {
+            this.suitColour = suitColour;
             this.emoji = emoji;
         }
 
@@ -21,7 +23,14 @@ public class Card {
         public String getEmojiAlias() {
             return emoji.getDiscordAlias();
         }
+
+
+        public SuitColour getSuitColour() {
+            return suitColour;
+        }
     }
+
+    public enum SuitColour {RED, BLACK}
 
 
 

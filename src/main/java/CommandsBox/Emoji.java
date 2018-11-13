@@ -13,9 +13,11 @@ import java.util.Optional;
  * created: 1/10/18
  */
 public enum Emoji {
-    POOP("poop", "\uD83D\uDCA9"), OKHAND("ok_hand", "\uD83D\uDC4C"), PUNCH("punch", "\uD83D\uDC4A"),
-    RAISEDHAND("raised_hand", "✋"), METAL("metal", "heavy_metal", "\uD83E\uDD18"), WAVE("wave", "\uD83D\uDC4B"),
-    X("x", "❌"), HEARTS("hearts", "♥"), CLUBS("clubs", "♣"), DIAMONDS("diamonds", "♦"), SPADES("spades", "♠");
+    POOP("poop", "\uD83D\uDCA9"), OK_HAND("ok_hand", "\uD83D\uDC4C"), PUNCH("punch", "\uD83D\uDC4A"),
+    RAISED_HAND("raised_hand", "✋"), METAL("metal", "heavy_metal", "\uD83E\uDD18"), WAVE("wave", "\uD83D\uDC4B"),
+    X("x", "❌"), HEARTS("hearts", "♥"), CLUBS("clubs", "♣"), DIAMONDS("diamonds", "♦"), SPADES("spades", "♠"),
+    MONEYBAG("moneybag", "💰"), GEM("gem", "\uD83D\uDC8E"), SCALES("scales", "⚖"),
+    VULCAN("vulcan", "vulcan_salute", "\uD83D\uDD96"), ONE_FINGER("point_up", "☝");
 
     private static Map<String, Emoji> parseMap = setUpParseMap();
     private String discordAlias;
@@ -30,13 +32,11 @@ public enum Emoji {
         if (emojiManagerAliasAlt != null) {
             emojiManagerAliasAlt = emojiManagerAliasAlt.replaceAll(aliasSurround, "");
         }
-        this.unicodeFullString = unicodeFullString;
-        for (String alias : new String[]{discordAlias, emojiManagerAliasAlt}) {
-            try {
-                unicode2char = EmojiManager.getForAlias(alias).getUnicode();
-            } catch (Exception ignored) {
-            }
+        else {
+            emojiManagerAliasAlt = this.discordAlias;
         }
+        this.unicodeFullString = unicodeFullString;
+        unicode2char = EmojiManager.getForAlias(emojiManagerAliasAlt).getUnicode();
         if (unicode2char == null) {
             throw new IllegalArgumentException("Could not find alias " + discordAlias + " in EmojiManager");
         }

@@ -15,6 +15,7 @@ import java.util.Map;
  * refactored: 1/10/18
  */
 class Table {
+    private static final int numberOfDecks = 8;
     // Players are modelled as integers because they can have multiple times turns (when a hand is split)
     // Integers correspond to the indexes in playerObjects
     private Map<Integer, Hand> players = new HashMap<>();
@@ -25,8 +26,9 @@ class Table {
 
     /**
      * Generates the decks to play with, gives the dealer and each player two cards
+     * Calculates side bet winnings
      */
-    Table(List<Member> playerObjects, int numberOfDecks) {
+    Table(List<Member> playerObjects, Bets bets) {
         deck = new Deck(numberOfDecks);
         this.playerObjects = new ArrayList<>(playerObjects);
 
@@ -40,14 +42,18 @@ class Table {
 
         /*
          * Draws 2 cards for the dealer and each of the players
+         * Done like this to be realistic rather than neat with one for i loop outside
          */
-        for (int j = 0; j < 2; j++) {
-            dealer.add(deck.drawCard());
-
-            for (int player : players.keySet()) {
+        for (int player : players.keySet()) {
+            for (int i = 0; i < 2; i++) {
                 players.get(player).add(deck.drawCard());
             }
         }
+        for (int i = 0; i < 2; i++) {
+            dealer.add(deck.drawCard());
+        }
+
+        bets.calculateSideBets(players, dealer.get(0));
     }
 
 
@@ -72,12 +78,11 @@ class Table {
 
 
     /**
-     * Players the dealer then checks whether each player won/lost/tied/bust
-     * @param playerList players in the game
-     * @return dealer's final hand and player's results
+     * Players the dealer then checks whether each player won/lost/tied/bust and clears the table
+     * @return Lists containing the indexes of the players sorted into blackjacks, winners, ties, and losers/busts in this order
      * TODO Implement add an overall winner(s) for who got the highest without going bust
      */
-    String finishRound(List<Member> playerList) {
+    List<Integer>[] finishRound() {
         /*
          * Dealer draws cards until their total is at 17 or more (hits on a soft 17), they go bust, or they have 5 cards
          */
@@ -87,71 +92,54 @@ class Table {
         }
 
         /*
-         * Create results string
+         * Check winners and losers
          */
-        final StringBuilder returnString = new StringBuilder(
-                getTableString(dealer.toString()) + GameInstance.dottedLineBreak);
-        final StringBuilder winners = new StringBuilder();
-        final StringBuilder ties = new StringBuilder();
-        final StringBuilder losers = new StringBuilder();
-        final StringBuilder busts = new StringBuilder();
+        final List<Integer> blackjacks = new ArrayList<>();
+        final List<Integer> winners = new ArrayList<>();
+        final List<Integer> ties = new ArrayList<>();
+        final List<Integer> losers = new ArrayList<>();
         final int dealerTotal = dealer.total();
         for (int player : players.keySet()) {
             final Hand hand = players.get(player);
-            final String playerName = GameInstance.getName(playerList.get(player));
             if (hand.isBust()) {
-                busts.append(playerName);
+                losers.add(player);
             }
             else {
                 final int handTotal = hand.total();
-                if (dealer.isBust() || !dealer.is5CardHand() && (handTotal > dealerTotal || hand.is5CardHand())) {
-                    winners.append(playerName);
+                if (!dealer.isBlackjack() && hand.isBlackjack()) {
+                    blackjacks.add(player);
                 }
-                else if (handTotal == dealerTotal) {
-                    ties.append(playerName);
+                else if (dealer.isBust() || (!dealer.is5CardHand() && (handTotal > dealerTotal || hand.is5CardHand()))) {
+                    winners.add(player);
+                }
+                else if ((!dealer.isBlackjack() && handTotal == dealerTotal) || hand.isBlackjack()) {
+                    ties.add(player);
                 }
                 else {
-                    losers.append(playerName);
+                    losers.add(player);
                 }
             }
         }
-        createResultsStringAppendMembers(returnString, winners, "Winners");
-        createResultsStringAppendMembers(returnString, ties, "Ties");
-        createResultsStringAppendMembers(returnString, losers, "Losers");
-        createResultsStringAppendMembers(returnString, busts, "Busts");
-        returnString.append(GameInstance.lineBreak);
 
         /*
          * Clear up
          */
         deck.gatherCards();
-        return returnString.toString();
+        return new List[]{blackjacks, winners, ties, losers};
     }
 
 
-    private String getTableString(String dealerHand) {
-        final String handString = "*%s*: %s\n";
+    private String getTableString(String dealerHand, Bets bets, int turn) {
+        final String handString = "*%s*%s: %s\n";
         final StringBuilder sb = new StringBuilder();
-        sb.append(String.format(handString, "Dealer", dealerHand));
-        // TODO Optimisation add better differentiation for split hands (atm they both show with the player's nickname)
-        for (Integer i : players.keySet()) {
-            sb.append(String.format(handString, GameInstance.getName(playerObjects.get(i)), getHand(i)));
+        sb.append(String.format(handString, "Dealer", "", dealerHand));
+        for (Integer player : players.keySet()) {
+            if (turn == player) {
+                sb.append("* ");
+            }
+            sb.append(String.format(handString, GameInstance.getName(playerObjects.get(player)), bets.getBet(player), getHand(player)));
         }
         return sb.toString();
-    }
-
-
-    /**
-     * Append the title and the members list to the string builder in the form "listTitle: membersList\n"
-     * @param sb the string builder to append the members list and list title
-     */
-    private void createResultsStringAppendMembers(StringBuilder sb, StringBuilder membersList, String listTitle) {
-        if (membersList.length() > 0) {
-            sb.append(listTitle);
-            sb.append(": ");
-            sb.append(membersList);
-            sb.append("\n");
-        }
     }
 
 
@@ -165,7 +153,7 @@ class Table {
      * adds the new hand to the end of the turns list (also adds the corresponding Member to playerObjects)
      * TODO Implement maximum number of splits: 3 (for a total of 4 hands)
      */
-    public void split(int player) {
+    void split(int player) {
         final Hand hand = players.get(player);
         final Hand newHand = hand.split();
         hand.add(deck.drawCard());
@@ -175,7 +163,12 @@ class Table {
     }
 
 
-    public String toString() {
-        return getTableString(dealer.oneFaceUpOneFaceDownString());
+    String getEndGameString(Bets bets) {
+        return getTableString(dealer.toString(), bets, -1);
+    }
+
+
+    String toStringDealerOneUpOneDown(Bets bets, int turn) {
+        return getTableString(dealer.oneFaceUpOneFaceDownString(), bets, turn);
     }
 }

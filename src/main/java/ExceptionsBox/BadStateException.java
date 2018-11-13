@@ -2,6 +2,7 @@ package ExceptionsBox;
 
 public class BadStateException extends IllegalStateException {
     public BadStateException() {
+        super();
     }
 
 

@@ -40,13 +40,7 @@ public class GetLogCommand extends AbstractCommand {
         checkPermission(event.getMember());
 
         final Message message = new MessageBuilder().append("Log").build();
-        try {
-            // TODO Implement PM this rather than dumping it in the channel
-            event.getChannel().sendFile(Logger.getLoggedEventsToSend(), message).queue();
-        } catch (IOException e) {
-            sendMessage(event.getChannel(), "Bzzt bzzt broken command");
-            e.printStackTrace();
-        }
+        event.getChannel().sendFile(Logger.getLoggedEventsToSend(), message).queue();
     }
 
 

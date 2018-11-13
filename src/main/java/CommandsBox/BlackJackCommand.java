@@ -4,8 +4,10 @@ import BlackJackBox.GameInstance;
 import CoreBox.AbstractCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
+import ExceptionsBox.ContactEwaException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageReaction;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.HashMap;
@@ -18,91 +20,32 @@ import java.util.Optional;
  * refactored: 1/10/18
  */
 public class BlackJackCommand extends AbstractCommand {
-    private static boolean gameRunning = false;
     private static GameInstance gameInstance = null;
     private static Message currentGamesChannelMessage;
 
 
     public static void setGameInstanceToNull() {
         currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
+        currentGamesChannelMessage.clearReactions().queue();
         gameInstance = null;
     }
 
 
     /**
      * Executes the command associated with the emoji. Does nothing if there is no command associated with the emoji
-     * @param emoji  an emoji in the form of a one/two char array
+     *
+     * @param emoji an emoji in the form of a one/two char array
      * @param player the one who invoked the command
      */
-    public static void executeFromRemoveReaction(String emoji, Member player) {
-        Optional<BlackJackEmojiArgument> argumentOptional = emojiToPlayArgument(emoji);
+    public static void executeFromRemoveReaction(String messageID, String emoji, Member player) {
+        if (gameInstance == null || currentGamesChannelMessage == null || !messageID.equals(
+                currentGamesChannelMessage.getId())) {
+            return;
+        }
+        final Optional<BlackJackEmojiArgument> argumentOptional = emojiToPlayArgument(emoji);
         if (argumentOptional.isPresent()) {
-            BlackJackEmojiArgument argument = argumentOptional.get();
-            if (argument == BlackJackEmojiArgument.JOIN) {
-                gameInstance.leave(player);
-            }
-        }
-        currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
-    }
-
-
-    /**
-     * Executes the command associated with the emoji. Does nothing if there is no command associated with the emoji
-     * @param emoji  an emoji in the form of a one/two char array
-     * @param player the one who invoked the command
-     */
-    public static void executeFromAddReaction(String emoji, Member player) {
-        Optional<BlackJackEmojiArgument> argument = emojiToPlayArgument(emoji);
-        argument.ifPresent(blackJackPlayArgument -> argumentSwitcher(blackJackPlayArgument, player));
-    }
-
-
-    /**
-     * Carries out the appropriate action for the command given
-     * @param player the one who invoked the command
-     */
-    private static void argumentSwitcher(BlackJackEmojiArgument argument, Member player) {
-        if (argument == BlackJackEmojiArgument.START && (gameRunning || gameInstance != null)) {
-            gameInstance.startGame();
-            gameRunning = true;
-        }
-        else {
-            if (gameRunning) {
-                switch (argument) {
-                    case JOIN:
-                        gameInstance.join(player);
-                        currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
-                        return;
-                    case HIT:
-                        gameInstance.hitMe(player);
-                        break;
-                    case STAND:
-                        gameInstance.stand(player);
-                        break;
-                    case SPLIT: // banana
-                        gameInstance.split(player);
-                        break;
-                    case LEAVE:
-                        gameInstance.leave(player);
-                        break;
-                    case END:
-                        if (gameInstance.isGameOwner(player) || AbstractCommand.getRank(player) == Rank.ADMIN) {
-                            endGame();
-                        }
-                        else {
-                            gameInstance.setMostRecentGameErrorInvalidPermissions();
-                            currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
-                        }
-                        return;
-                }
-            }
-            else {
-                throw new BadStateException("You need to create a game first");
-            }
-        }
-        if (gameInstance != null) {
+            argumentOptional.get().removeAction(player);
             currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
-            resetReactions();
         }
     }
 
@@ -111,8 +54,8 @@ public class BlackJackCommand extends AbstractCommand {
      * @param emoji an emoji in the form of a one/two char array
      * @return the argument represented by the given emoji
      */
-    public static Optional<BlackJackEmojiArgument> emojiToPlayArgument(String emoji) {
-        Optional<Emoji> emojiOptional = Emoji.getFromString(emoji);
+    private static Optional<BlackJackEmojiArgument> emojiToPlayArgument(String emoji) {
+        final Optional<Emoji> emojiOptional = Emoji.getFromString(emoji);
         if (emojiOptional.isPresent()) {
             return BlackJackEmojiArgument.getFromEmoji(emojiOptional.get());
         }
@@ -120,9 +63,56 @@ public class BlackJackCommand extends AbstractCommand {
     }
 
 
-    public static void setCurrentGamesChannelMessage(Message message) {
-        currentGamesChannelMessage = message;
-        resetReactions();
+    /**
+     * Executes the command associated with the emoji. Does nothing if there is no command associated with the emoji
+     *
+     * @param messageReaction an emoji in the form of a one/two char array
+     * @param player the one who invoked the command
+     */
+    public static void executeFromAddReaction(String messageID, MessageReaction messageReaction, Member player) {
+        if (gameInstance == null || currentGamesChannelMessage == null || !messageID.equals(
+                currentGamesChannelMessage.getId())) {
+            return;
+        }
+        final Optional<BlackJackEmojiArgument> argument = emojiToPlayArgument(
+                messageReaction.getReactionEmote().getName());
+        argument.ifPresent(blackJackPlayArgument -> {
+            argumentSwitcher(blackJackPlayArgument, player);
+            if (blackJackPlayArgument.removeReaction) {
+                messageReaction.removeReaction(player.getUser()).queue();
+            }
+        });
+    }
+
+
+    /**
+     * Carries out the appropriate action for the command given
+     *
+     * @param player the one who invoked the command
+     */
+    private static void argumentSwitcher(BlackJackEmojiArgument argument, Member player) {
+        switch (argument) {
+            case END:
+                if (gameInstance == null) {
+                    throw new BadStateException("You need to create a game first");
+                }
+                else if (!gameInstance.isGameOwner(player) && AbstractCommand.getRank(player) != Rank.ADMIN) {
+                    gameInstance.setMostRecentGameErrorInvalidPermissions();
+                }
+                break;
+            default:
+                if (gameInstance == null) {
+                    throw new BadStateException("You need to create a game first");
+                }
+                break;
+        }
+        argument.addAction(player);
+        if (gameInstance != null) {
+            currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
+            if (argument.resetAllReactions) {
+                resetReactions();
+            }
+        }
     }
 
 
@@ -144,18 +134,16 @@ public class BlackJackCommand extends AbstractCommand {
                     return;
                 }
                 for (BlackJackEmojiArgument argument : arguments) {
-                    argument.getEmoji().addAsReaction(currentGamesChannelMessage);
+                    argument.emoji.addAsReaction(currentGamesChannelMessage);
                 }
             }
         }
     }
 
 
-    public static boolean isGameMessage(String messageID) {
-        if (currentGamesChannelMessage == null) {
-            return false;
-        }
-        return messageID.equals(currentGamesChannelMessage.getId());
+    public static void setCurrentGamesChannelMessage(Message message) {
+        currentGamesChannelMessage = message;
+        resetReactions();
     }
 
 
@@ -177,53 +165,49 @@ public class BlackJackCommand extends AbstractCommand {
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getCommand() {
         return "blackjack";
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "create a game, have whoever you want join, then start it";
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getArguments() {
-        return "{new/end/reprint}";
+        return "{new/bet/end/reprint}";
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void execute(String args, MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
-        final BlackJackArgument argument = getArgument(args);
-        switch (argument) {
-            case NEW:
-                if (!gameRunning) {
-                    gameRunning = true;
-                    gameInstance = new GameInstance(event.getMember());
-                }
-                else {
-                    throw new BadStateException("Game already created, try joining it");
-                }
-                break;
-            case END:
-                endGame();
-                return;
-            case REPRINT:
-                voidGameMessage("GAME REPRINTED");
-                break;
-        }
-        sendMessage(event.getTextChannel(), gameInstance.toString());
+        getArgument(args.split(" ")[0]).execute(args, event);
     }
 
 
@@ -234,7 +218,7 @@ public class BlackJackCommand extends AbstractCommand {
      */
     private BlackJackArgument getArgument(String args) {
         try {
-            return BlackJackArgument.valueOf(args.toUpperCase().replaceAll(" ", ""));
+            return BlackJackArgument.valueOf(args.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new BadUserInputException("I don't understand that argument. Use one of " + getArguments());
         }
@@ -242,28 +226,26 @@ public class BlackJackCommand extends AbstractCommand {
 
 
     private static void endGame() {
-        setGameRunningFalse();
         voidGameMessage("FORCEFULLY ENDED");
+        gameInstance = null;
     }
 
 
     /**
      * Cross out the game message and remove reactions from it so that it can no longer be played
+     *
      * @param message explanation to be prepended onto the game string
      */
     private static void voidGameMessage(String message) {
-        currentGamesChannelMessage.editMessage(message + ": ~~" + currentGamesChannelMessage.getRawContent() + "~~")
+        currentGamesChannelMessage.editMessage(message + ": ~~" + currentGamesChannelMessage.getContentRaw() + "~~")
                 .queue();
-        currentGamesChannelMessage.clearReactions().complete();
+        currentGamesChannelMessage.clearReactions().queue();
     }
 
 
-    public static void setGameRunningFalse() {
-        gameRunning = false;
-        currentGamesChannelMessage.clearReactions().complete();
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
@@ -273,30 +255,339 @@ public class BlackJackCommand extends AbstractCommand {
     /**
      * Arguments that are triggered from the blackjack command args
      */
-    private enum BlackJackArgument {NEW, END, ENDGAME, REPRINT}
+    private enum BlackJackArgument implements StringArgAction {
+        NEW {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(String args, MessageReceivedEvent event) {
+                if (gameInstance == null) {
+                    gameInstance = new GameInstance(event.getMember());
+                    sendMessage(event.getTextChannel(), gameInstance.toString());
+                }
+                else {
+                    throw new BadStateException(
+                            "Game already created, try joining it (if you can't find it try !blackjack reprint");
+                }
+            }
+        },
+        END {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(String args, MessageReceivedEvent event) {
+                if (gameInstance != null) {
+                    endGame();
+                }
+                else {
+                    throw new BadStateException("There doesn't seem to be a game running, try making a new one");
+                }
+            }
+        },
+        REPRINT {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(String args, MessageReceivedEvent event) {
+                if (gameInstance != null) {
+                    voidGameMessage("GAME REPRINTED");
+                    sendMessage(event.getTextChannel(), gameInstance.toString());
+                }
+                else {
+                    throw new BadStateException("There doesn't seem to be a game running, try making a new one");
+                }
+            }
+        },
+        BET {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(String args, MessageReceivedEvent event) {
+                if (gameInstance == null) {
+                    throw new BadStateException("There must be a game running");
+                }
+                else if (gameInstance.getGameState() != GameInstance.GameState.LOBBY) {
+                    throw new BadStateException("The game can't have started!");
+                }
+
+                // Remove leading "bet "
+                args = args.substring(4);
+
+                if (args.equalsIgnoreCase("clear") || args.equalsIgnoreCase("c")) {
+                    gameInstance.clearBet(event.getMember());
+                }
+                else {
+                    final int numberOfBets = 3;
+                    String[] splitArgs = args.split(" ");
+                    if (splitArgs.length != numberOfBets) {
+                        splitArgs = args.split("/");
+                    }
+                    if (splitArgs.length != numberOfBets) {
+                        throw new BadUserInputException(
+                                "Bets need to be in the form '!blackjack bet 0 0 0' in the order main, perfect pair, "
+                                        + "21+3");
+                    }
+
+                    int[] bets = new int[numberOfBets];
+                    for (int i = 0; i < numberOfBets; i++) {
+                        try {
+                            bets[i] = Integer.parseInt(splitArgs[i]);
+                        } catch (NumberFormatException e) {
+                            throw new BadUserInputException("Bets must be just numbers!");
+                        }
+                    }
+
+                    gameInstance.placeBet(event.getMember(), bets[0], bets[1], bets[2]);
+                }
+
+                currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
+                event.getMessage().delete().queue();
+            }
+        },
+        KILL {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(String args, MessageReceivedEvent event) {
+                if (getRank(event.getMember()).hasPermission(Rank.ADMIN)) {
+                    gameInstance = null;
+                }
+            }
+        }
+    }
 
 
 
     /**
      * Arguments that are triggered from emojis
      */
-    private enum BlackJackEmojiArgument {
-        JOIN("join game", Emoji.POOP), START("start game", Emoji.OKHAND), HIT("hit", Emoji.PUNCH),
-        STAND("stand", Emoji.RAISEDHAND), SPLIT("split", Emoji.METAL), LEAVE("leave game", Emoji.WAVE),
-        END("end game", Emoji.X);
+    private enum BlackJackEmojiArgument implements EmojiReactionAction {
+        JOIN("join game", Emoji.POOP, false) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.join(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+                if (this.removeReaction) {
+                    throw new ContactEwaException("Bad BlackJackArgument declaration");
+                }
+                gameInstance.leave(player);
+            }
+        },
+        START("start game", Emoji.OK_HAND, false, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                if (gameInstance != null) {
+                    gameInstance.startGame();
+                }
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        HIT("hit", Emoji.PUNCH, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.hitMe(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        STAND("stand", Emoji.RAISED_HAND, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.stand(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        SPLIT("split", Emoji.METAL, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.split(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        LEAVE("leave game", Emoji.WAVE, false) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.leave(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        END("end game", Emoji.X, false) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                endGame();
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        MAIN_BET("default main bet", Emoji.MONEYBAG, false) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.placeDefaultMainBet(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+                if (this.removeReaction) {
+                    throw new ContactEwaException("Bad BlackJackArgument declaration");
+                }
+                gameInstance.removeDefaultMainBet(player);
+            }
+        },
+        SIDE_BET("default side bet", Emoji.GEM, false) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.placeDefaultSideBets(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+                if (this.removeReaction) {
+                    throw new ContactEwaException("Bad BlackJackArgument declaration");
+                }
+                gameInstance.removeDefaultSideBets(player);
+            }
+        },
+        BET_SPLIT("split with a bet", Emoji.VULCAN, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.betSplit(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        },
+        DOUBLE_DOWN("double down", Emoji.ONE_FINGER, true) {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void addAction(Member player) {
+                gameInstance.doubleDown(player);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void removeAction(Member player) {
+            }
+        };
+
         private static Map<Emoji, BlackJackEmojiArgument> emojiMappings = setEmojiMappings();
         private String description;
         private Emoji emoji;
+        protected boolean removeReaction;
+        private boolean resetAllReactions = false;
 
 
-        BlackJackEmojiArgument(String description, Emoji emoji) {
+        BlackJackEmojiArgument(String description, Emoji emoji, boolean removeReaction) {
             this.description = description;
             this.emoji = emoji;
+            this.removeReaction = removeReaction;
         }
 
 
-        public Emoji getEmoji() {
-            return emoji;
+        BlackJackEmojiArgument(String description, Emoji emoji, boolean removeReaction, boolean resetAllReactions) {
+            this.description = description;
+            this.emoji = emoji;
+            this.removeReaction = removeReaction;
+            this.resetAllReactions = resetAllReactions;
         }
 
 
@@ -343,12 +634,18 @@ public class BlackJackCommand extends AbstractCommand {
 
 
         static BlackJackEmojiArgument[] getLobbyCommands() {
-            return new BlackJackEmojiArgument[]{JOIN, START};
+            return new BlackJackEmojiArgument[]{JOIN, START, MAIN_BET, SIDE_BET};
         }
 
 
         static BlackJackEmojiArgument[] getGameCommands() {
-            return new BlackJackEmojiArgument[]{HIT, STAND, SPLIT, LEAVE, END};
+            return new BlackJackEmojiArgument[]{HIT, STAND, DOUBLE_DOWN, SPLIT, BET_SPLIT, LEAVE, END};
         }
+    }
+
+
+
+    private interface StringArgAction {
+        void execute(String args, MessageReceivedEvent event);
     }
 }

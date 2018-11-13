@@ -17,7 +17,7 @@ public class Hand {
     private boolean canHit = true;
 
 
-    public boolean canHit() {
+    boolean canHit() {
         return canHit;
     }
 
@@ -37,6 +37,16 @@ public class Hand {
     }
 
 
+    boolean isBlackjack() {
+        if (hand.size() != 2) {
+            return false;
+        }
+        int card1 = hand.get(0).getValue();
+        int card2 = hand.get(1).getValue();
+        return (card1 == 1 && card2 >= 10) || (card2 == 1 && card1 >= 10);
+    }
+
+
     /**
      * Blanks out the first cards and displays the second as a string
      */
@@ -45,7 +55,12 @@ public class Hand {
             throw new IllegalStateException("Can't do one up one down unless there're exactly 2 cards");
         }
 
-        return "--, " + hand.get(1);
+        return hand.get(0) + ", --";
+    }
+
+
+    Card get(int i) {
+        return hand.get(i);
     }
 
 

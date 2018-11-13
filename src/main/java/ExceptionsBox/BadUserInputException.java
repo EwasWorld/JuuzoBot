@@ -2,6 +2,7 @@ package ExceptionsBox;
 
 public class BadUserInputException extends IllegalArgumentException {
     public BadUserInputException() {
+        super();
     }
 
 
