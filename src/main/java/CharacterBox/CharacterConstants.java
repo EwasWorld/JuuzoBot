@@ -17,12 +17,27 @@ public class CharacterConstants {
     public enum Language {
         COMMON, DWARVISH, ELVISH, GIANT, GNOMISH, GOBLIN,
         HALFLING, ORC, ABYSSAL, CELESTIAL, DRACONIC, DEEPSPEECH,
-        INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD, WILDCARD2
+        INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD, WILDCARD2;
+
+
+        @Override
+        public String toString() {
+            String enumStr = super.toString();
+            return enumStr.charAt(0) + enumStr.substring(1).toLowerCase();
+        }
     }
 
 
 
-    public enum AbilityEnum {STRENGTH, DEXTERITY, CONSTITUTION, INTELLIGENCE, WISDOM, CHARISMA}
+    public enum AbilityEnum {
+        STRENGTH, DEXTERITY, CONSTITUTION, INTELLIGENCE, WISDOM, CHARISMA;
+
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
+    }
 
 
 
@@ -63,6 +78,12 @@ public class CharacterConstants {
 
         public AbilityEnum getMainAbility() {
             return mainAbility;
+        }
+
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
         }
     }
 

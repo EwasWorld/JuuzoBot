@@ -3,7 +3,6 @@ import junit.framework.TestCase;
 
 
 
-// TODO
 public class SessionTimesTests extends TestCase {
     @Override
     public void tearDown() throws Exception {

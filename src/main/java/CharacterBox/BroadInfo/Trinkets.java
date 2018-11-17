@@ -39,18 +39,14 @@ public class Trinkets {
 
 
     public static String getTrinketLowerCaseStart() {
-        try {
-            initialiseTrinkets();
-            String trinket = trinkets.get(Die.quickRoll(trinkets.size()) - 1);
-            // Change the first letter to lower case
-            return String.valueOf(trinket.charAt(0)).toLowerCase() + trinket.substring(1);
-        } catch (FileNotFoundException e) {
-            throw new BadStateException("Trinkets seem to be broken right now");
-        }
+        initialiseTrinkets();
+        String trinket = trinkets.get(Die.quickRoll(trinkets.size()) - 1);
+        // Change the first letter to lower case
+        return String.valueOf(trinket.charAt(0)).toLowerCase() + trinket.substring(1);
     }
 
 
-    private static void initialiseTrinkets() throws FileNotFoundException {
+    private static void initialiseTrinkets() {
         if (trinkets == null) {
             try {
                 final GsonBuilder gsonBuilder = new GsonBuilder();

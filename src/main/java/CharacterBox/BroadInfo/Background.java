@@ -2,6 +2,7 @@ package CharacterBox.BroadInfo;
 
 import CharacterBox.Alignment;
 import CharacterBox.CharacterConstants;
+import CharacterBox.UserBackground;
 import CoreBox.Bot;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
@@ -23,11 +24,23 @@ import static java.nio.file.Files.readAllBytes;
 public class Background {
     public enum BackgroundEnum {
         ACOLYTE, CHARLATAN, CRIMINAL, ENTERTAINER, FOLKHERO, GUILDARTISAN,
-        HERMIT, NOBLE, OUTLANDER, SAGE, SAILOR, SOLDIER, URCHIN
+        HERMIT, NOBLE, OUTLANDER, SAGE, SAILOR, SOLDIER, URCHIN;
+
+
+        public UserBackground generateRandomBackground(Alignment alignment) {
+            final Background bg = Background.getBackgroundInfo(this);
+            return new UserBackground(this, getRandomInt(bg.possibilities), getRandomInt(bg.traits), bg.getRandomIdealInt(alignment), getRandomInt(bg.bonds), getRandomInt(bg.flaws));
+        }
+
+
+        private int getRandomInt(Object[] objects) {
+            return new Random().nextInt(objects.length);
+        }
     }
 
 
 
+    // TODO Implement Instruments feature
     public enum InstrumentEnum {
         BAGPIPES("Bagpipes"), DRUM("Drum"), DULCIMER("Dulcimer"), FLUTE("Flute"),
         LUTE("Lute"), LYRE("Lyre"), HORN("Horn"), PANFLUTE("Pan Flute"),
@@ -50,11 +63,10 @@ public class Background {
 
 
     private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Backgrounds.json";
-    private static Map<String, Background> backgrounds;
+    private static Map<BackgroundEnum, Background> backgrounds;
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;
     private Set<CharacterConstants.Language> languages;
-    // TODO Implement Tools
     private String[] traits;
     private Ideal[] ideals;
     private String[] bonds;
@@ -70,7 +82,7 @@ public class Background {
             final JsonObject object = (JsonObject) element;
 
             backgrounds.put(
-                    object.get("name").getAsString().toUpperCase(),
+                    BackgroundEnum.valueOf(object.get("name").getAsString().toUpperCase()),
                     new Background(
                             CharacterConstants.getStringArrayFromJsonArray(object.getAsJsonArray("possibilities")),
                             CharacterConstants.createSkillProficiencies(object.getAsJsonArray("proficiencies")),
@@ -82,6 +94,22 @@ public class Background {
                     )
             );
         }
+    }
+
+
+    public String getBackgroundDescription(UserBackground background) {
+        Ideal ideal = ideals[background.getIdeal()];
+        String flaw = flaws[background.getFlaw()];
+        if (flaw.charAt(0) != "I".charAt(0)) {
+            flaw = String.valueOf(flaw.charAt(0)).toLowerCase() + flaw.substring(1);
+        }
+
+        String string = "";
+        string += String.format("%s %s", possibilities[background.getPossibility()], traits[background.getTrait()]);
+        string += String.format(" I'm driven by %s. %s", ideal.name.toLowerCase(), ideal.description);
+        string += String.format(" %s However, %s", bonds[background.getBond()], flaw);
+
+        return string;
     }
 
 
@@ -113,11 +141,10 @@ public class Background {
     }
 
 
-    public static Background getBackgroundInfo(String background) {
+    public static Background getBackgroundInfo(BackgroundEnum background) {
         if (backgrounds == null) {
             getBackgroundsFromFile();
         }
-        background = background.toUpperCase();
         if (backgrounds.containsKey(background)) {
             return backgrounds.get(background);
         }
@@ -167,57 +194,17 @@ public class Background {
     }
 
 
-    public static String getBackgroundsList() {
-        if (backgrounds == null) {
-            getBackgroundsFromFile();
-        }
-
-        String backgroundsList = "Available backgrounds: ";
-        final String[] backgroundsArr = backgrounds.keySet().toArray(new String[backgrounds.size()]);
-
-        for (int i = 0; i < backgroundsArr.length; i++) {
-            backgroundsList += backgroundsArr[i];
-
-            if (i < backgroundsArr.length - 1) {
-                backgroundsList += ", ";
-            }
-        }
-
-        return backgroundsList;
-    }
-
-
-    public String getRandomPossibility() {
-        return possibilities[new Random().nextInt(possibilities.length)];
-    }
-
-
-    public String getRandomTrait() {
-        return traits[new Random().nextInt(traits.length)];
-    }
-
-
     /*
      * Returns a random ideal ensuring the the alignment given allows for the ideal
      */
-    public Ideal getRandomIdeal(Alignment alignment) {
-        final List<Ideal> ideals = new ArrayList<>();
-        for (Ideal ideal : this.ideals) {
-            if (ideal.alignment.checkMatches(alignment)) {
-                ideals.add(ideal);
+    public int getRandomIdealInt(Alignment alignment) {
+        final List<Integer> validIdeals = new ArrayList<>();
+        for (int i = 0; i < ideals.length; i++) {
+            if (ideals[i].alignment.checkMatches(alignment)) {
+                validIdeals.add(i);
             }
         }
-        return ideals.get(new Random().nextInt(ideals.size()));
-    }
-
-
-    public String getRandomBond() {
-        return bonds[new Random().nextInt(bonds.length)];
-    }
-
-
-    public String getRandomFlaw() {
-        return flaws[new Random().nextInt(flaws.length)];
+        return validIdeals.get(new Random().nextInt(validIdeals.size()));
     }
 
 

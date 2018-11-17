@@ -1,7 +1,7 @@
 package DatabaseBox;
 
 /**
- * TODO: Refactor, is this even needed. Rather than Map<String, DatabaseFieldArgs> why not just Map<String, SQLType>. Generate and store creation string on databaseTable instantiation?
+ * TODO Refactor, is this even needed? Rather than Map<String, DatabaseFieldArgs> why not just Map<String, SQLType>. Generate and store creation string on databaseTable instantiation?
  * created: 27/09/18
  */
 public class DatabaseFieldArgs {

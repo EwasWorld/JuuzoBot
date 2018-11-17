@@ -6,46 +6,71 @@ import java.io.Serializable;
 
 
 
-public class UserBackground implements Serializable {
-    private String name;
-    private String possibility;
-    private String trait;
-    private String idealName;
-    private String idealDescription;
-    private String bond;
-    private String flaw;
+public class UserBackground {
+    private Background.BackgroundEnum background;
+    private int possibility;
+    private int trait;
+    private int ideal;
+    private int bond;
+    private int flaw;
 
 
-    public UserBackground(String name, Alignment alignment) {
-        this.name = name;
-        final Background background = Background.getBackgroundInfo(name);
+    public UserBackground(Background.BackgroundEnum background, int possibility, int trait, int ideal, int bond, int flaw) {
+        this.background = background;
+        this.possibility = possibility;
+        this.trait = trait;
+        this.ideal = ideal;
+        this.bond = bond;
+        this.flaw = flaw;
+    }
 
-        possibility = background.getRandomPossibility();
-        trait = background.getRandomTrait();
-        final Background.Ideal ideal = background.getRandomIdeal(alignment);
-        idealName = ideal.getName();
-        idealDescription = ideal.getDescription();
-        bond = background.getRandomBond();
-        flaw = background.getRandomFlaw();
+    public UserBackground(Background.BackgroundEnum background, String specific) {
+        this.background = background;
+        final String[] specifics = specific.split(" ");
+        possibility = Integer.parseInt(specifics[0]);
+        trait = Integer.parseInt(specifics[1]);
+        ideal = Integer.parseInt(specifics[2]);
+        bond = Integer.parseInt(specifics[3]);
+        flaw = Integer.parseInt(specifics[4]);
     }
 
 
-    public String getName() {
-        return name;
+    public Background.BackgroundEnum getBackgroundEnumVal() {
+        return background;
+    }
+
+
+    public int getPossibility() {
+        return possibility;
+    }
+
+
+    public int getTrait() {
+        return trait;
+    }
+
+
+    public int getIdeal() {
+        return ideal;
+    }
+
+
+    public int getBond() {
+        return bond;
+    }
+
+
+    public int getFlaw() {
+        return flaw;
     }
 
 
     public String getDescription() {
-        String flaw = this.flaw;
-        if (flaw.charAt(0) != "I".charAt(0)) {
-            flaw = String.valueOf(flaw.charAt(0)).toLowerCase() + flaw.substring(1);
-        }
+        return Background.getBackgroundInfo(background).getBackgroundDescription(this);
+    }
 
-        String string = "";
-        string += String.format("%s %s", possibility, trait);
-        string += String.format(" I'm driven by %s. %s", idealName.toLowerCase(), idealDescription);
-        string += String.format(" %s However, %s", bond, flaw);
 
-        return string;
+    public String getForSpecificsDatabase() {
+        return String.format("%s %s %s %s %s", possibility, trait, ideal, bond, flaw);
     }
 }

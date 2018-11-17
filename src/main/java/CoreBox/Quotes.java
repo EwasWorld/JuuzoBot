@@ -1,6 +1,5 @@
 package CoreBox;
 
-import DatabaseBox.DatabaseFieldArgs;
 import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
@@ -22,32 +21,53 @@ import java.util.Random;
  * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
-    private static DatabaseTable databaseTable = createDatabaseTable();
-    private static final String AUTHOR = "author";
-    private static final String DATE = "date";
-    private static final String MESSAGE = "message";
+    private static DatabaseTable databaseTable = DatabaseTable.createDatabaseTable("Quotes", QuoteDatabaseFields.values());
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
     private String author;
     private ZonedDateTime date;
     private String message;
 
 
+    private enum QuoteDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
+        AUTHOR("author", DatabaseTable.SQLType.TEXT, true), DATE("date", DatabaseTable.SQLType.DATE, true),
+        MESSAGE("message", DatabaseTable.SQLType.TEXT, true);
+
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        QuoteDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+    }
+
+
     public Quotes(String author, ZonedDateTime date, String message) {
         this.author = author;
         this.date = date;
         this.message = message;
-    }
-
-
-    /**
-     * Set up the table in which the quotes will be saved
-     */
-    private static DatabaseTable createDatabaseTable() {
-        Map<String, DatabaseFieldArgs> fields = new HashMap<>();
-        fields.put(AUTHOR, new DatabaseFieldArgs(DatabaseTable.SQLType.TEXT, true));
-        fields.put(DATE, new DatabaseFieldArgs(DatabaseTable.SQLType.DATE, true));
-        fields.put(MESSAGE, new DatabaseFieldArgs(DatabaseTable.SQLType.TEXT, true));
-        return new DatabaseTable("Quotes", fields);
     }
 
 
@@ -66,9 +86,9 @@ public class Quotes implements Serializable {
         Quotes quote = MessageHolder.findQuote(searchMessage);
 
         Map<String, Object> args = new HashMap<>();
-        args.put(AUTHOR, quote.author);
-        args.put(DATE, quote.date);
-        args.put(MESSAGE, quote.message);
+        args.put(QuoteDatabaseFields.AUTHOR.fieldName, quote.author);
+        args.put(QuoteDatabaseFields.DATE.fieldName, quote.date);
+        args.put(QuoteDatabaseFields.MESSAGE.fieldName, quote.message);
         databaseTable.insert(args);
 
         return getQuote(size());
@@ -91,9 +111,9 @@ public class Quotes implements Serializable {
             args.put(databaseTable.getPrimaryKey(), index);
             DatabaseTable.ResultsSetAction resultsSetAction = rs -> {
                 if (rs.next()) {
-                    String author = rs.getString(AUTHOR);
-                    ZonedDateTime date = DatabaseTable.getDatabaseDateFromString(rs.getString(DATE));
-                    String message = rs.getString(MESSAGE);
+                    String author = rs.getString(QuoteDatabaseFields.AUTHOR.fieldName);
+                    ZonedDateTime date = DatabaseTable.getDatabaseDateFromString(rs.getString(QuoteDatabaseFields.DATE.fieldName));
+                    String message = rs.getString(QuoteDatabaseFields.MESSAGE.fieldName);
                     return new Quotes(author, date, message);
                 }
                 return null;
@@ -134,14 +154,13 @@ public class Quotes implements Serializable {
 
 
     /**
-     * TODO Refactor
      * Deletes the specified saved quote from the bot
      */
     public static void removeQuote(int index) {
         getQuote(index);
-        Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = new HashMap<>();
         args.put(databaseTable.getPrimaryKey(), index);
-        databaseTable.delete(args);
+        databaseTable.deleteAND(args);
     }
 
 

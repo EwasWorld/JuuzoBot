@@ -25,10 +25,11 @@ import java.util.*;
  * created 13/11/18 (collated other character commands)
  */
 public class CharacterCommand extends AbstractCommand {
-    // TODO: this better
+    // TODO Optimisation - this better
     private static Map<Long, UserCharacter> partialCharacters = new HashMap<>();
     private static Map<Long, CreationStage> creationStages = new HashMap<>();
-    private static Map<Long, Message> messages = new HashMap<>();
+    private static Map<Long, Message> creationMessages = new HashMap<>();
+    private static Map<Long, Integer> creationMessageReactionLengths = new HashMap<>();
     private static BiMap<Emoji, Integer> emojiArguments = createEmojiArgumentsMap();
 
 
@@ -72,10 +73,10 @@ public class CharacterCommand extends AbstractCommand {
      * @return true if the reaction belonged to this method
      */
     public static boolean executeFromAddReaction(Long messageID, MessageReaction messageReaction, Member player) {
-        if (!messages.containsKey(messageID)) {
+        if (!creationMessages.containsKey(messageID)) {
             return false;
         }
-        final Message message = messages.get(messageID);
+        final Message message = creationMessages.get(messageID);
         if (message.getMentionedMembers().size() != 1 || !message.getMentionedMembers().contains(player)) {
             return false;
         }
@@ -126,20 +127,23 @@ public class CharacterCommand extends AbstractCommand {
             /*
              * Update reactions
              */
-            message.clearReactions().complete();
-            for (int i = 0; i < nextStage.getOptions(character.getRace()).length; i++) {
-                emojiArguments.inverse().get(i).addAsReaction(message);
+            int reactionsLength = nextStage.getOptions(character.getRace()).length;
+            if (reactionsLength > creationMessageReactionLengths.get(messageID)) {
+                for (int i = creationMessageReactionLengths.get(messageID); i < reactionsLength; i++) {
+                    emojiArguments.inverse().get(i).addAsReaction(message);
+                }
             }
+            messageReaction.removeReaction(player.getUser()).complete();
         }
         else {
             /*
              * Complete the creation and clean up
              */
-            character.completeCreation(authorID);
+            character.completeCreation(player.getUser().getId());
             message.editMessage("__**Creation complete**__ :tada: \n" + character.getDescription()).queue();
             partialCharacters.remove(authorID);
             creationStages.remove(authorID);
-            messages.remove(messageID);
+            creationMessages.remove(messageID);
             message.clearReactions().queue();
         }
 
@@ -148,16 +152,18 @@ public class CharacterCommand extends AbstractCommand {
 
 
     /**
-     * Adds the given message to the map of messages under the authorID
+     * Adds the given message to the map of creationMessages under the authorID
      */
     public static void addMessage(Message message) {
         if (message.getContentRaw().startsWith(SecondaryArg.NEW.messageStart)) {
-            messages.put(message.getIdLong(), message);
+            creationMessages.put(message.getIdLong(), message);
 
             Long authorID = message.getMentionedUsers().get(0).getIdLong();
-            for (int i = 0; i < creationStages.get(authorID).getOptions(null).length; i++) {
+            int reactionsLength = creationStages.get(authorID).getOptions(null).length;
+            for (int i = 0; i < reactionsLength; i++) {
                 emojiArguments.inverse().get(i).addAsReaction(message);
             }
+            creationMessageReactionLengths.put(message.getIdLong(), reactionsLength);
         }
     }
 
@@ -185,7 +191,7 @@ public class CharacterCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / delete";
+        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / deleteAND";
     }
 
 
@@ -248,7 +254,7 @@ public class CharacterCommand extends AbstractCommand {
              */
             @Override
             public void execute(String args, MessageReceivedEvent event) {
-                UserCharacter.deleteCharacter(event.getAuthor().getIdLong());
+                UserCharacter.deleteCharacter(event.getAuthor().getId(), args);
                 sendMessage(event.getChannel(), "Character deleted");
             }
         },
@@ -259,10 +265,11 @@ public class CharacterCommand extends AbstractCommand {
              */
             @Override
             public void execute(String args, MessageReceivedEvent event) {
-                sendMessage(event.getChannel(), UserCharacter.attack(event.getAuthor(), args));
+                final String[] splitArgs = SecondaryArg.splitArgsNameAndOther(args);
+                sendMessage(event.getChannel(), UserCharacter.attack(event.getAuthor(), splitArgs[0], splitArgs[1]));
             }
         },
-        GETWEAPONSLIST {
+        WEAPONSLIST {
             /**
              * {@inheritDoc}
              */
@@ -277,7 +284,8 @@ public class CharacterCommand extends AbstractCommand {
              */
             @Override
             public void execute(String args, MessageReceivedEvent event) {
-                UserCharacter.changeCharacterWeapon(event.getAuthor().getIdLong(), args);
+                final String[] splitArgs = SecondaryArg.splitArgsNameAndOther(args);
+                UserCharacter.changeCharacterWeapon(event.getAuthor().getId(), splitArgs[0], splitArgs[1]);
                 sendMessage(event.getChannel(), "Weapon change successful, enjoy your new toy.");
             }
         },
@@ -287,11 +295,28 @@ public class CharacterCommand extends AbstractCommand {
              */
             @Override
             public void execute(String args, MessageReceivedEvent event) {
-                sendMessage(event.getChannel(), UserCharacter.getCharacterDescription(event.getAuthor().getIdLong()));
+                sendMessage(event.getChannel(), UserCharacter.getCharacterDescription(event.getAuthor().getId(), args));
             }
         };
 
         String messageStart;
+
+
+        /**
+         * @return new String[] {rest of args, last word}
+         */
+        private static String[] splitArgsNameAndOther(String args) {
+            final String[] argsSplit = args.split(" ");
+            final String other = argsSplit[argsSplit.length - 1];
+            final int endLength = args.length() - other.length() - 1;
+            if (endLength <= 0) {
+                throw new BadUserInputException(
+                        "You forgot to tell me which of your fine characters you'd like to do this for");
+            }
+            else {
+                return new String[]{args.substring(0, endLength), other};
+            }
+        }
 
 
         SecondaryArg() {
@@ -385,7 +410,7 @@ public class CharacterCommand extends AbstractCommand {
              */
             @Override
             public void update(UserCharacter userCharacter, int index) {
-                userCharacter.setBackground(Background.BackgroundEnum.values()[index].toString());
+                userCharacter.setBackground(Background.BackgroundEnum.values()[index]);
             }
         };
 

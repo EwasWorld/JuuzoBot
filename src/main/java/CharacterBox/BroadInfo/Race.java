@@ -19,7 +19,20 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Race {
-    public enum RaceEnum {DWARF, ELF, HALFLING, HUMAN, DRAGONBORN, GNOME, HALFELF, HALFORC, TIEFLING}
+    public enum RaceEnum {
+        DWARF, ELF, HALFLING, HUMAN, DRAGONBORN, GNOME, HALFELF, HALFORC, TIEFLING;
+
+
+        public String toString() {
+            String enumStr = super.toString();
+            enumStr = enumStr.charAt(0) + enumStr.substring(1).toLowerCase();
+            if (enumStr.startsWith("Half")) {
+                enumStr = enumStr.substring(0, 4) + "-" + String.valueOf(enumStr.charAt(4)).toUpperCase() + enumStr
+                        .substring(5);
+            }
+            return enumStr;
+        }
+    }
 
 
 
@@ -150,38 +163,6 @@ public class Race {
             getRacesFromFile();
         }
         return subRaces.get(subRaceEnum);
-    }
-
-
-    public static String getRacesList() {
-        if (races == null) {
-            getRacesFromFile();
-        }
-
-        String races = "Available races: ";
-        final RaceEnum[] raceEnums = RaceEnum.values();
-
-        for (int i = 0; i < raceEnums.length; i++) {
-            races += raceEnums[i].toString();
-
-            if (i < raceEnums.length - 1) {
-                races += ", ";
-            }
-        }
-
-        races += "\n\nSubraces: ";
-        final Iterator<SubRace.SubRaceEnum> subRaceIterator = subRaces.keySet().iterator();
-        while (subRaceIterator.hasNext()) {
-            SubRace.SubRaceEnum subRaceEnum = subRaceIterator.next();
-            races += subRaceEnum.toString() + " " + subRaces.get(subRaceEnum).getMainRace();
-
-            if (subRaceIterator.hasNext()) {
-                races += ", ";
-            }
-        }
-
-        races += "\n\n(NB: For DROW use either 'DROW' or 'DARK ELF')";
-        return races;
     }
 
 

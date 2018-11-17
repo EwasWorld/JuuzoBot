@@ -29,7 +29,7 @@ public class DatabaseTable {
 
     /*
      * Date formats (all dates are stored in UTC)
-     * TODO: All dates are not being stored in UTC Q.Q plz fix
+     * TODO FIX All dates are not being stored in UTC Q.Q plz fix
      */
     // Date format given as an argument and stored in the database
     public static String setDateFormatStr = "HH:mm dd/M/yy z";
@@ -120,6 +120,26 @@ public class DatabaseTable {
     }
 
 
+    public static DatabaseTable createDatabaseTable(String tableName, DatabaseFieldsEnum[] fields) {
+        return new DatabaseTable(tableName, fieldsArrayToMap(fields));
+    }
+
+
+    public static DatabaseTable createDatabaseTable(String tableName, DatabaseFieldsEnum[] fields,
+                                                    PrimaryKey primaryKey) {
+        return new DatabaseTable(tableName, fieldsArrayToMap(fields), primaryKey);
+    }
+
+
+    private static Map<String, DatabaseFieldArgs> fieldsArrayToMap(DatabaseFieldsEnum[] fields) {
+        final Map<String, DatabaseFieldArgs> fieldsMap = new HashMap<>();
+        for (DatabaseFieldsEnum field : fields) {
+            fieldsMap.put(field.getFieldName(), new DatabaseFieldArgs(field.getSqlType(), field.isRequired()));
+        }
+        return fieldsMap;
+    }
+
+
     public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields, PrimaryKey primaryKey) {
         this.tableName = tableName;
         this.fields = fields;
@@ -148,7 +168,7 @@ public class DatabaseTable {
         for (String fieldName : fields.keySet()) {
             sb.append(String.format("%s %s,", fieldName, fields.get(fieldName).createTableLine()));
         }
-        Optional<String> primaryKeyOptional = primaryKey.getPrimaryKeyLine();
+        Optional<String> primaryKeyOptional = primaryKey.getPrimaryKeySQLLine(tableName);
         String primaryKeyString;
         if (!primaryKeyOptional.isPresent()) {
             sb.deleteCharAt(sb.length() - 1);
@@ -162,7 +182,7 @@ public class DatabaseTable {
 
 
     /**
-     * Creates an executes an SQL INSERT INTO statement
+     * Creates and executes an SQL INSERT INTO statement
      *
      * @param args Map<field, value> row information to insert
      */
@@ -171,6 +191,7 @@ public class DatabaseTable {
         final List<Object> objects = new ArrayList<>();
         final StringBuilder fieldNames = new StringBuilder();
         final StringBuilder values = new StringBuilder();
+        // TODO Optimisation think about making these loops generic?
         for (String arg : args.keySet()) {
             if (!fields.keySet().contains(arg)) {
                 throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
@@ -202,7 +223,65 @@ public class DatabaseTable {
     }
 
 
-    public void delete(Map<String, Object> args) {
+    /**
+     * Creates and executes an SQL UPDATE statement
+     *
+     * @param setArgs Map<field, value> columns to update and their new values
+     * @param whereArgs Map<field, value> WHERE arguments which will be ANDed together
+     */
+    public void updateAND(Map<String, Object> setArgs, Map<String, Object> whereArgs) {
+        final List<SQLType> types = new ArrayList<>();
+        final List<Object> objects = new ArrayList<>();
+        final StringBuilder set = new StringBuilder();
+        final StringBuilder where = new StringBuilder();
+        for (String setArg : setArgs.keySet()) {
+            if (!fields.keySet().contains(setArg)) {
+                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + setArg);
+            }
+            else {
+                SQLType sqlType = fields.get(setArg).getSqlType();
+                if (!sqlType.getClassName().equals(setArgs.get(setArg).getClass().getName())) {
+                    throw new IllegalArgumentException("Invalid argument type for " + setArg);
+                }
+                types.add(sqlType);
+                objects.add(setArgs.get(setArg));
+                set.append(String.format("%s=?, ", setArg));
+            }
+        }
+        for (String whereArg : whereArgs.keySet()) {
+            if (!fields.keySet().contains(whereArg)) {
+                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + whereArg);
+            }
+            else {
+                SQLType sqlType = fields.get(whereArg).getSqlType();
+                if (!sqlType.getClassName().equals(whereArgs.get(whereArg).getClass().getName())) {
+                    throw new IllegalArgumentException("Invalid argument type for " + whereArg);
+                }
+                types.add(sqlType);
+                objects.add(whereArgs.get(whereArg));
+                where.append(String.format("%s=? AND ", whereArg));
+            }
+        }
+        set.delete(set.length() - 2, set.length());
+        where.delete(where.length() - 5, where.length());
+        final String sql = String.format("UPDATE %s SET %s WHERE %s", tableName, set.toString(), where.toString());
+
+        getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            setValuesInPreparedStatement(ps, types, objects);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Creates and executes an SQL DELETE statement
+     *
+     * @param args Map<field, value> WHERE arguments which will be ANDed together
+     */
+    public void deleteAND(Map<String, Object> args) {
         final List<SQLType> types = new ArrayList<>();
         final List<Object> objects = new ArrayList<>();
         final StringBuilder where = new StringBuilder();
@@ -261,9 +340,9 @@ public class DatabaseTable {
 
 
     /**
-     * Create an execute a SELECT * statement where WHERE arguments are ANDed together
+     * Create an execute a SELECT * statemen
      *
-     * @param args             Map<field, value> fields and their values for the WHERE part of the statement
+     * @param args             Map<field, value> WHERE arguments which will be ANDed together
      * @param resultsSetAction what to do with the results set when it's found (must be done within the try/catch containing the prepared statement else rs becomes 'inactive')
      * @return result of resultsSetAction
      */
@@ -271,7 +350,7 @@ public class DatabaseTable {
         getConnection();
         if (args == null || args.size() == 0) {
             getConnection();
-            try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM %s")) {
+            try (PreparedStatement ps = connection.prepareStatement(String.format("SELECT * FROM %s", tableName))) {
                 ResultSet rs = ps.executeQuery();
                 return resultsSetAction.execute(rs);
             } catch (SQLException e) {
@@ -336,7 +415,7 @@ public class DatabaseTable {
 
 
     /**
-     * @param column the column to find the max of (must be an INT column)
+     * @param column must be of type INT
      * @return the max value in the given column
      */
     public int getMaxInColumn(String column) {
@@ -408,50 +487,13 @@ public class DatabaseTable {
 
 
 
-    private class PrimaryKey {
-        private Set<String> primaryKeys;
-        private boolean needsConstraintLine = true;
+    public interface DatabaseFieldsEnum {
+        String getFieldName();
 
 
-        public PrimaryKey(Set<String> primaryKeys) {
-            this.primaryKeys = primaryKeys;
-        }
+        SQLType getSqlType();
 
 
-        private PrimaryKey(String primaryKey) {
-            this.primaryKeys = new HashSet<>(Collections.singleton(primaryKey));
-            needsConstraintLine = false;
-        }
-
-
-        public String toString() {
-            if (primaryKeys.size() != 1) {
-                throw new IllegalStateException("Cannot give primary key name for composite key");
-            }
-            return primaryKeys.toArray(new String[]{})[0];
-        }
-
-
-        private Optional<String> getPrimaryKeyLine() {
-            if (needsConstraintLine) {
-                switch (primaryKeys.size()) {
-                    case 0:
-                        throw new IllegalStateException("No primary key given");
-                    case 1:
-                        return Optional.of(String.format("PRIMARY KEY(%s)", primaryKeys.iterator().next()));
-                    default:
-                        final StringBuilder sb = new StringBuilder();
-                        for (String key : primaryKeys) {
-                            sb.append(key);
-                            sb.append(", ");
-                        }
-                        sb.deleteCharAt(sb.length() - 1);
-                        return Optional.of(String.format("CONSTRAINT PK_%s PRIMARY KEY(%s)", tableName, sb.toString()));
-                }
-            }
-            else {
-                return Optional.empty();
-            }
-        }
+        boolean isRequired();
     }
 }

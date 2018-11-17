@@ -4,6 +4,7 @@ import CharacterBox.BroadInfo.Clazz;
 import CharacterBox.UserCharacter;
 import CharacterBox.BroadInfo.Race;
 import CharacterBox.BroadInfo.SubRace;
+import CoreBox.IDs;
 import ExceptionsBox.BadUserInputException;
 import junit.framework.TestCase;
 
@@ -29,39 +30,16 @@ public class CharacterTests extends TestCase {
 
 
     public void testBackgroundInfoRetrieval() {
-        Background.getBackgroundInfo("Criminal");
+        Background.getBackgroundInfo(Background.BackgroundEnum.CRIMINAL);
     }
 
 
     public void testCreateCharacter() {
-        /*
-        System.out.println(new UserCharacter(
-                "Akatsuki", Race.RaceEnum.ELF, null, Clazz.ClassEnum.ROGUE, "Criminal").getDescription());
-        System.out.println(new UserCharacter(
-                "Akatsuki", Race.RaceEnum.ELF, SubRace.SubRaceEnum.DARK, Clazz.ClassEnum.ROGUE, "Criminal"
-        ).getDescription());
-        */
-        System.out.println("\n\n");
-
-        List<String> testStrings = new ArrayList<>();
-        testStrings.add("Fi");
-        testStrings.add("Fi Elf");
-        testStrings.add("Fi Wood Elf");
-        testStrings.add("Fi Wood Elf Rogue");
-        testStrings.add("Fi Drow Rogue Criminal");
-        testStrings.add("Fi Drow Elf Rogue Criminal");
-        testStrings.add("Fi Wood Elf Rogue Criminal");
-        testStrings.add("Fi Wood Elf Criminal Rogue");
-        testStrings.add("Fi Elf Wood Criminal Rogue");
-
-        // TODO Improve shouldn't have to manually check the output...
-        for (String testString : testStrings) {
-            System.out.println("\n\nTest String: " + testString);
-            try {
-//                System.out.println(UserCharacter.createUserCharacter(testString).getDescription());
-            } catch (BadUserInputException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        UserCharacter userCharacter = new UserCharacter("Fi");
+        userCharacter.setRace(Race.RaceEnum.ELF);
+        userCharacter.setSubRace(SubRace.SubRaceEnum.WOOD);
+        userCharacter.setClazz(Clazz.ClassEnum.ROGUE);
+        userCharacter.setBackground(Background.BackgroundEnum.CRIMINAL);
+        userCharacter.completeCreation(IDs.eywaID);
     }
 }

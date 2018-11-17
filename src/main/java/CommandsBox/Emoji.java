@@ -50,7 +50,7 @@ public enum Emoji {
 
     private static Map<String, Emoji> parseMap = setUpParseMap();
     private String discordAlias;
-    // TODO Get this from unicode2char
+    // TODO Optimisation - get this from unicode2char
     private String unicodeFullString;
     private String unicode2char;
 

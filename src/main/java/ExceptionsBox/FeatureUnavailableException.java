@@ -1,6 +1,6 @@
 package ExceptionsBox;
 
-// TODO: implement these
+// TODO Implement these
 public class FeatureUnavailableException extends BadStateException {
     private static String message = "This feature is currently unavailable, complain at Ewa if you really want it";
 

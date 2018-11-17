@@ -10,7 +10,7 @@ import java.util.List;
 
 
 
-// TODO Implement this
+// TODO Implement command
 public class NoteToSelfCommand extends AbstractCommand {
     @Override
     public String getCommand() {

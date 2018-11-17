@@ -151,7 +151,7 @@ public class Weapon {
             }
         }
 
-        return weapons;
+        return weapons.toLowerCase();
     }
 
 

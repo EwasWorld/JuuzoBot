@@ -53,8 +53,12 @@ public class RollCommand extends AbstractCommand {
             result = String.format("%s %s", author.getName(), roll(args));
         }
         else {
-            // args = {skill/ability/initiative}
-            result = UserCharacter.roll(author.getIdLong(), args);
+            // args = name {skill/ability/initiative}
+            // TODO TEST are there any second args that could be more than one word?
+            String[] argsSplit = args.split(" ");
+            final String other = argsSplit[argsSplit.length - 1];
+            argsSplit = new String[]{args.substring(0, args.length() - other.length() - 1)};
+            result = UserCharacter.roll(author.getId(), argsSplit[0], argsSplit[1]);
         }
         sendMessage(event.getChannel(), result);
     }

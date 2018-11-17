@@ -1,12 +1,15 @@
 package CharacterBox.AttackBox;
 
+import DatabaseBox.DatabaseTable;
+
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 
 public class WeaponProficiencies implements Serializable {
+    public static String databaseTypeType = "WEAPONTYPE";
+    public static String databaseTypeSpecific = "WEAPON";
     private Set<Weapon.WeaponProficiencyEnum> typeProficiencies = new HashSet<>();
     private Set<Weapon.WeaponsEnum> specificProficiencies = new HashSet<>();
 
@@ -24,6 +27,24 @@ public class WeaponProficiencies implements Serializable {
     public boolean contains(Weapon.WeaponsEnum proficiency) {
         return specificProficiencies.contains(proficiency)
                 || typeProficiencies.contains(proficiency.getWeaponProficiency());
+    }
+
+
+    public List<Map<String, Object>> toDatabaseArgs(DatabaseTable.DatabaseFieldsEnum proficiencyFieldName, DatabaseTable.DatabaseFieldsEnum typeField) {
+        final List<Map<String, Object>> args = new ArrayList<>();
+        for (Weapon.WeaponProficiencyEnum proficiency : typeProficiencies) {
+            final Map<String, Object> proficiencyArgs = new HashMap<>();
+            proficiencyArgs.put(typeField.getFieldName(), databaseTypeType);
+            proficiencyArgs.put(proficiencyFieldName.getFieldName(), proficiency.toString());
+            args.add(proficiencyArgs);
+        }
+        for (Weapon.WeaponsEnum proficiency : specificProficiencies) {
+            final Map<String, Object> proficiencyArgs = new HashMap<>();
+            proficiencyArgs.put(typeField.getFieldName(), databaseTypeSpecific);
+            proficiencyArgs.put(proficiencyFieldName.getFieldName(), proficiency.toString());
+            args.add(proficiencyArgs);
+        }
+        return args;
     }
 
 

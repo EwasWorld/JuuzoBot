@@ -35,7 +35,7 @@ public class QuoteCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        return "add {start of message} / get [quote number] / remove {quote number} / reindex / delete all";
+        return "add {start of message} / get [quote number] / remove {quote number} / reindex / deleteAND all";
     }
 
 
@@ -141,7 +141,7 @@ public class QuoteCommand extends AbstractCommand {
             @Override
             public void execute(String args, MessageReceivedEvent event) {
                 checkPermission(event.getMember(), Rank.ADMIN);
-                // TODO "Thumbs up to this message if you're sure"
+                // TODO Implement "Thumbs up to this message if you're sure"
                 Quotes.clearMessagesAndQuotes();
             }
         }

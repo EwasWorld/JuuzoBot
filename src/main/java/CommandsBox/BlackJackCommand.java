@@ -190,7 +190,7 @@ public class BlackJackCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        // TODO Better way of doing this in enum - maybe give each a help string?
+        // TODO Optimisation - better way of doing this in enum - maybe give each a help string?
         return "{new / reprint / bet {main} {side} {side} / end}";
     }
 

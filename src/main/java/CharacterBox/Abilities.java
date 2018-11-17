@@ -17,6 +17,11 @@ public class Abilities implements Serializable {
     }
 
 
+    public Abilities(Map<CharacterConstants.AbilityEnum, Integer> abilities) {
+        this.abilities = abilities;
+    }
+
+
     public int getStat(CharacterConstants.AbilityEnum ability) {
         return abilities.get(ability);
     }

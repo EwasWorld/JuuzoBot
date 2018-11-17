@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * created 24/10/18
- * TODO ensure winnings are not paid out if the player has left
+ * TODO FIX ensure winnings are not paid out if the player has left
  */
 class Bets {
     private Map<Member, Integer> mainBetsTemp;
@@ -118,10 +118,25 @@ class Bets {
 
 
     /**
-     * Turn a particular player's bet into a string that can be displayed to the users
-     * TODO Make this generic for int or Member player
+     * @see Bets#getBet(Object, Map, Map, Map)
      */
     String getBet(int player) {
+        return getBet(player, mainBets, perfectPairs, twentyOnePlusThrees);
+    }
+
+
+    /**
+     * @see Bets#getBet(Object, Map, Map, Map)
+     */
+    String getBet(Member player) {
+        return getBet(player, mainBetsTemp, perfectPairsTemp, twentyOnePlusThreesTemp);
+    }
+
+
+    /**
+     * Turn a particular player's bet into a string that can be displayed to the users
+     */
+    private <T> String getBet(T player, Map<T, Integer> mainBets, Map<T, Integer> perfectPairs, Map<T, Integer> twentyOnePlusThrees) {
         int main = 0;
         int perfectPair = 0;
         int twentyOnePlusThree = 0;
@@ -133,32 +148,6 @@ class Bets {
         }
         if (twentyOnePlusThrees.containsKey(player)) {
             twentyOnePlusThree = twentyOnePlusThrees.get(player);
-        }
-
-        if (main == 0 && perfectPair == 0 && twentyOnePlusThree == 0) {
-            return "";
-        }
-        else {
-            return String.format(" (**%s**, %s/%s)", main, perfectPair, twentyOnePlusThree);
-        }
-    }
-
-
-    /**
-     * Turn a particular player's bet into a string that can be displayed to the users
-     */
-    String getBet(Member player) {
-        int main = 0;
-        int perfectPair = 0;
-        int twentyOnePlusThree = 0;
-        if (mainBetsTemp.containsKey(player)) {
-            main = mainBetsTemp.get(player);
-        }
-        if (perfectPairsTemp.containsKey(player)) {
-            perfectPair = perfectPairsTemp.get(player);
-        }
-        if (twentyOnePlusThreesTemp.containsKey(player)) {
-            twentyOnePlusThree = twentyOnePlusThreesTemp.get(player);
         }
 
         if (main == 0 && perfectPair == 0 && twentyOnePlusThree == 0) {

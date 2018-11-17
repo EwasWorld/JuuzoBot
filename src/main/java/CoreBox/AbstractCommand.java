@@ -107,8 +107,8 @@ public abstract class AbstractCommand {
 
 
     /**
-     * TODO Improve store these in a database rather than relying on roles?
-     * TODO Allocate them using commands
+     * TODO Optimisation store these in a database rather than relying on roles?
+     * TODO Idea - Allocate them using commands
      * @return the highest rank that matches the user's discord roles
      */
     static protected Rank getRank(Member member) {

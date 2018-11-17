@@ -141,29 +141,6 @@ public class Clazz {
     }
 
 
-    /*
-     * Returns a list of classes in the bot
-     */
-    public static String getClassesList() {
-        if (classes == null) {
-            getClassesFromFile();
-        }
-
-        String classes = "";
-        final ClassEnum[] classEnums = ClassEnum.values();
-
-        for (int i = 0; i < classEnums.length; i++) {
-            classes += classEnums[i].toString();
-
-            if (i < classEnums.length - 1) {
-                classes += ", ";
-            }
-        }
-
-        return classes;
-    }
-
-
     public int getStartHP(int constitutionModifier) {
         return hitDie + constitutionModifier;
     }
@@ -179,27 +156,27 @@ public class Clazz {
     }
 
 
-    /*
-     * Adds class proficiencies that are not already being used
+    /**
+     * @return the required number of class proficiencies chosen at random that are not already being used
      */
-    public Set<CharacterConstants.SkillEnum> getAddSkillProficiencies(
-            Set<CharacterConstants.SkillEnum> currentProficiencies)
-    {
-        // clone possible proficiencies
-        final Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>();
-        for (CharacterConstants.SkillEnum skill : skillProficiencies) {
-            possibleProficienciesClone.add(skill);
-        }
+    public Set<CharacterConstants.SkillEnum> getRandomSkillProficiencies(
+            Set<CharacterConstants.SkillEnum> currentProficiencies) {
+        final Set<CharacterConstants.SkillEnum> possibleProficienciesClone = new HashSet<>(skillProficiencies);
+        final Set<CharacterConstants.SkillEnum> newProficiencies = new HashSet<>();
 
         for (int i = 0; i < skillQuantity; i++) {
-            int size = possibleProficienciesClone.size();
-            final CharacterConstants.SkillEnum chosenSkill = possibleProficienciesClone
-                    .toArray(new CharacterConstants.SkillEnum[size])[new Random().nextInt(size)];
-            currentProficiencies.add(chosenSkill);
-            possibleProficienciesClone.remove(chosenSkill);
+            CharacterConstants.SkillEnum chosenSkill;
+            do {
+                int size = possibleProficienciesClone.size();
+                // select a random proficiency
+                chosenSkill = possibleProficienciesClone.toArray(new CharacterConstants.SkillEnum[size])[new Random()
+                        .nextInt(size)];
+                possibleProficienciesClone.remove(chosenSkill);
+            } while (currentProficiencies.contains(chosenSkill));
+            newProficiencies.add(chosenSkill);
         }
 
-        return currentProficiencies;
+        return newProficiencies;
     }
 
 

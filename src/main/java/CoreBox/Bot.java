@@ -45,8 +45,6 @@ public class Bot {
             resourceFilePath = pathToJuuzoBot + resourceFilePath;
         }
         startJDA();
-        DataPersistence.loadData();
-        new Thread(new DataPersistence()).start();
         loadCommands();
     }
 
@@ -150,7 +148,7 @@ public class Bot {
         public void onMessageReceived(MessageReceivedEvent event) {
             super.onMessageReceived(event);
             if (event.isFromType(ChannelType.PRIVATE)) {
-                // TODO: here are PMs
+                // here are PMs
             }
 
             String args = event.getMessage().getContentRaw();
