@@ -3,6 +3,7 @@ package CharacterBox.BroadInfo;
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.CharacterConstants;
+import CharacterBox.DiscordPrintable;
 import CoreBox.Bot;
 import com.google.gson.*;
 
@@ -16,10 +17,16 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class Clazz {
-    public enum ClassEnum {
+    public enum ClassEnum implements DiscordPrintable {
         BARBARIAN, BARD, CLERIC, DRUID, FINESSEFIGHTER,
         FIGHTER, MONK, PALADIN, RANGER, ROGUE,
-        SORCERER, WARLOCK, WIZARD
+        SORCERER, WARLOCK, WIZARD;
+
+
+        @Override
+        public String toPrintableString() {
+            return toString().toLowerCase();
+        }
     }
 
 
@@ -107,8 +114,7 @@ public class Clazz {
     private Clazz(int hitDie, CharacterConstants.AbilityEnum[] abilityOrder,
                   Set<CharacterConstants.AbilityEnum> savingThrows, int skillQuantity,
                   Set<CharacterConstants.SkillEnum> skillProficiencies, FundsSetUp fundsSetUp,
-                  WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon)
-    {
+                  WeaponProficiencies weaponProficiencies, Weapon.WeaponsEnum startWeapon) {
         this.hitDie = hitDie;
         this.abilityOrder = abilityOrder;
         this.savingThrows = savingThrows;
@@ -172,7 +178,7 @@ public class Clazz {
                 chosenSkill = possibleProficienciesClone.toArray(new CharacterConstants.SkillEnum[size])[new Random()
                         .nextInt(size)];
                 possibleProficienciesClone.remove(chosenSkill);
-            } while (currentProficiencies.contains(chosenSkill));
+            } while (currentProficiencies.contains(chosenSkill) && possibleProficienciesClone.size() > 0);
             newProficiencies.add(chosenSkill);
         }
 
@@ -197,8 +203,7 @@ public class Clazz {
 
     private static class ClassSetUpDeserializer implements JsonDeserializer<Clazz> {
         public Clazz deserialize(JsonElement json, Type typeOfT,
-                                 JsonDeserializationContext context) throws JsonParseException
-        {
+                                 JsonDeserializationContext context) throws JsonParseException {
             return new Clazz(json.getAsJsonObject().get("classes").getAsJsonArray());
         }
     }

@@ -30,7 +30,7 @@ public class WeaponProficiencies implements Serializable {
     }
 
 
-    public List<Map<String, Object>> toDatabaseArgs(DatabaseTable.DatabaseFieldsEnum proficiencyFieldName, DatabaseTable.DatabaseFieldsEnum typeField) {
+    public List<Map<String, Object>> toDatabaseArgs(DatabaseTable.DatabaseField proficiencyFieldName, DatabaseTable.DatabaseField typeField) {
         final List<Map<String, Object>> args = new ArrayList<>();
         for (Weapon.WeaponProficiencyEnum proficiency : typeProficiencies) {
             final Map<String, Object> proficiencyArgs = new HashMap<>();

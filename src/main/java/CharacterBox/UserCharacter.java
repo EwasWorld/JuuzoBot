@@ -8,11 +8,8 @@ import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
-import net.dv8tion.jda.core.entities.User;
 
 import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 
@@ -31,158 +28,6 @@ public class UserCharacter implements Serializable {
             "CharactersProficiencies", CharProficienciesDatabaseFields.values());
     private static DatabaseTable charLanguagesDatabaseTable = DatabaseTable.createDatabaseTable(
             "CharactersLanguages", CharLanguagesDatabaseFields.values());
-
-
-
-    private enum CharDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
-        USERID("user", DatabaseTable.SQLType.TEXT, true), NAME("name", DatabaseTable.SQLType.TEXT, true),
-        AGE("age", DatabaseTable.SQLType.INT, true), ALIGNMENT("alignment", DatabaseTable.SQLType.TEXT, true),
-        CLAZZ("clazz", DatabaseTable.SQLType.TEXT, true), RACE("race", DatabaseTable.SQLType.TEXT, true),
-        SUBRACE("subrace", DatabaseTable.SQLType.TEXT, false), BACKGROUND(
-                "background", DatabaseTable.SQLType.TEXT, true),
-        BACKGROUND_SPECIFICS("backgroundSpecifics", DatabaseTable.SQLType.TEXT, true),
-        TRINKET("trinket", DatabaseTable.SQLType.TEXT, true), WEAPON("weapon", DatabaseTable.SQLType.TEXT, true),
-        FUNDS("funds", DatabaseTable.SQLType.INT, true);
-
-        private String fieldName;
-        private DatabaseTable.SQLType sqlType;
-        private boolean required;
-
-
-        CharDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
-            this.fieldName = fieldName;
-            this.sqlType = sqlType;
-            this.required = required;
-        }
-
-
-        @Override
-        public String getFieldName() {
-            return fieldName;
-        }
-
-
-        @Override
-        public DatabaseTable.SQLType getSqlType() {
-            return sqlType;
-        }
-
-
-        @Override
-        public boolean isRequired() {
-            return required;
-        }
-    }
-
-
-
-    private enum CharAbilitiesDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
-        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), ABILITY("ability", DatabaseTable.SQLType.TEXT, true),
-        VALUE("value", DatabaseTable.SQLType.INT, true), IS_SAVING_THROW(
-                "isSavingThrow", DatabaseTable.SQLType.BIT, true);
-
-        private String fieldName;
-        private DatabaseTable.SQLType sqlType;
-        private boolean required;
-
-
-        CharAbilitiesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
-            this.fieldName = fieldName;
-            this.sqlType = sqlType;
-            this.required = required;
-        }
-
-
-        @Override
-        public String getFieldName() {
-            return fieldName;
-        }
-
-
-        @Override
-        public DatabaseTable.SQLType getSqlType() {
-            return sqlType;
-        }
-
-
-        @Override
-        public boolean isRequired() {
-            return required;
-        }
-    }
-
-
-
-    private enum CharProficienciesDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
-        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), PROF_TYPE("profType", DatabaseTable.SQLType.TEXT, true),
-        PROFICIENCY("proficiency", DatabaseTable.SQLType.TEXT, true);
-
-        private String fieldName;
-        private DatabaseTable.SQLType sqlType;
-        private boolean required;
-
-
-        CharProficienciesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
-            this.fieldName = fieldName;
-            this.sqlType = sqlType;
-            this.required = required;
-        }
-
-
-        @Override
-        public String getFieldName() {
-            return fieldName;
-        }
-
-
-        @Override
-        public DatabaseTable.SQLType getSqlType() {
-            return sqlType;
-        }
-
-
-        @Override
-        public boolean isRequired() {
-            return required;
-        }
-    }
-
-
-    private enum CharLanguagesDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
-        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), LANGUAGE("language", DatabaseTable.SQLType.TEXT, true);
-
-        private String fieldName;
-        private DatabaseTable.SQLType sqlType;
-        private boolean required;
-
-
-        CharLanguagesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
-            this.fieldName = fieldName;
-            this.sqlType = sqlType;
-            this.required = required;
-        }
-
-
-        @Override
-        public String getFieldName() {
-            return fieldName;
-        }
-
-
-        @Override
-        public DatabaseTable.SQLType getSqlType() {
-            return sqlType;
-        }
-
-
-        @Override
-        public boolean isRequired() {
-            return required;
-        }
-    }
-
-
-
     private String name;
     private int age;
     private String alignment;
@@ -224,89 +69,191 @@ public class UserCharacter implements Serializable {
     }
 
 
-    public void setClazz(Clazz.ClassEnum clazz) {
-        this.clazz = clazz;
+    public static int[] getRowCounts() {
+        final List<Object> results = doToAllTables(DatabaseTable::getRowCount);
+
+        int[] list = new int[4];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = (int) results.get(i);
+        }
+        return list;
     }
 
 
-    public void setRace(Race.RaceEnum race) {
-        this.race = race;
-    }
-
-
-    public Race.RaceEnum getRace() {
-        return race;
-    }
-
-
-    public void setSubRace(SubRace.SubRaceEnum subRace) {
-        this.subRace = subRace;
+    private static <T> List<T> doToAllTables(TableAction<T> tableAction) {
+        List<T> list = new ArrayList<>();
+        list.add(tableAction.action(charDatabaseTable));
+        list.add(tableAction.action(charAbilitiesDatabaseTable));
+        list.add(tableAction.action(charProficienciesDatabaseTable));
+        list.add(tableAction.action(charLanguagesDatabaseTable));
+        return list;
     }
 
 
     /**
-     * Sets the character background and alignment (required for background generation)
+     * Deletes all character data stored in the database
+     *
+     * @throws IllegalStateException if the database is not in test mode
      */
-    public void setBackground(Background.BackgroundEnum background) {
-        final Alignment alignment = Race.getRaceInfo(race).getRandomAlignment();
-        this.alignment = alignment.getAlignmentInitials();
-        this.background = background.generateRandomBackground(alignment);
+    public static void deleteAllTables() {
+        if (!DatabaseTable.isInTestMode()) {
+            throw new IllegalStateException("This action can only be taken in test mode");
+        }
+        doToAllTables(table -> {
+            table.deleteTable();
+            return null;
+        });
     }
 
 
-    private void saveToDatabase(String userID) {
-        charDatabaseTable.deleteTable();
-        charAbilitiesDatabaseTable.deleteTable();
-        charProficienciesDatabaseTable.deleteTable();
-
+    /**
+     * Deletes a specified characters related to a user
+     *
+     * @param userID the id of the user who's characters will be deleted
+     */
+    public static void deleteCharacter(String userID, String name) {
+        int charID = getCharID(userID, name);
         final Map<String, Object> charArgs = new HashMap<>();
-        charArgs.put(CharDatabaseFields.USERID.fieldName, userID);
-        charArgs.put(CharDatabaseFields.NAME.fieldName, name);
-        charArgs.put(CharDatabaseFields.AGE.fieldName, age);
-        charArgs.put(CharDatabaseFields.ALIGNMENT.fieldName, alignment);
-        charArgs.put(CharDatabaseFields.CLAZZ.fieldName, clazz.toString());
-        charArgs.put(CharDatabaseFields.RACE.fieldName, race.toString());
+        charArgs.put(CharDatabaseFields.USERID.getFieldName(), userID);
+        charArgs.put(CharDatabaseFields.NAME.getFieldName(), name);
+        charDatabaseTable.deleteAND(charArgs);
+
+        final Map<String, Object> abilArgs = new HashMap<>();
+        abilArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
+        charAbilitiesDatabaseTable.deleteAND(abilArgs);
+        final Map<String, Object> profArgs = new HashMap<>();
+        profArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
+        charProficienciesDatabaseTable.deleteAND(profArgs);
+        final Map<String, Object> landArgs = new HashMap<>();
+        landArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
+        charLanguagesDatabaseTable.deleteAND(landArgs);
+    }
+
+
+    /**
+     * @return character ID
+     * @throws BadUserInputException if the character name is invalid
+     * @throws BadStateException if the user doesn't have any characters
+     */
+    private static Integer getCharID(String userID, String name) {
+        final Map<String, Object> getIDArgs = new HashMap<>();
+        getIDArgs.put(CharDatabaseFields.USERID.fieldName, userID);
+        getIDArgs.put(CharDatabaseFields.NAME.fieldName, name);
+        return (Integer) charDatabaseTable.selectAND(getIDArgs, rs -> {
+            if (rs.next()) {
+                return rs.getInt(charDatabaseTable.getPrimaryKey());
+            }
+            else {
+                // Find out why the previous select failed by checking if the user has any characters
+                getIDArgs.remove(CharDatabaseFields.NAME.getFieldName());
+                return charDatabaseTable.selectAND(getIDArgs, rs2 -> {
+                    if (rs2.next()) {
+                        throw new BadUserInputException("You don't have a character with the name " + name);
+                    }
+                    else {
+                        throw new BadStateException("You don't have any characters");
+                    }
+                });
+            }
+        });
+    }
+
+
+    /**
+     * @throws BadUserInputException if weapon is not recognised
+     */
+    public static void changeCharacterWeapon(String authorID, String name, String newWeapon) {
+        final Weapon.WeaponsEnum weapon;
+        try {
+            weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException(
+                    "Weapon not recognised, you can see a list of weapons using !char weapons list");
+        }
+
+        final Map<String, Object> setArgs = new HashMap<>();
+        setArgs.put(CharDatabaseFields.WEAPON.getFieldName(), weapon.toString());
+        final Map<String, Object> whereArgs = new HashMap<>();
+        whereArgs.put(charDatabaseTable.getPrimaryKey(), getCharID(authorID, name));
+        charDatabaseTable.updateAND(setArgs, whereArgs);
+    }
+
+
+    /**
+     * @return attack flavour text and how much damage was dealt
+     */
+    public static String attack(String authorID, String characterName, String victim) {
+        final UserCharacter character = loadFromDatabase(authorID, characterName);
+        victim = victim.trim().replace("@", "");
+
+        final Weapon weapon = character.getWeaponInfo();
+        String message = weapon.getAttackLine();
+
+        final Die.RollResult attackRoll = new Die(1, 20, character.getAttackModifier()).roll();
+        if (attackRoll.getTotal() >= defenderAC && !attackRoll.isCritFail()) {
+            message += " " + weapon.getHitLine();
+
+            int damage;
+            damage = rollDamage(character, attackRoll.isNaddy20());
+            message += String.format(" VIC took %d damage", damage);
+        }
+        else {
+            message += " " + weapon.getMissLine();
+        }
+
+        message = message.replaceAll("PC", characterName);
+        return message.replaceAll("VIC", victim);
+    }
+
+
+    private static int rollDamage(UserCharacter character, boolean isNat20) {
+        if (isNat20) {
+            return character.rollCriticalDamage();
+        }
+        else {
+            return character.rollDamage();
+        }
+    }
+
+
+    /**
+     * @param name name of the character
+     * @return description of the character
+     */
+    public static String getCharacterDescription(String authorID, String name) {
+        return loadFromDatabase(authorID, name).getDescription();
+    }
+
+
+    public String getDescription() {
+        String subraceString = "";
         if (subRace != null) {
-            charArgs.put(CharDatabaseFields.SUBRACE.fieldName, subRace.toString());
-        }
-        charArgs.put(CharDatabaseFields.BACKGROUND.fieldName, background.getBackgroundEnumVal().toString());
-        charArgs.put(CharDatabaseFields.BACKGROUND_SPECIFICS.fieldName, background.getForSpecificsDatabase());
-        charArgs.put(CharDatabaseFields.TRINKET.fieldName, trinket);
-        charArgs.put(CharDatabaseFields.WEAPON.fieldName, weapon.toString());
-        charArgs.put(CharDatabaseFields.FUNDS.fieldName, funds);
-        charDatabaseTable.insert(charArgs);
-
-        final int charID = getCharID(userID, name);
-
-        for (CharacterConstants.AbilityEnum ability : CharacterConstants.AbilityEnum.values()) {
-            final Map<String, Object> abilityArgs = new HashMap<>();
-            abilityArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
-            abilityArgs.put(CharAbilitiesDatabaseFields.ABILITY.getFieldName(), ability.toString());
-            abilityArgs.put(CharAbilitiesDatabaseFields.VALUE.getFieldName(), abilities.getStat(ability));
-            abilityArgs.put(CharAbilitiesDatabaseFields.IS_SAVING_THROW.getFieldName(), savingThrows.contains(ability));
-            charAbilitiesDatabaseTable.insert(abilityArgs);
+            subraceString = subRace.toString().toLowerCase() + " ";
         }
 
-        for (CharacterConstants.SkillEnum skill : skillProficiencies) {
-            final Map<String, Object> proficiencyArgs = new HashMap<>();
-            proficiencyArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-            proficiencyArgs.put(CharProficienciesDatabaseFields.PROF_TYPE.getFieldName(), "SKILL");
-            proficiencyArgs.put(CharProficienciesDatabaseFields.PROFICIENCY.getFieldName(), skill.toString());
-            charProficienciesDatabaseTable.insert(proficiencyArgs);
-        }
-        for (Map<String, Object> weaponProficienciesArgs : weaponProficiencies.toDatabaseArgs(
-                CharProficienciesDatabaseFields.PROFICIENCY,
-                CharProficienciesDatabaseFields.PROF_TYPE)) {
-            weaponProficienciesArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-            charProficienciesDatabaseTable.insert(weaponProficienciesArgs);
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("```fix\n%s, %s, %s%s %s (%s), %d gp```", name, age, subraceString,
+                                race.toPrintableString(), clazz.toPrintableString(), alignment, funds));
+        sb.append(String.format(
+                "```yaml\nStrength %d, Dexterity %d, Constitution %d, Intelligence %d, Wisdom %d, Charisma %d\n```",
+                abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH),
+                abilities.getStat(CharacterConstants.AbilityEnum.DEXTERITY),
+                abilities.getStat(CharacterConstants.AbilityEnum.CONSTITUTION),
+                abilities.getStat(CharacterConstants.AbilityEnum.INTELLIGENCE),
+                abilities.getStat(CharacterConstants.AbilityEnum.WISDOM),
+                abilities.getStat(CharacterConstants.AbilityEnum.CHARISMA)
+        ));
+        sb.append("```ini\n");
+        sb.append(String.format("[Saving Throws]: %s\n", DiscordPrintable.getAsPrintableString(savingThrows)));
+        sb.append(String.format("[Skill Proficiencies]: %s\n",
+                                DiscordPrintable.getAsPrintableString(skillProficiencies)));
+        sb.append(String.format("[Languages]: %s\n", DiscordPrintable.getAsPrintableString(languages)));
+        sb.append(String.format("[Weapon Proficiencies]: %s\n", weaponProficiencies.toString()));
+        sb.append(String.format("[Weapon]: %s```\n", weapon.toString().toLowerCase()));
+        sb.append(background.getDescription());
+        sb.append(String.format("\n\nFor as long as I can remember I've had %s", trinket));
 
-        for (CharacterConstants.Language language : languages) {
-            final Map<String, Object> languageArgs = new HashMap<>();
-            languageArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
-            languageArgs.put(CharLanguagesDatabaseFields.LANGUAGE.getFieldName(), language.toString());
-            charLanguagesDatabaseTable.insert(languageArgs);
-        }
+        return sb.toString();
     }
 
 
@@ -403,7 +350,8 @@ public class UserCharacter implements Serializable {
         charLanguagesDatabaseTable.selectAND(langugesArgs, rs -> {
             character.languages = new HashSet<>();
             while (rs.next()) {
-                character.languages.add(CharacterConstants.Language.valueOf(rs.getString(CharLanguagesDatabaseFields.LANGUAGE.fieldName)));
+                character.languages.add(CharacterConstants.Language
+                                                .valueOf(rs.getString(CharLanguagesDatabaseFields.LANGUAGE.fieldName)));
             }
             return null;
         });
@@ -412,31 +360,80 @@ public class UserCharacter implements Serializable {
 
 
     /**
-     * @return character ID
-     * @throws BadUserInputException if the character name is invalid
-     * @throws BadStateException if the user doesn't have any characters
+     * Die a specific stat, saving throw, or initiative
+     *
+     * @return the roll string e.g. "name rolled a 7 and crit"
      */
-    private static Integer getCharID(String userID, String name) {
-        final Map<String, Object> getIDArgs = new HashMap<>();
-        getIDArgs.put(CharDatabaseFields.USERID.fieldName, userID);
-        getIDArgs.put(CharDatabaseFields.NAME.fieldName, name);
-        return (Integer) charDatabaseTable.selectAND(getIDArgs, rs -> {
-            if (rs.next()) {
-                return rs.getInt(charDatabaseTable.getPrimaryKey());
+    public static String roll(String authorID, String name, String args) {
+        args = args.toUpperCase();
+        final UserCharacter character = loadFromDatabase(authorID, name);
+        final String rollString = name + " ";
+
+        if (args.equals("INITIATIVE")) {
+            final int modifier = character.abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
+            return rollString + new Die(1, 20, modifier).getStringForRoll();
+        }
+
+        try {
+            final CharacterConstants.AbilityEnum ability = CharacterConstants.AbilityEnum.valueOf(args);
+            int modifier = character.abilities.getModifier(ability);
+            if (character.savingThrows.contains(ability)) {
+                modifier += CharacterConstants.getProficiencyBonus(character.level);
             }
-            else {
-                // Find out why the previous select failed by checking if the user has any characters
-                getIDArgs.remove(CharDatabaseFields.NAME.getFieldName());
-                return charDatabaseTable.selectAND(getIDArgs, rs2 -> {
-                    if (rs2.next()) {
-                        throw new BadUserInputException("You don't have a character with the name " + name);
-                    }
-                    else {
-                        throw new BadStateException("You don't have any characters");
-                    }
-                });
+            return rollString + new Die(1, 20, modifier).getStringForRoll();
+        } catch (IllegalArgumentException e) {
+            // It may have been a skill check
+        }
+
+        try {
+            final CharacterConstants.SkillEnum skill = CharacterConstants.SkillEnum.valueOf(args);
+            int modifier = character.abilities.getModifier(skill.getMainAbility());
+            if (character.skillProficiencies.contains(skill)) {
+                modifier += CharacterConstants.getProficiencyBonus(character.level);
             }
-        });
+            return rollString + new Die(1, 20, modifier).getStringForRoll();
+        } catch (IllegalArgumentException e) {
+            throw new BadUserInputException("You can only roll abilities, skills, or initiative");
+        }
+    }
+
+
+    public void setClazz(Clazz.ClassEnum clazz) {
+        this.clazz = clazz;
+    }
+
+
+    public Race.RaceEnum getRace() {
+        return race;
+    }
+
+
+    public void setRace(Race.RaceEnum race) {
+        this.race = race;
+    }
+
+
+    public void setSubRace(SubRace.SubRaceEnum subRace) {
+        if (race == null) {
+            throw new ContactEwaException("You need a race before you can have a subrace");
+        }
+        Race.RaceEnum mainRace = Race.getRaceInfo(subRace).getMainRace();
+        if (race == mainRace) {
+            this.subRace = subRace;
+        }
+        else {
+            throw new BadUserInputException("This subrace can only be chosen if your race is " + mainRace.toString());
+        }
+    }
+
+
+    /**
+     * Sets the character background and alignment (required for background generation)
+     */
+    public void setBackground(Background.BackgroundEnum background) {
+        final Alignment alignment = Race.getRaceInfo(race).getRandomAlignment();
+        this.alignment = alignment.getAlignmentInitials();
+        this.background = background.generateRandomBackground(alignment);
     }
 
 
@@ -566,172 +563,54 @@ public class UserCharacter implements Serializable {
     }
 
 
-    /**
-     * Deletes a specified characters related to a user
-     *
-     * @param userID the id of the user who's characters will be deleted
-     */
-    public static void deleteCharacter(String userID, String name) {
-        int charID = getCharID(userID, name);
+    private void saveToDatabase(String userID) {
         final Map<String, Object> charArgs = new HashMap<>();
-        charArgs.put(CharDatabaseFields.USERID.getFieldName(), userID);
-        charArgs.put(CharDatabaseFields.NAME.getFieldName(), name);
-        charDatabaseTable.deleteAND(charArgs);
-
-        final Map<String, Object> abilArgs = new HashMap<>();
-        abilArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charAbilitiesDatabaseTable.deleteAND(abilArgs);
-        final Map<String, Object> profArgs = new HashMap<>();
-        profArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charProficienciesDatabaseTable.deleteAND(profArgs);
-    }
-
-
-    /**
-     * @throws BadUserInputException if weapon is not recognised
-     */
-    public static void changeCharacterWeapon(String authorID, String name, String newWeapon) {
-        final Weapon.WeaponsEnum weapon;
-        try {
-            weapon = Weapon.WeaponsEnum.valueOf(newWeapon.replace(" ", "").toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException(
-                    "Weapon not recognised, you can see a list of weapons using !char weapons list");
-        }
-
-        final Map<String, Object> setArgs = new HashMap<>();
-        setArgs.put(CharDatabaseFields.WEAPON.getFieldName(), weapon.toString());
-        final Map<String, Object> whereArgs = new HashMap<>();
-        whereArgs.put(charDatabaseTable.getPrimaryKey(), getCharID(authorID, name));
-        charDatabaseTable.updateAND(setArgs, whereArgs);
-    }
-
-
-    /**
-     * @return attack flavour text and how much damage was dealt
-     */
-    public static String attack(User author, String characterName, String victim) {
-        final UserCharacter character = loadFromDatabase(author.getId(), characterName);
-        victim = victim.trim().replace("@", "");
-
-        final Weapon weapon = character.getWeaponInfo();
-        String message = weapon.getAttackLine();
-
-        final Die.RollResult attackRoll = new Die(1, 20, character.getAttackModifier()).roll();
-        if (attackRoll.getTotal() >= defenderAC && !attackRoll.isCritFail()) {
-            message += " " + weapon.getHitLine();
-
-            int damage;
-            damage = rollDamage(character, attackRoll.isNaddy20());
-            message += String.format(" VIC took %d damage", damage);
-        }
-        else {
-            message += " " + weapon.getMissLine();
-        }
-
-        message = message.replaceAll("PC", characterName);
-        return message.replaceAll("VIC", victim);
-    }
-
-
-    private static int rollDamage(UserCharacter character, boolean isNat20) {
-        if (isNat20) {
-            return character.rollCriticalDamage();
-        }
-        else {
-            return character.rollDamage();
-        }
-    }
-
-
-    /**
-     * @param name name of the character
-     * @return description of the character
-     */
-    public static String getCharacterDescription(String authorID, String name) {
-        return loadFromDatabase(authorID, name).getDescription();
-    }
-
-
-    public String getDescription() {
-        String subraceString = "";
+        charArgs.put(CharDatabaseFields.USERID.fieldName, userID);
+        charArgs.put(CharDatabaseFields.NAME.fieldName, name);
+        charArgs.put(CharDatabaseFields.AGE.fieldName, age);
+        charArgs.put(CharDatabaseFields.ALIGNMENT.fieldName, alignment);
+        charArgs.put(CharDatabaseFields.CLAZZ.fieldName, clazz.toString());
+        charArgs.put(CharDatabaseFields.RACE.fieldName, race.toString());
         if (subRace != null) {
-            subraceString = subRace.toString().toLowerCase() + " ";
+            charArgs.put(CharDatabaseFields.SUBRACE.fieldName, subRace.toString());
+        }
+        charArgs.put(CharDatabaseFields.BACKGROUND.fieldName, background.getBackgroundEnumVal().toString());
+        charArgs.put(CharDatabaseFields.BACKGROUND_SPECIFICS.fieldName, background.getForSpecificsDatabase());
+        charArgs.put(CharDatabaseFields.TRINKET.fieldName, trinket);
+        charArgs.put(CharDatabaseFields.WEAPON.fieldName, weapon.toString());
+        charArgs.put(CharDatabaseFields.FUNDS.fieldName, funds);
+        charDatabaseTable.insert(charArgs);
+
+        final int charID = getCharID(userID, name);
+
+        for (CharacterConstants.AbilityEnum ability : CharacterConstants.AbilityEnum.values()) {
+            final Map<String, Object> abilityArgs = new HashMap<>();
+            abilityArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
+            abilityArgs.put(CharAbilitiesDatabaseFields.ABILITY.getFieldName(), ability.toString());
+            abilityArgs.put(CharAbilitiesDatabaseFields.VALUE.getFieldName(), abilities.getStat(ability));
+            abilityArgs.put(CharAbilitiesDatabaseFields.IS_SAVING_THROW.getFieldName(), savingThrows.contains(ability));
+            charAbilitiesDatabaseTable.insert(abilityArgs);
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("```fix\n%s, %s, %s%s %s (%s), %d gp```", name, age, subraceString,
-                                race.toString(), clazz.toString().toLowerCase(), alignment, funds));
-        sb.append(String.format(
-                "```yaml\nStrength %d, Dexterity %d, Constitution %d, Intelligence %d, Wisdom %d, Charisma %d\n```",
-                abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH),
-                abilities.getStat(CharacterConstants.AbilityEnum.DEXTERITY),
-                abilities.getStat(CharacterConstants.AbilityEnum.CONSTITUTION),
-                abilities.getStat(CharacterConstants.AbilityEnum.INTELLIGENCE),
-                abilities.getStat(CharacterConstants.AbilityEnum.WISDOM),
-                abilities.getStat(CharacterConstants.AbilityEnum.CHARISMA)
-        ));
-        sb.append("```ini\n");
-        sb.append(String.format("[Saving Throws]: %s\n", getAsPrintableString(savingThrows)));
-        sb.append(String.format("[Skill Proficiencies]: %s\n", getAsPrintableString(skillProficiencies)));
-        sb.append(String.format("[Languages]: %s\n", getAsPrintableString(languages)));
-        sb.append(String.format("[Weapon Proficiencies]: %s\n", weaponProficiencies.toString()));
-        sb.append(String.format("[Weapon]: %s```\n", weapon.toString().toLowerCase()));
-        sb.append(background.getDescription());
-        sb.append(String.format("\n\nFor as long as I can remember I've had %s", trinket));
-
-        return sb.toString();
-    }
-
-
-    /**
-     * @return each item in the list separated by ,
-     */
-    private <E extends Enum<E>> String getAsPrintableString(Set<E> objects) {
-        final StringBuilder sb = new StringBuilder();
-        for (E object : objects) {
-            sb.append(object.toString());
-            sb.append(", ");
+        for (CharacterConstants.SkillEnum skill : skillProficiencies) {
+            final Map<String, Object> proficiencyArgs = new HashMap<>();
+            proficiencyArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
+            proficiencyArgs.put(CharProficienciesDatabaseFields.PROF_TYPE.getFieldName(), "SKILL");
+            proficiencyArgs.put(CharProficienciesDatabaseFields.PROFICIENCY.getFieldName(), skill.toString());
+            charProficienciesDatabaseTable.insert(proficiencyArgs);
         }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
-    }
-
-
-    /**
-     * Die a specific stat, saving throw, or initiative
-     * @return the roll string e.g. "name rolled a 7 and crit"
-     */
-    public static String roll(String authorID, String name, String args) {
-        args = args.toUpperCase();
-        final UserCharacter character = loadFromDatabase(authorID, name);
-        final String rollString = name + " ";
-
-        if (args.equals("INITIATIVE")) {
-            final int modifier = character.abilities.getModifier(CharacterConstants.AbilityEnum.DEXTERITY);
-            return rollString + new Die(1, 20, modifier).getStringForRoll();
+        for (Map<String, Object> weaponProficienciesArgs : weaponProficiencies.toDatabaseArgs(
+                CharProficienciesDatabaseFields.PROFICIENCY,
+                CharProficienciesDatabaseFields.PROF_TYPE)) {
+            weaponProficienciesArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
+            charProficienciesDatabaseTable.insert(weaponProficienciesArgs);
         }
 
-        try {
-            final CharacterConstants.AbilityEnum ability = CharacterConstants.AbilityEnum.valueOf(args);
-            int modifier = character.abilities.getModifier(ability);
-            if (character.savingThrows.contains(ability)) {
-                modifier += CharacterConstants.getProficiencyBonus(character.level);
-            }
-            return rollString + new Die(1, 20, modifier).getStringForRoll();
-        } catch (IllegalArgumentException e) {
-            // It may have been a skill check
-        }
-
-        try {
-            final CharacterConstants.SkillEnum skill = CharacterConstants.SkillEnum.valueOf(args);
-            int modifier = character.abilities.getModifier(skill.getMainAbility());
-            if (character.skillProficiencies.contains(skill)) {
-                modifier += CharacterConstants.getProficiencyBonus(character.level);
-            }
-            return rollString + new Die(1, 20, modifier).getStringForRoll();
-        } catch (IllegalArgumentException e) {
-            throw new BadUserInputException("You can only roll abilities, skills, or initiative");
+        for (CharacterConstants.Language language : languages) {
+            final Map<String, Object> languageArgs = new HashMap<>();
+            languageArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
+            languageArgs.put(CharLanguagesDatabaseFields.LANGUAGE.getFieldName(), language.toString());
+            charLanguagesDatabaseTable.insert(languageArgs);
         }
     }
 
@@ -770,8 +649,7 @@ public class UserCharacter implements Serializable {
             case FINESSE:
             default:
                 if (abilities.getStat(CharacterConstants.AbilityEnum.STRENGTH) > abilities
-                        .getStat(CharacterConstants.AbilityEnum.DEXTERITY))
-                {
+                        .getStat(CharacterConstants.AbilityEnum.DEXTERITY)) {
                     return getAbilityAttackModifier(Weapon.AttackTypeEnum.MELEE);
                 }
                 else {
@@ -802,5 +680,160 @@ public class UserCharacter implements Serializable {
             damage += getWeaponInfo().rollOneDamageDie();
         }
         return damage;
+    }
+
+
+    private interface TableAction<T> {
+        T action(DatabaseTable table);
+    }
+
+
+
+    private enum CharDatabaseFields implements DatabaseTable.DatabaseField {
+        USERID("user", DatabaseTable.SQLType.TEXT, true), NAME("name", DatabaseTable.SQLType.TEXT, true),
+        AGE("age", DatabaseTable.SQLType.INT, true), ALIGNMENT("alignment", DatabaseTable.SQLType.TEXT, true),
+        CLAZZ("clazz", DatabaseTable.SQLType.TEXT, true), RACE("race", DatabaseTable.SQLType.TEXT, true),
+        SUBRACE("subrace", DatabaseTable.SQLType.TEXT, false), BACKGROUND(
+                "background", DatabaseTable.SQLType.TEXT, true),
+        BACKGROUND_SPECIFICS("backgroundSpecifics", DatabaseTable.SQLType.TEXT, true),
+        TRINKET("trinket", DatabaseTable.SQLType.TEXT, true), WEAPON("weapon", DatabaseTable.SQLType.TEXT, true),
+        FUNDS("funds", DatabaseTable.SQLType.INT, true);
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        CharDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+    }
+
+
+
+    private enum CharAbilitiesDatabaseFields implements DatabaseTable.DatabaseField {
+        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), ABILITY("ability", DatabaseTable.SQLType.TEXT, true),
+        VALUE("value", DatabaseTable.SQLType.INT, true), IS_SAVING_THROW(
+                "isSavingThrow", DatabaseTable.SQLType.BIT, true);
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        CharAbilitiesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+    }
+
+
+
+    private enum CharProficienciesDatabaseFields implements DatabaseTable.DatabaseField {
+        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), PROF_TYPE("profType", DatabaseTable.SQLType.TEXT, true),
+        PROFICIENCY("proficiency", DatabaseTable.SQLType.TEXT, true);
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        CharProficienciesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+    }
+
+
+
+    private enum CharLanguagesDatabaseFields implements DatabaseTable.DatabaseField {
+        CHAR_ID("charID", DatabaseTable.SQLType.INT, true), LANGUAGE("language", DatabaseTable.SQLType.TEXT, true);
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        CharLanguagesDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
     }
 }

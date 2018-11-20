@@ -17,51 +17,18 @@ import java.util.Random;
 /**
  * Preserve the beautiful words of those in the server in time immemorial
  * Allows users to save messages and retrieve saved messages
+ * Message indexes are SQL auto incremented so they start at 1
  * TODO Implement Remove duplicate quotes
  * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
-    private static DatabaseTable databaseTable = DatabaseTable.createDatabaseTable("Quotes", QuoteDatabaseFields.values());
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
+    private static DatabaseTable databaseTable = DatabaseTable.createDatabaseTable(
+            "Quotes", QuoteDatabaseFields.values());
     private String author;
     private ZonedDateTime date;
     private String message;
 
-
-    private enum QuoteDatabaseFields implements DatabaseTable.DatabaseFieldsEnum {
-        AUTHOR("author", DatabaseTable.SQLType.TEXT, true), DATE("date", DatabaseTable.SQLType.DATE, true),
-        MESSAGE("message", DatabaseTable.SQLType.TEXT, true);
-
-
-        private String fieldName;
-        private DatabaseTable.SQLType sqlType;
-        private boolean required;
-
-
-        QuoteDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
-            this.fieldName = fieldName;
-            this.sqlType = sqlType;
-            this.required = required;
-        }
-
-
-        @Override
-        public String getFieldName() {
-            return fieldName;
-        }
-
-
-        @Override
-        public DatabaseTable.SQLType getSqlType() {
-            return sqlType;
-        }
-
-
-        @Override
-        public boolean isRequired() {
-            return required;
-        }
-    }
 
 
     public Quotes(String author, ZonedDateTime date, String message) {
@@ -106,19 +73,24 @@ public class Quotes implements Serializable {
         else if (index > size) {
             throw new BadUserInputException("Quote number is too high");
         }
+        else if (index == 0) {
+            throw new BadUserInputException("Arrays start at 1, ( ͡° ͜ʖ ͡°)");
+        }
+        else if (index < 0) {
+            throw new BadUserInputException("A positive number please");
+        }
         else {
-            Map<String, Object> args = new HashMap<>();
+            final Map<String, Object> args = new HashMap<>();
             args.put(databaseTable.getPrimaryKey(), index);
-            DatabaseTable.ResultsSetAction resultsSetAction = rs -> {
+            final Quotes quote = (Quotes) databaseTable.selectAND(args, rs -> {
                 if (rs.next()) {
-                    String author = rs.getString(QuoteDatabaseFields.AUTHOR.fieldName);
-                    ZonedDateTime date = DatabaseTable.getDatabaseDateFromString(rs.getString(QuoteDatabaseFields.DATE.fieldName));
-                    String message = rs.getString(QuoteDatabaseFields.MESSAGE.fieldName);
-                    return new Quotes(author, date, message);
+                    return new Quotes(
+                            rs.getString(QuoteDatabaseFields.AUTHOR.fieldName),
+                            DatabaseTable.getDatabaseDateFromString(rs.getString(QuoteDatabaseFields.DATE.fieldName)),
+                            rs.getString(QuoteDatabaseFields.MESSAGE.fieldName));
                 }
                 return null;
-            };
-            final Quotes quote = (Quotes) databaseTable.selectAND(args, resultsSetAction);
+            });
             if (quote != null) {
                 return String.format("Quote number %d\n%s", index, quote.toString());
             }
@@ -126,6 +98,14 @@ public class Quotes implements Serializable {
                 throw new BadStateException("There is no quote with the id " + index);
             }
         }
+    }
+
+
+    /**
+     * @return the number of quotes currently stored
+     */
+    public static int size() {
+        return databaseTable.getRowCount();
     }
 
 
@@ -165,14 +145,6 @@ public class Quotes implements Serializable {
 
 
     /**
-     * @return the number of quotes currently stored
-     */
-    public static int size() {
-        return databaseTable.getRowCount();
-    }
-
-
-    /**
      * WARNING: DATA LOSS
      * Deletes the channelMessages history and all savedQuotes
      */
@@ -191,6 +163,42 @@ public class Quotes implements Serializable {
                 "Reset all the quoteIDs so that they are consecutive stating from 1 (helpful if many quotes have been"
                         + " deleted and numbers are getting sparse)");
     }
+
+
+    private enum QuoteDatabaseFields implements DatabaseTable.DatabaseField {
+        AUTHOR("author", DatabaseTable.SQLType.TEXT, true), DATE("date", DatabaseTable.SQLType.DATE, true),
+        MESSAGE("message", DatabaseTable.SQLType.TEXT, true);
+
+        private String fieldName;
+        private DatabaseTable.SQLType sqlType;
+        private boolean required;
+
+
+        QuoteDatabaseFields(String fieldName, DatabaseTable.SQLType sqlType, boolean required) {
+            this.fieldName = fieldName;
+            this.sqlType = sqlType;
+            this.required = required;
+        }
+
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        @Override
+        public DatabaseTable.SQLType getSqlType() {
+            return sqlType;
+        }
+
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+    }
+
 
 
     /**

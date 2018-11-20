@@ -1,6 +1,7 @@
 package CharacterBox.AttackBox;
 
 import CharacterBox.CharacterConstants;
+import CharacterBox.DiscordPrintable;
 import CoreBox.Bot;
 import CoreBox.Die;
 import com.google.gson.*;
@@ -30,40 +31,37 @@ public class Weapon {
 
 
 
-    public enum WeaponsEnum {
-        IMPROVISED, SHORTSWORD, LONGSWORD, SHORTBOW, LONGBOW, RAPIER, GREATAXE, MACE, CROSSBOW, LIGHTCROSSBOW, UNARMED,
-        LIGHTHAMMER;
-
-
-        static {
-            IMPROVISED.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-            MACE.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-            LIGHTHAMMER.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-            UNARMED.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-
-            SHORTBOW.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-            LIGHTCROSSBOW.weaponProficiency = WeaponProficiencyEnum.SIMPLE;
-
-            SHORTSWORD.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-            RAPIER.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-            GREATAXE.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-            LONGSWORD.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-
-            LONGBOW.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-            CROSSBOW.weaponProficiency = WeaponProficiencyEnum.MARTIAL;
-        }
+    public enum WeaponsEnum implements DiscordPrintable {
+        IMPROVISED(WeaponProficiencyEnum.SIMPLE), SHORTSWORD(WeaponProficiencyEnum.MARTIAL),
+        LONGSWORD(WeaponProficiencyEnum.MARTIAL), SHORTBOW(WeaponProficiencyEnum.SIMPLE),
+        LONGBOW(WeaponProficiencyEnum.MARTIAL), RAPIER(WeaponProficiencyEnum.MARTIAL),
+        GREATAXE(WeaponProficiencyEnum.MARTIAL), MACE(WeaponProficiencyEnum.SIMPLE),
+        CROSSBOW(WeaponProficiencyEnum.MARTIAL), LIGHTCROSSBOW(WeaponProficiencyEnum.SIMPLE),
+        UNARMED(WeaponProficiencyEnum.SIMPLE), LIGHTHAMMER(WeaponProficiencyEnum.SIMPLE);
 
 
         private WeaponProficiencyEnum weaponProficiency;
 
 
+        WeaponsEnum(WeaponProficiencyEnum weaponProficiency) {
+            this.weaponProficiency = weaponProficiency;
+        }
+
+
         public WeaponProficiencyEnum getWeaponProficiency() {
             return weaponProficiency;
+        }
+
+
+        @Override
+        public String toPrintableString() {
+            return toString().toLowerCase();
         }
     }
 
 
 
+    // TODO Implement damage types
     public enum DamageType {BLUDGEONING, PIERCING, SLASHING}
 
 
@@ -103,8 +101,7 @@ public class Weapon {
 
 
     public Weapon(AttackTypeEnum weaponTypeEnum, int damageQuantity, int damageDie, String[] attackLines,
-                  String[] hitLines, String[] missLines)
-    {
+                  String[] hitLines, String[] missLines) {
         this.weaponTypeEnum = weaponTypeEnum;
         this.damageQuantity = damageQuantity;
         this.damageDie = damageDie;
@@ -139,19 +136,7 @@ public class Weapon {
         if (weapons == null) {
             getWeaponsFromFile();
         }
-
-        String weapons = "Available weapons: ";
-        final WeaponsEnum[] weaponsEnums = WeaponsEnum.values();
-
-        for (int i = 0; i < weaponsEnums.length; i++) {
-            weapons += weaponsEnums[i].toString();
-
-            if (i < weaponsEnums.length - 1) {
-                weapons += ", ";
-            }
-        }
-
-        return weapons.toLowerCase();
+        return "Available weapons: " + DiscordPrintable.getAsPrintableString(WeaponsEnum.values());
     }
 
 
@@ -207,8 +192,7 @@ public class Weapon {
 
     private static class WeaponDeserializer implements JsonDeserializer<Weapon> {
         public Weapon deserialize(JsonElement json, Type typeOfT,
-                                  JsonDeserializationContext context) throws JsonParseException
-        {
+                                  JsonDeserializationContext context) throws JsonParseException {
             return new Weapon(json.getAsJsonObject().get("weapons").getAsJsonArray());
         }
     }

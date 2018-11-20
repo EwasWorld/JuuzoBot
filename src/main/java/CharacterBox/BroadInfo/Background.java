@@ -2,6 +2,7 @@ package CharacterBox.BroadInfo;
 
 import CharacterBox.Alignment;
 import CharacterBox.CharacterConstants;
+import CharacterBox.DiscordPrintable;
 import CharacterBox.UserBackground;
 import CoreBox.Bot;
 import ExceptionsBox.BadStateException;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
@@ -22,19 +22,27 @@ import static java.nio.file.Files.readAllBytes;
 
 
 public class Background {
-    public enum BackgroundEnum {
+    public enum BackgroundEnum implements DiscordPrintable {
         ACOLYTE, CHARLATAN, CRIMINAL, ENTERTAINER, FOLKHERO, GUILDARTISAN,
         HERMIT, NOBLE, OUTLANDER, SAGE, SAILOR, SOLDIER, URCHIN;
 
 
         public UserBackground generateRandomBackground(Alignment alignment) {
             final Background bg = Background.getBackgroundInfo(this);
-            return new UserBackground(this, getRandomInt(bg.possibilities), getRandomInt(bg.traits), bg.getRandomIdealInt(alignment), getRandomInt(bg.bonds), getRandomInt(bg.flaws));
+            return new UserBackground(
+                    this, getRandomInt(bg.possibilities), getRandomInt(bg.traits), bg.getRandomIdealInt(alignment),
+                    getRandomInt(bg.bonds), getRandomInt(bg.flaws));
         }
 
 
         private int getRandomInt(Object[] objects) {
             return new Random().nextInt(objects.length);
+        }
+
+
+        @Override
+        public String toPrintableString() {
+            return toString();
         }
     }
 
@@ -64,6 +72,7 @@ public class Background {
 
     private static final String fileLocation = Bot.getResourceFilePath() + "CharacterGeneration/Backgrounds.json";
     private static Map<BackgroundEnum, Background> backgrounds;
+    private static File file = new File(fileLocation);
     private String[] possibilities;
     private Set<CharacterConstants.SkillEnum> proficiencies;
     private Set<CharacterConstants.Language> languages;
@@ -71,8 +80,6 @@ public class Background {
     private Ideal[] ideals;
     private String[] bonds;
     private String[] flaws;
-
-    private static File file = new File(fileLocation);
 
 
     public Background(Object rawObj) {
@@ -97,22 +104,6 @@ public class Background {
     }
 
 
-    public String getBackgroundDescription(UserBackground background) {
-        Ideal ideal = ideals[background.getIdeal()];
-        String flaw = flaws[background.getFlaw()];
-        if (flaw.charAt(0) != "I".charAt(0)) {
-            flaw = String.valueOf(flaw.charAt(0)).toLowerCase() + flaw.substring(1);
-        }
-
-        String string = "";
-        string += String.format("%s %s", possibilities[background.getPossibility()], traits[background.getTrait()]);
-        string += String.format(" I'm driven by %s. %s", ideal.name.toLowerCase(), ideal.description);
-        string += String.format(" %s However, %s", bonds[background.getBond()], flaw);
-
-        return string;
-    }
-
-
     private Ideal[] createIdeals(JsonArray idealsJsonArray) {
         List<Ideal> ideals = new ArrayList<>();
         for (JsonElement element : idealsJsonArray) {
@@ -129,8 +120,7 @@ public class Background {
 
     private Background(String[] possibilities, Set<CharacterConstants.SkillEnum> proficiencies,
                        Set<CharacterConstants.Language> languages, String[] traits,
-                       Ideal[] ideals, String[] bonds, String[] flaws)
-    {
+                       Ideal[] ideals, String[] bonds, String[] flaws) {
         this.possibilities = possibilities;
         this.proficiencies = proficiencies;
         this.languages = languages;
@@ -175,7 +165,6 @@ public class Background {
                 file.createNewFile();
                 InputStream inputStream = Background.class.getResourceAsStream(fileLocation);
                 Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -194,6 +183,22 @@ public class Background {
     }
 
 
+    public String getBackgroundDescription(UserBackground background) {
+        final Ideal ideal = ideals[background.getIdeal()];
+        String flaw = flaws[background.getFlaw()];
+        if (flaw.charAt(0) != "I".charAt(0)) {
+            flaw = String.valueOf(flaw.charAt(0)).toLowerCase() + flaw.substring(1);
+        }
+
+        String string = "";
+        string += String.format("%s %s", possibilities[background.getPossibility()], traits[background.getTrait()]);
+        string += String.format(" I'm driven by %s. %s", ideal.name.toLowerCase(), ideal.description);
+        string += String.format(" %s However, %s", bonds[background.getBond()], flaw);
+
+        return string;
+    }
+
+
     /*
      * Returns a random ideal ensuring the the alignment given allows for the ideal
      */
@@ -208,8 +213,11 @@ public class Background {
     }
 
 
+    /**
+     * @return a copy of the skill proficiencies of the background
+     */
     public Set<CharacterConstants.SkillEnum> getProficiencies() {
-        return proficiencies;
+        return new HashSet<>(proficiencies);
     }
 
 
@@ -220,8 +228,7 @@ public class Background {
 
     private static class BackgroundsSetUpDeserializer implements JsonDeserializer<Background> {
         public Background deserialize(JsonElement json, Type typeOfT,
-                                      JsonDeserializationContext context) throws JsonParseException
-        {
+                                      JsonDeserializationContext context) throws JsonParseException {
             return new Background(json.getAsJsonObject().get("backgrounds").getAsJsonArray());
         }
     }

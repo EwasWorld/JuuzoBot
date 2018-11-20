@@ -9,19 +9,18 @@ import java.util.*;
 
 public class CharacterConstants {
 
-
     public enum Size {TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN}
 
 
 
-    public enum Language {
+    public enum Language implements DiscordPrintable {
         COMMON, DWARVISH, ELVISH, GIANT, GNOMISH, GOBLIN,
         HALFLING, ORC, ABYSSAL, CELESTIAL, DRACONIC, DEEPSPEECH,
         INFERNAL, PRIMORDIAL, SYLVAN, UNDERCOMMON, WILDCARD, WILDCARD2;
 
 
         @Override
-        public String toString() {
+        public String toPrintableString() {
             String enumStr = super.toString();
             return enumStr.charAt(0) + enumStr.substring(1).toLowerCase();
         }
@@ -29,19 +28,19 @@ public class CharacterConstants {
 
 
 
-    public enum AbilityEnum {
+    public enum AbilityEnum implements DiscordPrintable {
         STRENGTH, DEXTERITY, CONSTITUTION, INTELLIGENCE, WISDOM, CHARISMA;
 
 
         @Override
-        public String toString() {
+        public String toPrintableString() {
             return super.toString().toLowerCase();
         }
     }
 
 
 
-    public enum SkillEnum {
+    public enum SkillEnum implements DiscordPrintable {
         ACROBATICS, ANIMALHANDLING, ARCANA, ATHLETICS, DECEPTION, HISTORY,
         INSIGHT, INTIMIDATION, INVESTIGATION, MEDICINE, NATURE, PERCEPTION,
         PERFORMANCE, PERSUASION, RELIGION, SLEIGHTOFHAND, STEALTH, SURVIVAL;
@@ -82,7 +81,7 @@ public class CharacterConstants {
 
 
         @Override
-        public String toString() {
+        public String toPrintableString() {
             return super.toString().toLowerCase();
         }
     }
@@ -113,28 +112,17 @@ public class CharacterConstants {
 
 
     public static AbilityEnum convertAbilityToEnum(String ability) {
-        switch (ability) {
-            case "Strength":
-            case "Str":
-                return AbilityEnum.STRENGTH;
-            case "Dexterity":
-            case "Dex":
-                return AbilityEnum.DEXTERITY;
-            case "Constitution":
-            case "Con":
-                return AbilityEnum.CONSTITUTION;
-            case "Intelligence":
-            case "Int":
-                return AbilityEnum.INTELLIGENCE;
-            case "Wisdom":
-            case "Wis":
-                return AbilityEnum.WISDOM;
-            case "Charisma":
-            case "Cha":
-                return AbilityEnum.CHARISMA;
-            default:
-                return null;
+        try {
+            return AbilityEnum.valueOf(ability.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // May be using a shortened version of the name
         }
+        for (AbilityEnum abilityEnum : AbilityEnum.values()) {
+            if (abilityEnum.toString().startsWith(ability.toUpperCase())) {
+                return abilityEnum;
+            }
+        }
+        return null;
     }
 
 
@@ -169,8 +157,8 @@ public class CharacterConstants {
 
 
     /*
-         * If there is a wildcard language then it picks one at random
-         */
+     * If there is a wildcard language then it picks one at random
+     */
     public static Set<Language> createLanguages(JsonArray languagesJson) {
         final Set<Language> languages = new HashSet<>();
         for (JsonElement language : languagesJson) {

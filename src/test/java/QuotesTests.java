@@ -1,29 +1,40 @@
+import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadUserInputException;
 import CoreBox.Quotes;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 
 
-public class QuotesTests extends TestCase {
-    /*@Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+/**
+ * refactored: 19/11/18
+ */
+public class QuotesTests {
+    @Before
+    public void setup() {
+        DatabaseTable.setTestMode();
+        Quotes.addMessage("TestAuthor", "TestQuote");
+        Quotes.addMessage("TestAuthor", "AddQuote");
+        Quotes.addMessage("TestAuthor", "TestQuote");
+    }
+
+    @After
+    public void tearDown() {
         Quotes.clearMessagesAndQuotes();
     }
 
 
+    @Test
     public void testAddMessage() {
-        Quotes.addMessage("TestAuthor", "TestQuote");
     }
 
 
+    @Test
     public void testAddQuotes() {
-        Quotes.addMessage("TestAuthor", "TestQuote");
-        Quotes.addMessage("TestAuthor", "AddQuote");
-        Quotes.addMessage("TestAuthor", "TestQuote");
         Quotes.addQuote("Add");
-        assertEquals(1, Quotes.size());
-
+        Assert.assertEquals(1, Quotes.size());
 
         boolean exceptionThrown = false;
         try {
@@ -31,9 +42,8 @@ public class QuotesTests extends TestCase {
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
-        assertEquals(1, Quotes.size());
-
+        Assert.assertFalse(exceptionThrown);
+        Assert.assertEquals(2, Quotes.size());
 
         exceptionThrown = false;
         try {
@@ -41,18 +51,15 @@ public class QuotesTests extends TestCase {
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
-        assertEquals(1, Quotes.size());
+        Assert.assertTrue(exceptionThrown);
+        Assert.assertEquals(2, Quotes.size());
     }
 
 
+    @Test
     public void testRemoveQuote() {
-        Quotes.addMessage("TestAuthor", "TestQuote");
-        Quotes.addMessage("TestAuthor", "AddQuote");
-        Quotes.addMessage("TestAuthor", "TestQuote");
         Quotes.addQuote("Add");
-        assertEquals(1, Quotes.size());
-
+        Assert.assertEquals(1, Quotes.size());
 
         boolean exceptionThrown = false;
         try {
@@ -60,50 +67,47 @@ public class QuotesTests extends TestCase {
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
-        assertEquals(1, Quotes.size());
+        Assert.assertTrue(exceptionThrown);
+        Assert.assertEquals(1, Quotes.size());
 
-
-        Quotes.removeQuote(0);
-        assertEquals(0, Quotes.size());
+        Quotes.removeQuote(1);
+        Assert.assertEquals(0, Quotes.size());
     }
 
 
+    @Test
     public void testGetQuote() {
-        Quotes.addMessage("TestAuthor", "TestQuote");
-        Quotes.addMessage("TestAuthor", "AddQuote");
-        Quotes.addMessage("TestAuthor", "TestQuote");
         Quotes.addQuote("AddQuote");
-        assertEquals(1, Quotes.size());
-
+        Assert.assertEquals(1, Quotes.size());
         Quotes.getQuote();
-        Quotes.getQuote(0);
-
+        Quotes.getQuote(1);
 
         boolean exceptionThrown = false;
+        try {
+            Quotes.getQuote(0);
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        exceptionThrown = false;
         try {
             Quotes.getQuote(3);
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
+        Assert.assertTrue(exceptionThrown);
+        Assert.assertEquals(1, Quotes.size());
+    }
 
 
-        exceptionThrown = false;
-        try {
-            Quotes.getQuote("3");
-        } catch (BadUserInputException e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
+    @Test
+    public void testDeleteAllQuotes() {
+        Quotes.addQuote("AddQuote");
+        Quotes.addQuote("TestQuote");
+        Assert.assertEquals(2, Quotes.size());
 
-
-        exceptionThrown = false;
-        try {
-            Quotes.getQuote("Potato");
-        } catch (BadUserInputException e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
-    }*/
+        Quotes.clearMessagesAndQuotes();
+        Assert.assertEquals(0, Quotes.size());
+    }
 }

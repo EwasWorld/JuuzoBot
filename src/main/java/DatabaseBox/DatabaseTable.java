@@ -1,6 +1,7 @@
 package DatabaseBox;
 
 import CoreBox.Bot;
+import ExceptionsBox.ContactEwaException;
 
 import java.io.File;
 import java.sql.*;
@@ -16,17 +17,42 @@ import java.util.Date;
 
 /**
  * Abstracts database connections and provides methods for querying the database
+ * TODO have a test database that inherits from here so that live data is not edited when testing
  * created: 27/09/18
  */
 public class DatabaseTable {
+    public enum SQLType {
+        TEXT("text", String.class.getName()), BIT("bit", Boolean.class.getName()), INT("int", Integer.class.getName()),
+        DATE("text", ZonedDateTime.class.getName()), INTEGER("INTEGER", Integer.class.getName());
+
+        private String sqlName;
+        private String className;
+
+
+        SQLType(String sqlName, String className) {
+            this.sqlName = sqlName;
+            this.className = className;
+        }
+
+
+        public String getSqlName() {
+            return sqlName;
+        }
+
+
+        public String getClassName() {
+            return className;
+        }
+    }
+
+
+
     /*
      * Database connection
      */
-    private static final String databaseFileLocation = Bot.getPathToJuuzoBot() + "Juuzo2.db";
+    private static final String databaseFileLocation = "Juuzo2.db";
     // Used to establish the connection to the database
-    private static final String url = "jdbc:sqlite:" + databaseFileLocation;
-    private static Connection connection = null;
-
+    private static final String urlPrefix = "jdbc:sqlite:" + Bot.getPathToJuuzoBot();
     /*
      * Date formats (all dates are stored in UTC)
      * TODO FIX All dates are not being stored in UTC Q.Q plz fix
@@ -37,7 +63,8 @@ public class DatabaseTable {
     // Date format when printing the date
     public static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
     public static ZoneId zoneId = ZoneId.of("UTC");
-
+    private static String url = urlPrefix + databaseFileLocation;
+    private static Connection connection = null;
     /*
      * Table information
      */
@@ -46,39 +73,33 @@ public class DatabaseTable {
     private PrimaryKey primaryKey;
 
 
-    /**
-     * Fetches the existing database or creates a new database if one is not found
-     */
-    private static void createConnection() {
-        if (connection == null) {
-            try {
-                connection = DriverManager.getConnection(url);
-
-                if (!new File(databaseFileLocation).exists()) {
-                    if (connection != null) {
-                        connection.getMetaData();
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields, PrimaryKey primaryKey) {
+        this.tableName = tableName;
+        this.fields = fields;
+        this.primaryKey = primaryKey;
     }
 
 
     /**
-     * Make a connection to the database and create the table (if it doesn't already exist)
+     * Primary key: tableName + "ID"
      */
-    public Connection getConnection() {
-        if (connection == null) {
-            createConnection();
-        }
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(getCreateTableString());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
+    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields) {
+        this.tableName = tableName;
+        this.fields = fields;
+
+        final String primaryKeyName = tableName.toLowerCase() + "ID";
+        fields.put(primaryKeyName, new DatabaseFieldArgs(SQLType.INTEGER, "PRIMARY KEY", false));
+        primaryKey = new PrimaryKey(primaryKeyName);
+    }
+
+
+    public static void setTestMode() {
+        url = urlPrefix + "JuuzoTest.db";
+    }
+
+
+    public static boolean isInTestMode() {
+        return !url.equals(urlPrefix + databaseFileLocation);
     }
 
 
@@ -108,6 +129,26 @@ public class DatabaseTable {
     }
 
 
+    public static DatabaseTable createDatabaseTable(String tableName, DatabaseField[] fields) {
+        return new DatabaseTable(tableName, fieldsArrayToMap(fields));
+    }
+
+
+    private static Map<String, DatabaseFieldArgs> fieldsArrayToMap(DatabaseField[] fields) {
+        final Map<String, DatabaseFieldArgs> fieldsMap = new HashMap<>();
+        for (DatabaseField field : fields) {
+            fieldsMap.put(field.getFieldName(), new DatabaseFieldArgs(field.getSqlType(), field.isRequired()));
+        }
+        return fieldsMap;
+    }
+
+
+    public static DatabaseTable createDatabaseTable(String tableName, DatabaseField[] fields,
+                                                    PrimaryKey primaryKey) {
+        return new DatabaseTable(tableName, fieldsArrayToMap(fields), primaryKey);
+    }
+
+
     public void deleteTable() {
         if (connection == null) {
             createConnection();
@@ -120,43 +161,89 @@ public class DatabaseTable {
     }
 
 
-    public static DatabaseTable createDatabaseTable(String tableName, DatabaseFieldsEnum[] fields) {
-        return new DatabaseTable(tableName, fieldsArrayToMap(fields));
-    }
+    /**
+     * Fetches the existing database or creates a new database if one is not found
+     */
+    private static void createConnection() {
+        if (connection == null) {
+            try {
+                connection = DriverManager.getConnection(url);
 
-
-    public static DatabaseTable createDatabaseTable(String tableName, DatabaseFieldsEnum[] fields,
-                                                    PrimaryKey primaryKey) {
-        return new DatabaseTable(tableName, fieldsArrayToMap(fields), primaryKey);
-    }
-
-
-    private static Map<String, DatabaseFieldArgs> fieldsArrayToMap(DatabaseFieldsEnum[] fields) {
-        final Map<String, DatabaseFieldArgs> fieldsMap = new HashMap<>();
-        for (DatabaseFieldsEnum field : fields) {
-            fieldsMap.put(field.getFieldName(), new DatabaseFieldArgs(field.getSqlType(), field.isRequired()));
+                if (!new File(databaseFileLocation).exists()) {
+                    if (connection != null) {
+                        connection.getMetaData();
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        return fieldsMap;
-    }
-
-
-    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields, PrimaryKey primaryKey) {
-        this.tableName = tableName;
-        this.fields = fields;
-        this.primaryKey = primaryKey;
     }
 
 
     /**
-     * Primary key: tableName + "ID"
+     * Creates and executes an SQL INSERT INTO statement
+     *
+     * @param args Map<field, value> row information to insert
      */
-    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields) {
-        this.tableName = tableName;
-        this.fields = fields;
+    public void insert(Map<String, Object> args) {
+        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, ", ", 2);
+        String values = "?,".repeat(args.size());
+        values = values.substring(0, values.length() - 1);
+        final String sql = String.format("INSERT INTO %s(%s) VALUES (%s)", tableName, buildArgs.string, values);
+        executePreparedStatement(sql, buildArgs.types, buildArgs.values);
+    }
 
-        final String primaryKeyName = tableName.toLowerCase() + "ID";
-        fields.put(primaryKeyName, new DatabaseFieldArgs(SQLType.INTEGER, "PRIMARY KEY", false));
-        primaryKey = new PrimaryKey(primaryKeyName);
+
+    private void executePreparedStatement(String sql, List<SQLType> types, List<Object> objects) {
+        getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            setValuesInPreparedStatement(ps, types, objects);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Make a connection to the database and create the table (if it doesn't already exist)
+     */
+    public Connection getConnection() {
+        if (connection == null) {
+            createConnection();
+        }
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(getCreateTableString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return connection;
+    }
+
+
+    private void setValuesInPreparedStatement(PreparedStatement ps, List<SQLType> types, List<Object> objects)
+            throws SQLException {
+        for (int i = 0; i < types.size(); i++) {
+            switch (types.get(i)) {
+                case TEXT:
+                    ps.setString(i + 1, (String) objects.get(i));
+                    break;
+                case BIT:
+                    ps.setBoolean(i + 1, (boolean) objects.get(i));
+                    break;
+                case DATE:
+                    final ZonedDateTime zonedDateTime = (ZonedDateTime) objects.get(i);
+                    ps.setString(i + 1, setDateFormat.format(Date.from(zonedDateTime.toInstant())));
+                    break;
+                case INT:
+                case INTEGER:
+                    ps.setInt(i + 1, (int) objects.get(i));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid SQLType: " + types.get(i));
+            }
+        }
     }
 
 
@@ -182,97 +269,21 @@ public class DatabaseTable {
 
 
     /**
-     * Creates and executes an SQL INSERT INTO statement
-     *
-     * @param args Map<field, value> row information to insert
-     */
-    public void insert(Map<String, Object> args) {
-        final List<SQLType> types = new ArrayList<>();
-        final List<Object> objects = new ArrayList<>();
-        final StringBuilder fieldNames = new StringBuilder();
-        final StringBuilder values = new StringBuilder();
-        // TODO Optimisation think about making these loops generic?
-        for (String arg : args.keySet()) {
-            if (!fields.keySet().contains(arg)) {
-                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
-            }
-            else {
-                SQLType sqlType = fields.get(arg).getSqlType();
-                if (!sqlType.getClassName().equals(args.get(arg).getClass().getName())) {
-                    throw new IllegalArgumentException("Invalid argument type for " + arg);
-                }
-                types.add(sqlType);
-                objects.add(args.get(arg));
-                fieldNames.append(arg);
-                fieldNames.append(", ");
-                values.append("?,");
-            }
-        }
-        fieldNames.delete(fieldNames.length() - 2, fieldNames.length());
-        values.deleteCharAt(values.length() - 1);
-        final String sql = String
-                .format("INSERT INTO %s(%s) VALUES (%s)", tableName, fieldNames.toString(), values.toString());
-
-        getConnection();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            setValuesInPreparedStatement(ps, types, objects);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
      * Creates and executes an SQL UPDATE statement
      *
      * @param setArgs Map<field, value> columns to update and their new values
      * @param whereArgs Map<field, value> WHERE arguments which will be ANDed together
      */
     public void updateAND(Map<String, Object> setArgs, Map<String, Object> whereArgs) {
-        final List<SQLType> types = new ArrayList<>();
-        final List<Object> objects = new ArrayList<>();
-        final StringBuilder set = new StringBuilder();
-        final StringBuilder where = new StringBuilder();
-        for (String setArg : setArgs.keySet()) {
-            if (!fields.keySet().contains(setArg)) {
-                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + setArg);
-            }
-            else {
-                SQLType sqlType = fields.get(setArg).getSqlType();
-                if (!sqlType.getClassName().equals(setArgs.get(setArg).getClass().getName())) {
-                    throw new IllegalArgumentException("Invalid argument type for " + setArg);
-                }
-                types.add(sqlType);
-                objects.add(setArgs.get(setArg));
-                set.append(String.format("%s=?, ", setArg));
-            }
-        }
-        for (String whereArg : whereArgs.keySet()) {
-            if (!fields.keySet().contains(whereArg)) {
-                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + whereArg);
-            }
-            else {
-                SQLType sqlType = fields.get(whereArg).getSqlType();
-                if (!sqlType.getClassName().equals(whereArgs.get(whereArg).getClass().getName())) {
-                    throw new IllegalArgumentException("Invalid argument type for " + whereArg);
-                }
-                types.add(sqlType);
-                objects.add(whereArgs.get(whereArg));
-                where.append(String.format("%s=? AND ", whereArg));
-            }
-        }
-        set.delete(set.length() - 2, set.length());
-        where.delete(where.length() - 5, where.length());
-        final String sql = String.format("UPDATE %s SET %s WHERE %s", tableName, set.toString(), where.toString());
-
-        getConnection();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            setValuesInPreparedStatement(ps, types, objects);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        final BuildSQLArgsString setBuildArgs = new BuildSQLArgsString(setArgs, "=?, ", 2);
+        final List<SQLType> types = setBuildArgs.types;
+        final List<Object> objects = setBuildArgs.values;
+        final BuildSQLArgsString whereBuildArgs = new BuildSQLArgsString(whereArgs, "=? AND ", 5);
+        types.addAll(whereBuildArgs.types);
+        objects.addAll(whereBuildArgs.values);
+        final String sql = String.format(
+                "UPDATE %s SET %s WHERE %s", tableName, setBuildArgs.string, whereBuildArgs.string);
+        executePreparedStatement(sql, types, objects);
     }
 
 
@@ -282,112 +293,53 @@ public class DatabaseTable {
      * @param args Map<field, value> WHERE arguments which will be ANDed together
      */
     public void deleteAND(Map<String, Object> args) {
-        final List<SQLType> types = new ArrayList<>();
-        final List<Object> objects = new ArrayList<>();
-        final StringBuilder where = new StringBuilder();
-        for (String arg : args.keySet()) {
-            if (!fields.keySet().contains(arg)) {
-                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
-            }
-            else {
-                DatabaseFieldArgs databaseFieldArgs = fields.get(arg);
-                SQLType sqlType = databaseFieldArgs.getSqlType();
-                if (!sqlType.getClassName().equals(args.get(arg).getClass().getName())) {
-                    throw new IllegalArgumentException("Invalid argument type for " + arg);
-                }
-                where.append(String.format("%s=? AND ", arg));
-                types.add(sqlType);
-                objects.add(args.get(arg));
-            }
-        }
-        where.delete(where.length() - 5, where.length());
-        final String sql = String.format("DELETE FROM %s WHERE %s", tableName, where.toString());
-
-        getConnection();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            setValuesInPreparedStatement(ps, types, objects);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private void setValuesInPreparedStatement(PreparedStatement ps, List<SQLType> types, List<Object> objects)
-            throws SQLException
-    {
-        for (int i = 0; i < types.size(); i++) {
-            switch (types.get(i)) {
-                case TEXT:
-                    ps.setString(i + 1, (String) objects.get(i));
-                    break;
-                case BIT:
-                    ps.setBoolean(i + 1, (boolean) objects.get(i));
-                    break;
-                case DATE:
-                    final ZonedDateTime zonedDateTime = (ZonedDateTime) objects.get(i);
-                    ps.setString(i + 1, setDateFormat.format(Date.from(zonedDateTime.toInstant())));
-                    break;
-                case INT:
-                case INTEGER:
-                    ps.setInt(i + 1, (int) objects.get(i));
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid SQLType: " + types.get(i));
-            }
-        }
+        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, "=? AND ", 5);
+        final String sql = String.format("DELETE FROM %s WHERE %s", tableName, buildArgs.string);
+        executePreparedStatement(sql, buildArgs.types, buildArgs.values);
     }
 
 
     /**
-     * Create an execute a SELECT * statemen
+     * Create an execute a SELECT * statement
      *
-     * @param args             Map<field, value> WHERE arguments which will be ANDed together
-     * @param resultsSetAction what to do with the results set when it's found (must be done within the try/catch containing the prepared statement else rs becomes 'inactive')
+     * @param args Map<field, value> WHERE arguments which will be ANDed together
+     * @param resultsSetAction what to do with the results set when it's found (must be done within the try/catch
+     * containing the prepared statement else rs becomes 'inactive')
      * @return result of resultsSetAction
      */
     public Object selectAND(Map<String, Object> args, ResultsSetAction resultsSetAction) {
         getConnection();
         if (args == null || args.size() == 0) {
-            getConnection();
-            try (PreparedStatement ps = connection.prepareStatement(String.format("SELECT * FROM %s", tableName))) {
-                ResultSet rs = ps.executeQuery();
-                return resultsSetAction.execute(rs);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            throw new IllegalStateException("Database query SimpleSelectAND failed");
+            return executePreparedStatement(String.format("SELECT * FROM %s", tableName), null, null, resultsSetAction);
         }
 
-        final List<SQLType> types = new ArrayList<>();
-        final List<Object> objects = new ArrayList<>();
-        final StringBuilder fieldNames = new StringBuilder();
-        for (String arg : args.keySet()) {
-            if (!fields.keySet().contains(arg)) {
-                throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
-            }
-            else {
-                SQLType sqlType = fields.get(arg).getSqlType();
-                if (!sqlType.getClassName().equals(args.get(arg).getClass().getName())) {
-                    throw new IllegalArgumentException("Invalid argument type for " + arg);
-                }
-                types.add(sqlType);
-                objects.add(args.get(arg));
-                fieldNames.append(arg);
-                fieldNames.append("=? AND ");
-            }
-        }
-        fieldNames.delete(fieldNames.length() - 5, fieldNames.length());
+        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, "=? AND ", 5);
+        final String sql = String.format("SELECT * FROM %s WHERE %s", tableName, buildArgs.string);
+        return executePreparedStatement(sql, buildArgs.types, buildArgs.values, resultsSetAction);
+    }
 
-        final String sql = String.format("SELECT * FROM %s WHERE %s", tableName, fieldNames.toString());
+
+    /**
+     * @param types can be null
+     * @param objects can be null
+     * @param resultsSetAction what to do when the
+     * @return what the ResultsSetAction returns
+     */
+    private Object executePreparedStatement(String sql, List<SQLType> types, List<Object> objects,
+                                            ResultsSetAction resultsSetAction) {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            setValuesInPreparedStatement(ps, types, objects);
+            if (types != null && objects != null) {
+                setValuesInPreparedStatement(ps, types, objects);
+            }
+            else if (sql.contains("?")) {
+                throw new ContactEwaException("Parameters in SQL not set");
+            }
             ResultSet rs = ps.executeQuery();
             return resultsSetAction.execute(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        throw new IllegalStateException("Database query SelectAND failed");
+        throw new ContactEwaException("Database query failed");
     }
 
 
@@ -455,39 +407,15 @@ public class DatabaseTable {
     }
 
 
-    public enum SQLType {
-        TEXT("text", String.class.getName()), BIT("bit", Boolean.class.getName()), INT("int", Integer.class.getName()),
-        DATE("text", ZonedDateTime.class.getName()), INTEGER("INTEGER", Integer.class.getName());
-
-        private String sqlName;
-        private String className;
-
-
-        SQLType(String sqlName, String className) {
-            this.sqlName = sqlName;
-            this.className = className;
-        }
-
-
-        public String getSqlName() {
-            return sqlName;
-        }
-
-
-        public String getClassName() {
-            return className;
-        }
-    }
-
-
-
+    /**
+     * Defines what to do with a results set from an SQL query
+     */
     public interface ResultsSetAction {
         Object execute(ResultSet rs) throws SQLException;
     }
 
 
-
-    public interface DatabaseFieldsEnum {
+    public interface DatabaseField {
         String getFieldName();
 
 
@@ -495,5 +423,44 @@ public class DatabaseTable {
 
 
         boolean isRequired();
+    }
+
+
+
+    /**
+     * Used to turn a map into a string to add to the SQL statement along with the values to insert into the prepared statement and their types
+     */
+    private class BuildSQLArgsString {
+        private List<SQLType> types;
+        private List<Object> values;
+        private String string;
+
+
+        /**
+         * @param args Map<field, value> arguments which will be turned into a string
+         * @param separator in the string what to separate each of the field names using
+         * @param removableLength the amount to remove from the end of the string to remove any trailing field separators
+         * @throws IllegalArgumentException if the field name or type of the value is invalid
+         */
+        private BuildSQLArgsString(Map<String, Object> args, String separator, int removableLength) {
+            types = new ArrayList<>();
+            values = new ArrayList<>();
+            final StringBuilder sb = new StringBuilder();
+            for (String arg : args.keySet()) {
+                final Object value = args.get(arg);
+                if (!fields.keySet().contains(arg)) {
+                    throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + arg);
+                }
+                else if (!fields.get(arg).getSqlType().getClassName().equals(value.getClass().getName())) {
+                    throw new IllegalArgumentException("Invalid argument type for " + arg);
+                }
+                types.add(fields.get(arg).getSqlType());
+                values.add(value);
+                sb.append(arg);
+                sb.append(separator);
+            }
+            sb.delete(sb.length() - removableLength, sb.length());
+            string = sb.toString();
+        }
     }
 }

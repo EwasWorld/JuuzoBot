@@ -2,6 +2,7 @@ package CharacterBox.BroadInfo;
 
 import CharacterBox.Alignment;
 import CharacterBox.CharacterConstants;
+import CharacterBox.DiscordPrintable;
 import CoreBox.Bot;
 import ExceptionsBox.BadUserInputException;
 import com.google.gson.*;
@@ -19,11 +20,12 @@ import static java.nio.file.Files.readAllBytes;
  * Class information used for setting up a character
  */
 public class Race {
-    public enum RaceEnum {
+    public enum RaceEnum implements DiscordPrintable {
         DWARF, ELF, HALFLING, HUMAN, DRAGONBORN, GNOME, HALFELF, HALFORC, TIEFLING;
 
 
-        public String toString() {
+        @Override
+        public String toPrintableString() {
             String enumStr = super.toString();
             enumStr = enumStr.charAt(0) + enumStr.substring(1).toLowerCase();
             if (enumStr.startsWith("Half")) {
@@ -120,8 +122,7 @@ public class Race {
 
     private Race(Map<CharacterConstants.AbilityEnum, Integer> abilityIncreases, int ageLowerBound, int ageUpperBound,
                  CharacterConstants.Size size, int speed, Set<CharacterConstants.Language> languages,
-                 List<Alignment.GoodEvilEnum> goodEvilEnums, List<Alignment.LawChaosEnum> lawChaosEnums)
-    {
+                 List<Alignment.GoodEvilEnum> goodEvilEnums, List<Alignment.LawChaosEnum> lawChaosEnums) {
         if (ageLowerBound >= ageUpperBound) {
             throw new BadUserInputException("Lower bound age must be larger than upper bound");
         }
@@ -201,8 +202,7 @@ public class Race {
 
     private static class RaceSetUpDeserializer implements JsonDeserializer<Race> {
         public Race deserialize(JsonElement json, Type typeOfT,
-                                JsonDeserializationContext context) throws JsonParseException
-        {
+                                JsonDeserializationContext context) throws JsonParseException {
             return new Race(json.getAsJsonObject().get("races"));
         }
     }

@@ -190,15 +190,6 @@ public class CharacterCommand extends AbstractCommand {
      * {@inheritDoc}
      */
     @Override
-    public String getArguments() {
-        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / deleteAND";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.CHARACTER;
     }
@@ -221,6 +212,33 @@ public class CharacterCommand extends AbstractCommand {
     public Rank getRequiredRank() {
         return Rank.USER;
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / deleteAND";
+    }
+
+
+    private interface CreationStageActions {
+        /**
+         * Update the character with the desired update for the stage
+         *
+         * @param index the chosen option's index in getOptions
+         */
+        void update(UserCharacter userCharacter, int index);
+
+
+        /**
+         * @param race cannot be null for SubRace
+         * @return all possible options the user can choose at this stage
+         */
+        Object[] getOptions(Race.RaceEnum race);
+    }
+
 
 
     private enum SecondaryArg implements SecondaryCommandAction {
@@ -266,7 +284,9 @@ public class CharacterCommand extends AbstractCommand {
             @Override
             public void execute(String args, MessageReceivedEvent event) {
                 final String[] splitArgs = SecondaryArg.splitArgsNameAndOther(args);
-                sendMessage(event.getChannel(), UserCharacter.attack(event.getAuthor(), splitArgs[0], splitArgs[1]));
+                sendMessage(
+                        event.getChannel(),
+                        UserCharacter.attack(event.getAuthor().getId(), splitArgs[0], splitArgs[1]));
             }
         },
         WEAPONSLIST {
@@ -302,6 +322,15 @@ public class CharacterCommand extends AbstractCommand {
         String messageStart;
 
 
+        SecondaryArg() {
+        }
+
+
+        SecondaryArg(String messageStart) {
+            this.messageStart = messageStart;
+        }
+
+
         /**
          * @return new String[] {rest of args, last word}
          */
@@ -316,15 +345,6 @@ public class CharacterCommand extends AbstractCommand {
             else {
                 return new String[]{args.substring(0, endLength), other};
             }
-        }
-
-
-        SecondaryArg() {
-        }
-
-
-        SecondaryArg(String messageStart) {
-            this.messageStart = messageStart;
         }
     }
 
@@ -445,23 +465,5 @@ public class CharacterCommand extends AbstractCommand {
             sb.append("```");
             return sb.toString();
         }
-    }
-
-
-
-    private interface CreationStageActions {
-        /**
-         * Update the character with the desired update for the stage
-         *
-         * @param index the chosen option's index in getOptions
-         */
-        void update(UserCharacter userCharacter, int index);
-
-
-        /**
-         * @param race cannot be null for SubRace
-         * @return all possible options the user can choose at this stage
-         */
-        Object[] getOptions(Race.RaceEnum race);
     }
 }
