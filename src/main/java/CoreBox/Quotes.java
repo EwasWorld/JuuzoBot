@@ -22,7 +22,8 @@ import java.util.Random;
  * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(Database.setDateFormatStr);
+    // TODO this isn't the intended useage of setDateFormatStr
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DatabaseTable.setDateFormatStr);
     private static DatabaseTable databaseTable = DatabaseTable.createDatabaseTable(
             "Quotes", QuoteDatabaseFields.values());
     private String author;

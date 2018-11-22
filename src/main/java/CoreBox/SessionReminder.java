@@ -53,7 +53,7 @@ public class SessionReminder implements Runnable {
 
 
     private void removeElement() {
-        // TODO call from removeSessionTime in SessionDatabase
+        // TODO call from removeSessionTime in GameSession
     }
 
 
@@ -75,7 +75,7 @@ public class SessionReminder implements Runnable {
 
         public SessionQueueElement(String shortName) {
             this.shortName = shortName;
-            sessionTime = SessionDatabase.getNextSession(shortName).getTime();
+//            sessionTime = GameSession.getNextSession(shortName).getTime();
         }
 
 

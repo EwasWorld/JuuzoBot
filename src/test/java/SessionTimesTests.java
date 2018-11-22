@@ -1,48 +1,239 @@
+import CoreBox.GameSession;
+import CoreBox.IDs;
+import DatabaseBox.DatabaseTable;
+import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 
-public class SessionTimesTests extends TestCase {
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-//        SessionTimes.clearGameInformation();
+/**
+ * refactored 22/11/18
+ */
+public class SessionTimesTests {
+    @Before
+    public void setup() {
+        DatabaseTable.setTestMode();
+    }
+
+    @After
+    public void tearDown() {
+        GameSession.deleteAllTables();
     }
 
 
-/*
+    @Test
     public void testAddGame() {
-        SessionTimes.addGame("TG Test Game");
-        assertEquals(1, SessionTimes.size());
-        
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        int[] rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(1, rowCounts[0]);
+        Assert.assertEquals(0, rowCounts[1]);
+
         boolean exceptionThrown = false;
         try {
-            SessionTimes.addGame("TG Test Game 2");
+            GameSession.addGameToDatabase("POP", "cbfghgd", "tfhdsefghfj");
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
-        assertEquals(1, SessionTimes.size());
+        Assert.assertTrue(exceptionThrown);
+        rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(1, rowCounts[0]);
+        Assert.assertEquals(0, rowCounts[1]);
+
+        GameSession.addGameToDatabase("YE", "Yell Exclusively", IDs.eywaID);
+        rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(2, rowCounts[0]);
+        Assert.assertEquals(0, rowCounts[1]);
     }
 
 
+    @Test
+    public void testAddPlayer() {
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        int[] rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(1, rowCounts[0]);
+        Assert.assertEquals(0, rowCounts[1]);
+
+        GameSession.addPlayer("POP", "Player1");
+        GameSession.addPlayer("POP", "Player2");
+        rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(1, rowCounts[0]);
+        Assert.assertEquals(2, rowCounts[1]);
+
+
+        boolean exceptionThrown = false;
+        try {
+            GameSession.addPlayer("POP", "Player2");
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+        rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(1, rowCounts[0]);
+        Assert.assertEquals(2, rowCounts[1]);
+    }
+
+
+    @Test
     public void testAddSessionTime() {
-        SessionTimes.addGame("TG Test Game");
-        assertEquals(1, SessionTimes.size());
+        // Find using DM
+        boolean exceptionThrown = false;
+        try {
+            GameSession.addSessionTime(IDs.eywaID, ZonedDateTime.now());
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        GameSession.addSessionTime(IDs.eywaID, ZonedDateTime.now());
+        GameSession.addGameToDatabase("YE", "Yell Exclusively", IDs.eywaID);
+
+        exceptionThrown = false;
+        try {
+            GameSession.addSessionTime(IDs.eywaID, ZonedDateTime.now());
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        // Find using short name
+        GameSession.addGameToDatabase("Hella", "Hella Gud", "Heh");
+        GameSession.addSessionTime(IDs.eywaID, "POP", ZonedDateTime.now());
+        GameSession.addSessionTime(IDs.eywaID, "YE", ZonedDateTime.now());
+
+        exceptionThrown = false;
+        try {
+            GameSession.addSessionTime(IDs.eywaID, "ouisidgf", ZonedDateTime.now());
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+        exceptionThrown = false;
+        try {
+            GameSession.addSessionTime(IDs.eywaID, "Hella", ZonedDateTime.now());
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+    }
+
+
+    @Test
+    public void testGetAllSessions() {
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        GameSession.addSessionTime(IDs.eywaID, ZonedDateTime.now());
+        GameSession.addGameToDatabase("YE", "Yell Exclusively", "Bloop");
+        GameSession.addGameToDatabase("Hella", "Hella Gud", "Heh");
+        GameSession.addPlayer("POP", "Player1");
+        GameSession.addPlayer("POP", "Player2");
+        GameSession.addPlayer("YE", "Player2");
+        System.out.println(GameSession.getAllSessionTimes("Player1"));
+        System.out.println("--------------------------");
+        System.out.println(GameSession.getAllSessionTimes("Player2"));
+        System.out.println("--------------------------");
+        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID));
+
+        boolean exceptionThrown = false;
+        try {
+            System.out.println(GameSession.getAllSessionTimes("sdufhjskldjg"));
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+    }
+
+
+    @Test
+    public void testGetNextSession() {
+        String shortName = "POP";
+        GameSession.addGameToDatabase(shortName, "The Particulars of Petrification", IDs.eywaID);
+        // No session time
+        boolean exceptionThrown = false;
+        try {
+            GameSession.getNextSession(shortName);
+        } catch (BadStateException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        // Session time in the past
+        ZonedDateTime zonedDateTime = ZonedDateTime.now().minusDays(1);
+        GameSession.addSessionTime(IDs.eywaID, zonedDateTime);
+        exceptionThrown = false;
+        try {
+            GameSession.getNextSession(shortName);
+        } catch (BadStateException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        // Session time in the future
+        zonedDateTime = zonedDateTime.plusDays(3);
+        GameSession.addSessionTime(IDs.eywaID, zonedDateTime);
+        // Note: game times can only be input up to minute accuracy
+        Assert.assertEquals(zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")).truncatedTo(MINUTES), GameSession
+                .getNextSession(shortName));
+
+        // Invalid shortname
+        exceptionThrown = false;
+        try {
+            GameSession.getNextSession("sdufhjskldjg");
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
 
     }
-*/
 
 
-    public void testGetSession() {
-    }
-
-
+    @Test
     public void testGetSessionReminder() {
+        // TODO dm with only one game
+        // TODO specified shortname
     }
 
 
-    public void testRemoveGame() {
+    @Test
+    public void testDeleteGame() {
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        GameSession.addGameToDatabase("YE", "Yell Exclusively", "Bloop");
+        GameSession.addGameToDatabase("Hella", "Hella Gud", "Heh");
+        GameSession.addPlayer("POP", "Player1");
+        GameSession.addPlayer("POP", "Player2");
+        GameSession.addPlayer("YE", "Player2");
+        int[] rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(3, rowCounts[0]);
+        Assert.assertEquals(3, rowCounts[1]);
+
+        GameSession.deleteGame("POP");
+        rowCounts = GameSession.getRowCounts();
+        Assert.assertEquals(2, rowCounts[0]);
+        Assert.assertEquals(1, rowCounts[1]);
+
+        boolean exceptionThrown = false;
+        try {
+            GameSession.deleteGame("sdgdfhdfg");
+        } catch (BadUserInputException e) {
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+    }
+
+
+    @Test
+    public void testGamesList() {
+        GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
+        GameSession.addGameToDatabase("YE", "Yell Exclusively", "Bloop");
+        GameSession.addGameToDatabase("Hella", "Hella Gud", "Heh");
+        System.out.println(GameSession.getGamesList());
     }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 
 
 /**
- * refactored: 19/11/18
+ * refactored 19/11/18
  */
 public class CharacterTests {
     @Before

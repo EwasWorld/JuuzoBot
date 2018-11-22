@@ -59,10 +59,10 @@ public class DatabaseTable {
      */
     // Date format given as an argument and stored in the database
     public static String setDateFormatStr = "HH:mm dd/M/yy z";
-    public static DateFormat setDateFormat = new SimpleDateFormat(setDateFormatStr);
+    private static DateFormat setDateFormat = new SimpleDateFormat(setDateFormatStr);
     // Date format when printing the date
-    public static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
-    public static ZoneId zoneId = ZoneId.of("UTC");
+    private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
+    private static ZoneId zoneId = ZoneId.of("UTC");
     private static String url = urlPrefix + databaseFileLocation;
     private static Connection connection = null;
     /*
@@ -111,6 +111,16 @@ public class DatabaseTable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static ZonedDateTime parseDate(String string) throws ParseException {
+        return ZonedDateTime.ofInstant(setDateFormat.parse(string).toInstant(), zoneId);
+    }
+
+
+    public static String zonedDateTimeToString(ZonedDateTime zonedDateTime) {
+        return printDateFormat.format(Date.from(zonedDateTime.toInstant()));
     }
 
 
@@ -187,6 +197,7 @@ public class DatabaseTable {
      * @param args Map<field, value> row information to insert
      */
     public void insert(Map<String, Object> args) {
+        // TODO Check that all required fields are given
         final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, ", ", 2);
         String values = "?,".repeat(args.size());
         values = values.substring(0, values.length() - 1);
@@ -244,6 +255,11 @@ public class DatabaseTable {
                     throw new IllegalArgumentException("Invalid SQLType: " + types.get(i));
             }
         }
+    }
+
+
+    public static String databaseStringToPrintableString(String string) {
+        return zonedDateTimeToString(getDatabaseDateFromString(string));
     }
 
 
@@ -316,6 +332,11 @@ public class DatabaseTable {
         final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, "=? AND ", 5);
         final String sql = String.format("SELECT * FROM %s WHERE %s", tableName, buildArgs.string);
         return executePreparedStatement(sql, buildArgs.types, buildArgs.values, resultsSetAction);
+    }
+
+
+    public Object selectAll(ResultsSetAction resultsSetAction) {
+        return selectAND(null, resultsSetAction);
     }
 
 

@@ -16,6 +16,7 @@ import java.util.*;
 
 /**
  * refactored 13/11/18
+ * TODO prevent two characters with the same name from being created by a single user
  */
 public class UserCharacter implements Serializable {
     // When a character makes an attack the number that must be beaten or equaled for a hit
