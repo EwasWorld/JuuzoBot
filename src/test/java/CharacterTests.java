@@ -27,7 +27,7 @@ public class CharacterTests {
 
     @After
     public void teardown() {
-        UserCharacter.deleteAllTables();
+        UserCharacter.getDatabaseWrapper().deleteAllTables();
     }
 
 
@@ -66,10 +66,10 @@ public class CharacterTests {
         userCharacter.setBackground(Background.BackgroundEnum.CRIMINAL);
         userCharacter.completeCreation(IDs.eywaID);
         System.out.println(userCharacter.getDescription());
-        int[] rowCounts = UserCharacter.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        for (int i = 1; i < rowCounts.length; i++) {
-            Assert.assertTrue(UserCharacter.getRowCounts()[i] > 0);
+        List<Integer> rowCounts = UserCharacter.getDatabaseWrapper().getRowCounts();
+        Assert.assertEquals(1, (int) rowCounts.get(0));
+        for (int i = 1; i < rowCounts.size(); i++) {
+            Assert.assertTrue(rowCounts.get(i) > 0);
         }
 
         // Standard character without subrace
@@ -79,10 +79,10 @@ public class CharacterTests {
         userCharacter.setBackground(Background.BackgroundEnum.CRIMINAL);
         userCharacter.completeCreation("dfglijdfg");
         System.out.println(userCharacter.getDescription());
-        Assert.assertEquals(2,  UserCharacter.getRowCounts()[0]);
+        Assert.assertEquals(2, (int) UserCharacter.getDatabaseWrapper().getRowCounts().get(0));
 
         // Standard character with invalid subrace
-        int[] startingRowCounts = UserCharacter.getRowCounts();
+        List<Integer> startingRowCounts = UserCharacter.getDatabaseWrapper().getRowCounts();
         boolean exceptionThrown = false;
         try {
             userCharacter = new UserCharacter("Jo");
@@ -96,8 +96,9 @@ public class CharacterTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
-        for (int i = 1; i < startingRowCounts.length; i++) {
-            Assert.assertEquals(startingRowCounts[i], UserCharacter.getRowCounts()[i]);
+        rowCounts = UserCharacter.getDatabaseWrapper().getRowCounts();
+        for (int i = 1; i < startingRowCounts.size(); i++) {
+            Assert.assertEquals(startingRowCounts.get(i), rowCounts.get(i));
         }
     }
 
@@ -119,18 +120,18 @@ public class CharacterTests {
         userCharacter.setClazz(Clazz.ClassEnum.ROGUE);
         userCharacter.setBackground(Background.BackgroundEnum.CRIMINAL);
         userCharacter.completeCreation(userID);
-        int[] rowCounts = UserCharacter.getRowCounts();
-        Assert.assertEquals(2, rowCounts[0]);
-        for (int i = 1; i < rowCounts.length; i++) {
-            Assert.assertTrue(rowCounts[i] > 0);
+        List<Integer> rowCounts = UserCharacter.getDatabaseWrapper().getRowCounts();
+        Assert.assertEquals(2, (int) rowCounts.get(0));
+        for (int i = 1; i < rowCounts.size(); i++) {
+            Assert.assertTrue(rowCounts.get(i) > 0);
         }
 
         UserCharacter.deleteCharacter(userID, name1);
-        int[] newRowCounts = UserCharacter.getRowCounts();
-        Assert.assertEquals(1, newRowCounts[0]);
-        for (int i = 1; i < newRowCounts.length; i++) {
-            Assert.assertTrue(newRowCounts[i] > 0);
-            Assert.assertTrue(newRowCounts[i] < rowCounts[i]);
+        List<Integer> newRowCounts = UserCharacter.getDatabaseWrapper().getRowCounts();
+        Assert.assertEquals(1, (int) newRowCounts.get(0));
+        for (int i = 1; i < newRowCounts.size(); i++) {
+            Assert.assertTrue(newRowCounts.get(i) > 0);
+            Assert.assertTrue(newRowCounts.get(i) < rowCounts.get(i));
         }
 
         UserCharacter.getCharacterDescription(userID, name2);

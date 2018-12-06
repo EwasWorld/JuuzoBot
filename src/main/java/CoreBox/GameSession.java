@@ -1,13 +1,16 @@
 package CoreBox;
 
 import DatabaseBox.DatabaseTable;
+import DatabaseBox.DatabaseWrapper;
 import DatabaseBox.PrimaryKey;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
+import ExceptionsBox.ContactEwaException;
 import ExceptionsBox.FeatureUnavailableException;
 import net.dv8tion.jda.core.entities.Guild;
 
 import java.sql.ResultSet;
+import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -25,23 +28,26 @@ public class GameSession {
     private static final DatabaseTable sessionsDatabaseTable = DatabaseTable.createDatabaseTable(
             "Sessions", SessionsDatabaseFields.values(), new PrimaryKey(Collections.singleton(
                     SessionsDatabaseFields.SHORT_NAME.fieldName)));
-    private static final DatabaseTable sessionPlayersDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable playersDatabaseTable = DatabaseTable.createDatabaseTable(
             "SessionPlayers", SessionPlayersDatabaseFields.values());
+    private static final DatabaseWrapper databaseWrapper = new DatabaseWrapper(new DatabaseTable[] {sessionsDatabaseTable, playersDatabaseTable});
 
 
-    public static void deleteAllTables() {
-        if (!DatabaseTable.isInTestMode()) {
-            throw new IllegalStateException("This action can only be taken in test mode");
-        }
-        else {
-            sessionsDatabaseTable.deleteTable();
-            sessionPlayersDatabaseTable.deleteTable();
-        }
+    /**
+     * Helper method for testing
+     */
+    public static boolean checkRowCounts(int sessions, int players) {
+        DatabaseWrapper.checkDatabaseInTestMode();
+        return databaseWrapper.checkRowCounts(new int[] {sessions, players});
     }
 
 
-    public static int[] getRowCounts() {
-        return new int[]{sessionsDatabaseTable.getRowCount(), sessionPlayersDatabaseTable.getRowCount()};
+    /**
+     * Helper method for testing
+     */
+    public static DatabaseWrapper getDatabaseWrapper() {
+        DatabaseWrapper.checkDatabaseInTestMode();
+        return databaseWrapper;
     }
 
 
@@ -175,13 +181,13 @@ public class GameSession {
         final Map<String, Object> args = new HashMap<>();
         args.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
         args.put(SessionPlayersDatabaseFields.PLAYER.getFieldName(), playerID);
-        sessionPlayersDatabaseTable.selectAND(args, rs -> {
+        playersDatabaseTable.selectAND(args, rs -> {
             if (rs.next()) {
                 throw new BadUserInputException("This player has already been added to the game");
             }
             return null;
         });
-        sessionPlayersDatabaseTable.insert(args);
+        playersDatabaseTable.insert(args);
     }
 
 
@@ -202,7 +208,7 @@ public class GameSession {
         final String dmStar = "*";
         final List<String> playerGames = new LinkedList<>(Arrays.asList(playerGamesArray));
         final List<String> dmGames = new LinkedList<>(Arrays.asList(dmGamesArray));
-        return (String) sessionsDatabaseTable.selectAll(rs -> {
+        return (String) sessionsDatabaseTable.selectAND(null, rs -> {
             final StringBuilder sb = new StringBuilder("Note: name* means you DM this game\n");
             while (rs.next()) {
                 final String shortName = rs.getString(SessionsDatabaseFields.SHORT_NAME.getFieldName());
@@ -233,7 +239,7 @@ public class GameSession {
     private static String[] getPlayerGamesShortNames(String playerID) {
         final Map<String, Object> args = new HashMap<>();
         args.put(SessionPlayersDatabaseFields.PLAYER.getFieldName(), playerID);
-        return (String[]) sessionPlayersDatabaseTable.selectAND(args, rs -> {
+        return (String[]) playersDatabaseTable.selectAND(args, rs -> {
             final List<String> shortNames = new ArrayList<>();
             while (rs.next()) {
                 shortNames.add(rs.getString(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName()));
@@ -298,7 +304,12 @@ public class GameSession {
             if (rs.next()) {
                 final String date = rs.getString(SessionsDatabaseFields.SESSION_TIME.getFieldName());
                 if (date != null) {
-                    final ZonedDateTime zonedDateTime = DatabaseTable.getDatabaseDateFromString(date);
+                    final ZonedDateTime zonedDateTime;
+                    try {
+                        zonedDateTime = DatabaseTable.parseDateFromDatabase(date);
+                    } catch (ParseException e) {
+                        throw new ContactEwaException("Date parsing problem");
+                    }
                     if (zonedDateTime.isBefore(ZonedDateTime.now())) {
                         throw new BadStateException("The game time entered is in the past, ask the DM to update it");
                     }
@@ -327,7 +338,7 @@ public class GameSession {
         }
         final Map<String, Object> args = new HashMap<>();
         args.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        return (String[]) sessionPlayersDatabaseTable.selectAND(args, rs -> {
+        return (String[]) playersDatabaseTable.selectAND(args, rs -> {
             final List<String> players = new ArrayList<>();
             while (rs.next()) {
                 players.add(rs.getString(SessionPlayersDatabaseFields.PLAYER.getFieldName()));
@@ -376,7 +387,7 @@ public class GameSession {
         sessionsDatabaseTable.deleteAND(args);
         final Map<String, Object> playersArgs = new HashMap<>();
         playersArgs.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        sessionPlayersDatabaseTable.deleteAND(playersArgs);
+        playersDatabaseTable.deleteAND(playersArgs);
     }
 
 
@@ -386,7 +397,7 @@ public class GameSession {
      * @return a list of all games in the database
      */
     public static String getGamesList() {
-        return (String) sessionsDatabaseTable.selectAll(rs -> {
+        return (String) sessionsDatabaseTable.selectAND(null, rs -> {
             final StringBuilder sb = new StringBuilder();
             while (rs.next()) {
                 sb.append(rs.getString(SessionsDatabaseFields.SHORT_NAME.getFieldName()));

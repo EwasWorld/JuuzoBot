@@ -118,7 +118,7 @@ public class GameSessionCommand extends AbstractCommand {
                 ZonedDateTime date;
                 String shortName;
                 try {
-                    date = DatabaseTable.parseDate(args);
+                    date = DatabaseTable.parseDateFromDatabase(args);
                     shortName = GameSession.addSessionTime(event.getAuthor().getId(), date);
                 } catch (ParseException e) {
                     // Might begin with shortname
@@ -129,13 +129,13 @@ public class GameSessionCommand extends AbstractCommand {
                     shortName = splitArgs[0];
                     final String remainingString = args.substring(shortName.length() + 1);
                     try {
-                        date = DatabaseTable.parseDate(remainingString);
+                        date = DatabaseTable.parseDateFromDatabase(remainingString);
                         GameSession.addSessionTime(event.getAuthor().getId(), shortName, date);
                     } catch (ParseException e1) {
                         throw new BadUserInputException("Can't parse date: " + remainingString);
                     }
                 }
-                sendMessage(event.getChannel(), "The next session for " + shortName + " is set to " + DatabaseTable.zonedDateTimeToString(date));
+                sendMessage(event.getChannel(), "The next session for " + shortName + " is set to " + DatabaseTable.formatDateForPrint(date));
             }
         },
         GAMESLIST {
@@ -164,7 +164,7 @@ public class GameSessionCommand extends AbstractCommand {
                     throw new BadUserInputException("What game do you want the next session for?");
                 }
                 sendMessage(event.getChannel(), "The next game for " + args + " is "
-                        + DatabaseTable.zonedDateTimeToString(GameSession.getNextSession(args)));
+                        + DatabaseTable.formatDateForPrint(GameSession.getNextSession(args)));
             }
         },
         REMINDER {

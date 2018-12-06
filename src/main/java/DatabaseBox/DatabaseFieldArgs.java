@@ -1,27 +1,27 @@
 package DatabaseBox;
 
 /**
- * TODO Refactor, is this even needed? Rather than Map<String, DatabaseFieldArgs> why not just Map<String, SQLType>. Generate and store creation string on databaseTable instantiation?
  * created: 27/09/18
  */
-public class DatabaseFieldArgs {
+class DatabaseFieldArgs {
+    private static final String notNull = "NOT NULL";
     private DatabaseTable.SQLType sqlType;
     private String options;
 
 
-    public DatabaseFieldArgs(DatabaseTable.SQLType sqlType, String options, boolean isRequired) {
+    DatabaseFieldArgs(DatabaseTable.SQLType sqlType, String options, boolean isRequired) {
         this.sqlType = sqlType;
         this.options = options;
         if (isRequired) {
-            this.options = "NOT NULL " + options;
+            this.options = notNull + " " + options;
         }
     }
 
 
-    public DatabaseFieldArgs(DatabaseTable.SQLType sqlType, boolean isRequired) {
+    DatabaseFieldArgs(DatabaseTable.SQLType sqlType, boolean isRequired) {
         this.sqlType = sqlType;
         if (isRequired) {
-            this.options = "NOT NULL";
+            this.options = notNull;
         }
         else {
             this.options = "";
@@ -34,7 +34,12 @@ public class DatabaseFieldArgs {
     }
 
 
-    public DatabaseTable.SQLType getSqlType() {
+    DatabaseTable.SQLType getSqlType() {
         return sqlType;
+    }
+
+
+    boolean isRequired() {
+        return options.contains(notNull);
     }
 }

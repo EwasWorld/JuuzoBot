@@ -36,16 +36,10 @@ public class QuotesTests {
         Quotes.addQuote("Add");
         Assert.assertEquals(1, Quotes.size());
 
-        boolean exceptionThrown = false;
-        try {
-            Quotes.addQuote("TestQuote");
-        } catch (BadUserInputException e) {
-            exceptionThrown = true;
-        }
-        Assert.assertFalse(exceptionThrown);
+        Quotes.addQuote("TestQuote");
         Assert.assertEquals(2, Quotes.size());
 
-        exceptionThrown = false;
+        boolean exceptionThrown = false;
         try {
             Quotes.addQuote("NotAQuote");
         } catch (BadUserInputException e) {
@@ -101,6 +95,7 @@ public class QuotesTests {
     }
 
 
+    // TODO: change delete table so that it creates a new table to overwrite rather than just deleting
     @Test
     public void testDeleteAllQuotes() {
         Quotes.addQuote("AddQuote");

@@ -18,7 +18,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 /**
  * refactored 22/11/18
  */
-public class SessionTimesTests {
+public class GameSessionTests {
     @Before
     public void setup() {
         DatabaseTable.setTestMode();
@@ -26,16 +26,14 @@ public class SessionTimesTests {
 
     @After
     public void tearDown() {
-        GameSession.deleteAllTables();
+        GameSession.getDatabaseWrapper().deleteAllTables();
     }
 
 
     @Test
     public void testAddGame() {
         GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
-        int[] rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        Assert.assertEquals(0, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(1, 0));
 
         boolean exceptionThrown = false;
         try {
@@ -44,29 +42,21 @@ public class SessionTimesTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
-        rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        Assert.assertEquals(0, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(1, 0));
 
         GameSession.addGameToDatabase("YE", "Yell Exclusively", IDs.eywaID);
-        rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(2, rowCounts[0]);
-        Assert.assertEquals(0, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(2, 0));
     }
 
 
     @Test
     public void testAddPlayer() {
         GameSession.addGameToDatabase("POP", "The Particulars of Petrification", IDs.eywaID);
-        int[] rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        Assert.assertEquals(0, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(1, 0));
 
         GameSession.addPlayer("POP", "Player1");
         GameSession.addPlayer("POP", "Player2");
-        rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        Assert.assertEquals(2, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(1, 2));
 
 
         boolean exceptionThrown = false;
@@ -76,9 +66,7 @@ public class SessionTimesTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
-        rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(1, rowCounts[0]);
-        Assert.assertEquals(2, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(1, 2));
     }
 
 
@@ -210,14 +198,10 @@ public class SessionTimesTests {
         GameSession.addPlayer("POP", "Player1");
         GameSession.addPlayer("POP", "Player2");
         GameSession.addPlayer("YE", "Player2");
-        int[] rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(3, rowCounts[0]);
-        Assert.assertEquals(3, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(3, 3));
 
         GameSession.deleteGame("POP");
-        rowCounts = GameSession.getRowCounts();
-        Assert.assertEquals(2, rowCounts[0]);
-        Assert.assertEquals(1, rowCounts[1]);
+        Assert.assertTrue(GameSession.checkRowCounts(2, 1));
 
         boolean exceptionThrown = false;
         try {
@@ -226,6 +210,7 @@ public class SessionTimesTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
+        Assert.assertTrue(GameSession.checkRowCounts(2, 1));
     }
 
 

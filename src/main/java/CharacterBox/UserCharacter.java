@@ -5,6 +5,7 @@ import CharacterBox.AttackBox.WeaponProficiencies;
 import CharacterBox.BroadInfo.*;
 import CoreBox.Die;
 import DatabaseBox.DatabaseTable;
+import DatabaseBox.DatabaseWrapper;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
@@ -21,14 +22,17 @@ import java.util.*;
 public class UserCharacter implements Serializable {
     // When a character makes an attack the number that must be beaten or equaled for a hit
     private static final int defenderAC = 13;
-    private static DatabaseTable charDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable charDatabaseTable = DatabaseTable.createDatabaseTable(
             "Characters", CharDatabaseFields.values());
-    private static DatabaseTable charAbilitiesDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable abilitiesDatabaseTable = DatabaseTable.createDatabaseTable(
             "CharacterAbilities", CharAbilitiesDatabaseFields.values());
-    private static DatabaseTable charProficienciesDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable proficienciesDatabaseTable = DatabaseTable.createDatabaseTable(
             "CharactersProficiencies", CharProficienciesDatabaseFields.values());
-    private static DatabaseTable charLanguagesDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable languagesDatabaseTable = DatabaseTable.createDatabaseTable(
             "CharactersLanguages", CharLanguagesDatabaseFields.values());
+    private static final DatabaseWrapper databaseWrapper = new DatabaseWrapper(new DatabaseTable[] {charDatabaseTable,
+            abilitiesDatabaseTable, proficienciesDatabaseTable, languagesDatabaseTable});
+
     private String name;
     private int age;
     private String alignment;
@@ -70,40 +74,21 @@ public class UserCharacter implements Serializable {
     }
 
 
-    public static int[] getRowCounts() {
-        final List<Object> results = doToAllTables(DatabaseTable::getRowCount);
-
-        int[] list = new int[4];
-        for (int i = 0; i < list.length; i++) {
-            list[i] = (int) results.get(i);
-        }
-        return list;
-    }
-
-
-    private static <T> List<T> doToAllTables(TableAction<T> tableAction) {
-        List<T> list = new ArrayList<>();
-        list.add(tableAction.action(charDatabaseTable));
-        list.add(tableAction.action(charAbilitiesDatabaseTable));
-        list.add(tableAction.action(charProficienciesDatabaseTable));
-        list.add(tableAction.action(charLanguagesDatabaseTable));
-        return list;
+    /**
+     * Helper method for testing
+     */
+    public static boolean checkRowCounts(int characters, int abilities, int proficiencies, int languages) {
+        DatabaseWrapper.checkDatabaseInTestMode();
+        return databaseWrapper.checkRowCounts(new int[] {characters, abilities, proficiencies, languages});
     }
 
 
     /**
-     * Deletes all character data stored in the database
-     *
-     * @throws IllegalStateException if the database is not in test mode
+     * Helper method for testing
      */
-    public static void deleteAllTables() {
-        if (!DatabaseTable.isInTestMode()) {
-            throw new IllegalStateException("This action can only be taken in test mode");
-        }
-        doToAllTables(table -> {
-            table.deleteTable();
-            return null;
-        });
+    public static DatabaseWrapper getDatabaseWrapper() {
+        DatabaseWrapper.checkDatabaseInTestMode();
+        return databaseWrapper;
     }
 
 
@@ -121,13 +106,13 @@ public class UserCharacter implements Serializable {
 
         final Map<String, Object> abilArgs = new HashMap<>();
         abilArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charAbilitiesDatabaseTable.deleteAND(abilArgs);
+        abilitiesDatabaseTable.deleteAND(abilArgs);
         final Map<String, Object> profArgs = new HashMap<>();
         profArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charProficienciesDatabaseTable.deleteAND(profArgs);
+        proficienciesDatabaseTable.deleteAND(profArgs);
         final Map<String, Object> landArgs = new HashMap<>();
         landArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charLanguagesDatabaseTable.deleteAND(landArgs);
+        languagesDatabaseTable.deleteAND(landArgs);
     }
 
 
@@ -304,7 +289,7 @@ public class UserCharacter implements Serializable {
          */
         final Map<String, Object> abilitiesArgs = new HashMap<>();
         charArgs.put(CharAbilitiesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charAbilitiesDatabaseTable.selectAND(abilitiesArgs, rs -> {
+        abilitiesDatabaseTable.selectAND(abilitiesArgs, rs -> {
             final Map<CharacterConstants.AbilityEnum, Integer> abilitiesMap = new HashMap<>();
             character.savingThrows = new HashSet<>();
             while (rs.next()) {
@@ -324,7 +309,7 @@ public class UserCharacter implements Serializable {
          */
         final Map<String, Object> proficienciesArgs = new HashMap<>();
         proficienciesArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charProficienciesDatabaseTable.selectAND(proficienciesArgs, rs -> {
+        proficienciesDatabaseTable.selectAND(proficienciesArgs, rs -> {
             character.weaponProficiencies = new WeaponProficiencies();
             character.skillProficiencies = new HashSet<>();
             while (rs.next()) {
@@ -348,7 +333,7 @@ public class UserCharacter implements Serializable {
          */
         final Map<String, Object> langugesArgs = new HashMap<>();
         langugesArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
-        charLanguagesDatabaseTable.selectAND(langugesArgs, rs -> {
+        languagesDatabaseTable.selectAND(langugesArgs, rs -> {
             character.languages = new HashSet<>();
             while (rs.next()) {
                 character.languages.add(CharacterConstants.Language
@@ -590,7 +575,7 @@ public class UserCharacter implements Serializable {
             abilityArgs.put(CharAbilitiesDatabaseFields.ABILITY.getFieldName(), ability.toString());
             abilityArgs.put(CharAbilitiesDatabaseFields.VALUE.getFieldName(), abilities.getStat(ability));
             abilityArgs.put(CharAbilitiesDatabaseFields.IS_SAVING_THROW.getFieldName(), savingThrows.contains(ability));
-            charAbilitiesDatabaseTable.insert(abilityArgs);
+            abilitiesDatabaseTable.insert(abilityArgs);
         }
 
         for (CharacterConstants.SkillEnum skill : skillProficiencies) {
@@ -598,20 +583,20 @@ public class UserCharacter implements Serializable {
             proficiencyArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
             proficiencyArgs.put(CharProficienciesDatabaseFields.PROF_TYPE.getFieldName(), "SKILL");
             proficiencyArgs.put(CharProficienciesDatabaseFields.PROFICIENCY.getFieldName(), skill.toString());
-            charProficienciesDatabaseTable.insert(proficiencyArgs);
+            proficienciesDatabaseTable.insert(proficiencyArgs);
         }
         for (Map<String, Object> weaponProficienciesArgs : weaponProficiencies.toDatabaseArgs(
                 CharProficienciesDatabaseFields.PROFICIENCY,
                 CharProficienciesDatabaseFields.PROF_TYPE)) {
             weaponProficienciesArgs.put(CharProficienciesDatabaseFields.CHAR_ID.getFieldName(), charID);
-            charProficienciesDatabaseTable.insert(weaponProficienciesArgs);
+            proficienciesDatabaseTable.insert(weaponProficienciesArgs);
         }
 
         for (CharacterConstants.Language language : languages) {
             final Map<String, Object> languageArgs = new HashMap<>();
             languageArgs.put(CharLanguagesDatabaseFields.CHAR_ID.getFieldName(), charID);
             languageArgs.put(CharLanguagesDatabaseFields.LANGUAGE.getFieldName(), language.toString());
-            charLanguagesDatabaseTable.insert(languageArgs);
+            languagesDatabaseTable.insert(languageArgs);
         }
     }
 

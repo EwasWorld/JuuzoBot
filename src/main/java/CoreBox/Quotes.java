@@ -6,6 +6,7 @@ import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.FeatureUnavailableException;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -85,10 +86,14 @@ public class Quotes implements Serializable {
             args.put(databaseTable.getPrimaryKey(), index);
             final Quotes quote = (Quotes) databaseTable.selectAND(args, rs -> {
                 if (rs.next()) {
-                    return new Quotes(
-                            rs.getString(QuoteDatabaseFields.AUTHOR.fieldName),
-                            DatabaseTable.getDatabaseDateFromString(rs.getString(QuoteDatabaseFields.DATE.fieldName)),
-                            rs.getString(QuoteDatabaseFields.MESSAGE.fieldName));
+                    try {
+                        return new Quotes(
+                                rs.getString(QuoteDatabaseFields.AUTHOR.fieldName),
+                                DatabaseTable.parseDateFromDatabase(rs.getString(QuoteDatabaseFields.DATE.fieldName)),
+                                rs.getString(QuoteDatabaseFields.MESSAGE.fieldName));
+                    } catch (ParseException ignore) {
+                        return null;
+                    }
                 }
                 return null;
             });
@@ -106,7 +111,12 @@ public class Quotes implements Serializable {
      * @return the number of quotes currently stored
      */
     public static int size() {
-        return databaseTable.getRowCount();
+        try {
+            return databaseTable.getFunctionOfIntColumn(
+                    DatabaseTable.ColumnFunction.COUNT, databaseTable.getPrimaryKey(), null);
+        } catch (NullPointerException e) {
+            return 0;
+        }
     }
 
 
