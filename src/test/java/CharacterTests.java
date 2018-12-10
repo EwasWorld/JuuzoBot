@@ -1,17 +1,18 @@
 import CharacterBox.AttackBox.Weapon;
 import CharacterBox.BroadInfo.Background;
 import CharacterBox.BroadInfo.Clazz;
-import CharacterBox.UserCharacter;
 import CharacterBox.BroadInfo.Race;
 import CharacterBox.BroadInfo.SubRace;
+import CharacterBox.UserCharacter;
 import CoreBox.IDs;
 import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
-import junit.framework.TestCase;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,9 +26,10 @@ public class CharacterTests {
         DatabaseTable.setTestMode();
     }
 
+
     @After
     public void teardown() {
-        UserCharacter.getDatabaseWrapper().deleteAllTables();
+        UserCharacter.getDatabaseWrapper().dropAllTables();
     }
 
 

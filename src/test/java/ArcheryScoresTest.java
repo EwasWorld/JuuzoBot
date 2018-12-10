@@ -2,10 +2,7 @@ import CoreBox.ArcheryScores;
 import DatabaseBox.DatabaseTable;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -26,23 +23,30 @@ public class ArcheryScoresTest {
 
     @After
     public void teardown() {
-        ArcheryScores.getDatabaseWrapper().deleteAllTables();
+        ArcheryScores.getDatabaseWrapper().dropAllTables();
     }
 
 
     @Test
     public void testAverageScore() {
-        Assert.assertEquals(500, Math.round(ArcheryScores.ScoringType.METRIC.averageScorePerArrow(ArcheryScores.yardsToMeters(20), 60, 47, false) * 60));
-        Assert.assertEquals(407, Math.round(ArcheryScores.ScoringType.METRIC.averageScorePerArrow(ArcheryScores.yardsToMeters(20), 60, 61, false) * 60));
+        Assert.assertEquals(
+                500, Math.round(ArcheryScores.ScoringType.METRIC.averageScorePerArrow(
+                        ArcheryScores.yardsToMeters(20), 60, 47, false) * 60));
+        Assert.assertEquals(
+                407, Math.round(ArcheryScores.ScoringType.METRIC.averageScorePerArrow(
+                        ArcheryScores.yardsToMeters(20), 60, 61, false) * 60));
     }
 
-    @Test
+
+    @Ignore
+    @Deprecated
     public void testApproxHandicap() {
-        // TODO Test for other rounds
         double maxDifference = 0;
         for (double i = 0; i <= 100; i += 0.1) {
-            double scorePerArrow = ArcheryScores.ScoringType.METRIC.averageScorePerArrow(ArcheryScores.yardsToMeters(20), 60, i, false);
-            double handicap = ArcheryScores.ScoringType.METRIC.getHandicap(ArcheryScores.yardsToMeters(20), 60, scorePerArrow, false);
+            double scorePerArrow = ArcheryScores.ScoringType.METRIC.averageScorePerArrow(
+                    ArcheryScores.yardsToMeters(20), 60, i, false);
+            double handicap = ArcheryScores.ScoringType.METRIC.getHandicap(
+                    ArcheryScores.yardsToMeters(20), 60, scorePerArrow, false);
             double difference = Math.abs(handicap - i);
             if (difference > 0.01) {
                 System.out.println(String.format("%.1f, %.3f (%.3f)", i, handicap, difference));
@@ -54,6 +58,7 @@ public class ArcheryScoresTest {
         }
         System.out.println(maxDifference);
     }
+
 
     @Test
     public void testAddArcher() {
@@ -70,6 +75,7 @@ public class ArcheryScoresTest {
         Assert.assertTrue(exceptionThrown);
         Assert.assertTrue(ArcheryScores.checkRowCounts(0, 0, 2, 0, 0, 0));
     }
+
 
     @Test
     public void testAddBow() {
@@ -92,8 +98,10 @@ public class ArcheryScoresTest {
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
-        Assert.assertTrue(exceptionThrown);Assert.assertTrue(ArcheryScores.checkRowCounts(0, 0, 1, 3, 0, 0));
+        Assert.assertTrue(exceptionThrown);
+        Assert.assertTrue(ArcheryScores.checkRowCounts(0, 0, 1, 3, 0, 0));
     }
+
 
     @Test
     public void testAddRoundRef() {
@@ -102,7 +110,9 @@ public class ArcheryScoresTest {
         faceSizes.put(distanceInMeters, 60);
         Map<Double, Integer> arrowCounts = new HashMap<>();
         arrowCounts.put(distanceInMeters, 60);
-        ArcheryScores.addRoundRef("Portsmouth", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes, true);
+        ArcheryScores.addRoundRef(
+                "Portsmouth", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes,
+                true);
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 0, 0, 0, 0));
 
         faceSizes = new HashMap<>();
@@ -115,17 +125,23 @@ public class ArcheryScoresTest {
         arrowCounts.put(60.0, 36);
         arrowCounts.put(50.0, 36);
         arrowCounts.put(30.0, 36);
-        ArcheryScores.addRoundRef("WA 1440", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
+        ArcheryScores.addRoundRef(
+                "WA 1440", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
         Assert.assertTrue(ArcheryScores.checkRowCounts(2, 5, 0, 0, 0, 0));
 
-        ArcheryScores.addRoundRef("WA 1440 TEST1", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), 36, faceSizes, false);
-        ArcheryScores.addRoundRef("WA 1440 TEST2", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, 122, false);
-        ArcheryScores.addRoundRef("WA 1440 TEST3", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), 36, 122, false);
+        ArcheryScores.addRoundRef(
+                "WA 1440 TEST1", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), 36, faceSizes, false);
+        ArcheryScores.addRoundRef(
+                "WA 1440 TEST2", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, 122, false);
+        ArcheryScores.addRoundRef(
+                "WA 1440 TEST3", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), 36, 122, false);
 
         boolean exceptionThrown = false;
         try {
             // Repeat name
-            ArcheryScores.addRoundRef("Portsmouth", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes, true);
+            ArcheryScores.addRoundRef(
+                    "Portsmouth", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes,
+                    true);
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -134,7 +150,9 @@ public class ArcheryScoresTest {
         try {
             // One extra arrow count
             arrowCounts.put(10.0, 20);
-            ArcheryScores.addRoundRef("dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes, false);
+            ArcheryScores.addRoundRef(
+                    "dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes,
+                    false);
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -144,7 +162,9 @@ public class ArcheryScoresTest {
             // One extra face size
             faceSizes.put(10.0, 20);
             faceSizes.put(20.0, 20);
-            ArcheryScores.addRoundRef("dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes, false);
+            ArcheryScores.addRoundRef(
+                    "dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes,
+                    false);
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -153,12 +173,15 @@ public class ArcheryScoresTest {
         try {
             // Mismatched distances in arrow counts and face sizes
             arrowCounts.put(40.0, 20);
-            ArcheryScores.addRoundRef("dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes, false);
+            ArcheryScores.addRoundRef(
+                    "dgfhhgsh", ArcheryScores.ScoringType.METRIC, false, faceSizes.keySet(), arrowCounts, faceSizes,
+                    false);
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
     }
+
 
     @Test
     public void testStartNewRound() {
@@ -169,14 +192,18 @@ public class ArcheryScoresTest {
 
         ArcheryScores.addArcher(archerName);
         ArcheryScores.addBow(archerName, bowName, ArcheryScores.Bowsyle.RECURVE);
-        ArcheryScores.addRoundRef(roundName, ArcheryScores.ScoringType.METRIC, false, Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
+        ArcheryScores.addRoundRef(
+                roundName, ArcheryScores.ScoringType.METRIC, false,
+                Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 0, 0));
 
         ArcheryScores.startNewRound(archerName, null, roundName, date, null, null, null, null, true);
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, 0));
         ArcheryScores.deleteArcherRoundsTableAndRemoveInProgressRound();
 
-        ArcheryScores.startNewRound(archerName, bowName, roundName, date, ArcheryScores.ShootStatus.CLUB_SHOOT, 500, 1, "Good weather", false);
+        ArcheryScores.startNewRound(
+                archerName, bowName, roundName, date, ArcheryScores.ShootStatus.CLUB_SHOOT, 500, 1, "Good weather",
+                false);
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, 0));
 
         boolean exceptionThrown = false;
@@ -200,7 +227,9 @@ public class ArcheryScoresTest {
 
         ArcheryScores.addArcher(archerName);
         ArcheryScores.addBow(archerName, bowName, ArcheryScores.Bowsyle.RECURVE);
-        ArcheryScores.addRoundRef(roundName, ArcheryScores.ScoringType.METRIC, false, Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
+        ArcheryScores.addRoundRef(
+                roundName, ArcheryScores.ScoringType.METRIC, false,
+                Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
         ArcheryScores.startNewRound(archerName, null, roundName, date, null, null, null, null, true);
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, 0));
 
@@ -209,7 +238,7 @@ public class ArcheryScoresTest {
         // Add 60 arrows
         for (int i = 0; i < 60 / scores.length; i++) {
             ArcheryScores.addEnd(archerName, scores, isX);
-            Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, (i+1) * 6));
+            Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, (i + 1) * 6));
         }
         // Add more arrows
         boolean exceptionThrown = false;
@@ -263,7 +292,7 @@ public class ArcheryScoresTest {
         Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, 1, 60));
     }
 
-    
+
     @Test
     public void testSetRoundComplete() {
         final String archerName = "Ella";
@@ -273,7 +302,9 @@ public class ArcheryScoresTest {
 
         ArcheryScores.addArcher(archerName);
         ArcheryScores.addBow(archerName, bowName, ArcheryScores.Bowsyle.RECURVE, 100, 100);
-        ArcheryScores.addRoundRef(roundName, ArcheryScores.ScoringType.METRIC, false, Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
+        ArcheryScores.addRoundRef(
+                roundName, ArcheryScores.ScoringType.METRIC, false,
+                Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, false);
 
         for (int i = 0; i < 4; i++) {
             ArcheryScores.startNewRound(archerName, null, roundName, date, null, null, null, null, true);
@@ -283,7 +314,7 @@ public class ArcheryScoresTest {
             for (int j = 0; j < 60 / scores.length; j++) {
                 ArcheryScores.addEnd(archerName, scores, isX);
             }
-            Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, i+1, 60 * (i+1)));
+            Assert.assertTrue(ArcheryScores.checkRowCounts(1, 1, 1, 1, i + 1, 60 * (i + 1)));
             ArcheryScores.setRoundComplete(archerName);
             switch (i) {
                 case 0:
@@ -311,7 +342,9 @@ public class ArcheryScoresTest {
     @Test
     public void getHandicapForRound() {
         // Portsmouth normal scoring
-        ArcheryScores.addRoundRef("Portsmouth", ArcheryScores.ScoringType.METRIC, false, Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, true);
+        ArcheryScores.addRoundRef(
+                "Portsmouth", ArcheryScores.ScoringType.METRIC, false,
+                Collections.singleton(ArcheryScores.yardsToMeters(20)), 60, 60, true);
         for (int i = 0; i <= 100; i++) {
             int score = ArcheryScores.getScoreForRound(1, i, false, null);
             int predictedHC = ArcheryScores.getHandicapForRound(1, score, false, null);
@@ -375,16 +408,20 @@ public class ArcheryScoresTest {
         Map<Double, Integer> arrowCounts = new HashMap<>();
         faceSizes.put(70.0, 122);
         arrowCounts.put(70.0, 36);
-        ArcheryScores.addRoundRef("WA 1440 Pt1", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
+        ArcheryScores.addRoundRef("WA 1440 Pt1", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(),
+                                  arrowCounts, faceSizes, false);
         faceSizes.put(60.0, 122);
         arrowCounts.put(60.0, 36);
-        ArcheryScores.addRoundRef("WA 1440 Pt2", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
+        ArcheryScores.addRoundRef("WA 1440 Pt2", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(),
+                                  arrowCounts, faceSizes, false);
         faceSizes.put(50.0, 80);
         arrowCounts.put(50.0, 36);
-        ArcheryScores.addRoundRef("WA 1440 Pt3", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
+        ArcheryScores.addRoundRef("WA 1440 Pt3", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(),
+                                  arrowCounts, faceSizes, false);
         faceSizes.put(30.0, 80);
         arrowCounts.put(30.0, 36);
-        ArcheryScores.addRoundRef("WA 1440", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts, faceSizes, false);
+        ArcheryScores.addRoundRef("WA 1440", ArcheryScores.ScoringType.METRIC, true, faceSizes.keySet(), arrowCounts,
+                                  faceSizes, false);
         for (int i = 0; i <= 100; i++) {
             int score = ArcheryScores.getScoreForRound(5, i, false, null);
             int predictedHC = ArcheryScores.getHandicapForRound(5, score, false, null);
@@ -410,7 +447,7 @@ public class ArcheryScoresTest {
 
             for (int j = 2; j < 5; j++) {
                 int partialRoundScore = ArcheryScores.getScoreForRound(j, i, false, null);
-                int partialScore = ArcheryScores.getScoreForRound(5, i, false, (j-1) * 36);
+                int partialScore = ArcheryScores.getScoreForRound(5, i, false, (j - 1) * 36);
                 Assert.assertEquals(partialRoundScore, partialScore);
             }
         }
@@ -448,10 +485,5 @@ public class ArcheryScoresTest {
                 Assert.assertEquals(handicapTablesHc, predictedHC);
             }
         }
-    }
-
-    @Test
-    public void testPartialHandicap() {
-
     }
 }

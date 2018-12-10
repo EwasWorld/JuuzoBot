@@ -3,8 +3,10 @@ package DatabaseBox;
 import CoreBox.Bot;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.ContactEwaException;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.sql.*;
 import java.text.DateFormat;
@@ -12,14 +14,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 
 
 /**
  * Abstracts database connections and provides methods for querying the database
- * TODO Optimisation create some sort of Args class to make extra parts of SQL like ORDER simpler
  * created: 27/09/18
  */
 public class DatabaseTable {
@@ -47,6 +48,9 @@ public class DatabaseTable {
 
 
 
+    /**
+     * Functions that can be applied to columns e.g. MAX(columnName)
+     */
     public enum ColumnFunction {
         MAX, SUM, COUNT(false);
 
@@ -75,7 +79,7 @@ public class DatabaseTable {
      * TODO FIX All dates are not being stored in UTC Q.Q plz fix
      */
     // Date format given as an argument and stored in the database
-    public static String setDateFormatStr = "yyyy-M-dd HH:mm";
+    private static String setDateFormatStr = "yyyy-M-dd HH:mm";
     private static DateFormat setDateFormat = new SimpleDateFormat(setDateFormatStr);
     // Date format when printing the date
     private static DateFormat printDateFormat = new SimpleDateFormat("E dd MMM 'at' HH:mm z");
@@ -90,17 +94,38 @@ public class DatabaseTable {
     private PrimaryKey primaryKey;
 
 
-    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields, PrimaryKey primaryKey) {
+    public DatabaseTable(@NotNull String tableName, @NotNull DatabaseField[] fields, @NotNull PrimaryKey primaryKey) {
+        this(tableName, fieldsArrayToMap(fields), primaryKey);
+    }
+
+
+    public DatabaseTable(@NotNull String tableName, @NotNull Map<String, DatabaseFieldArgs> fields,
+                         @NotNull PrimaryKey primaryKey) {
         this.tableName = tableName;
         this.fields = fields;
         this.primaryKey = primaryKey;
     }
 
 
+    private static Map<String, DatabaseFieldArgs> fieldsArrayToMap(@NotNull DatabaseField[] fields) {
+        final Map<String, DatabaseFieldArgs> fieldsMap = new HashMap<>();
+        for (DatabaseField field : fields) {
+            fieldsMap.put(field.getFieldName(), new DatabaseFieldArgs(field.getSqlType(), field.isRequired()));
+        }
+        return fieldsMap;
+    }
+
+
+    public DatabaseTable(@NotNull String tableName, @NotNull DatabaseField[] fields) {
+        this(tableName, fieldsArrayToMap(fields));
+    }
+
+
     /**
+     * TODO change default primary key to rowID
      * Primary key: tableName + "ID"
      */
-    public DatabaseTable(String tableName, Map<String, DatabaseFieldArgs> fields) {
+    public DatabaseTable(@NotNull String tableName, Map<String, @NotNull DatabaseFieldArgs> fields) {
         this.tableName = tableName;
         this.fields = fields;
 
@@ -110,6 +135,14 @@ public class DatabaseTable {
     }
 
 
+    public static String getSetDateFormatStr() {
+        return setDateFormatStr;
+    }
+
+
+    /**
+     * Change the database mode so that testing doesn't affect live data
+     */
     public static void setTestMode() {
         url = urlPrefix + "JuuzoTest.db";
     }
@@ -120,13 +153,16 @@ public class DatabaseTable {
     }
 
 
+    /**
+     * @throws ContactEwaException if an SQLException occurs
+     */
     private static void closeConnection() {
         try {
             if (connection != null) {
                 connection.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new ContactEwaException("Close connection error");
         }
     }
 
@@ -136,138 +172,120 @@ public class DatabaseTable {
     }
 
 
-    public static DatabaseTable createDatabaseTable(String tableName, DatabaseField[] fields) {
-        return new DatabaseTable(tableName, fieldsArrayToMap(fields));
-    }
-
-
-    private static Map<String, DatabaseFieldArgs> fieldsArrayToMap(DatabaseField[] fields) {
-        final Map<String, DatabaseFieldArgs> fieldsMap = new HashMap<>();
-        for (DatabaseField field : fields) {
-            fieldsMap.put(field.getFieldName(), new DatabaseFieldArgs(field.getSqlType(), field.isRequired()));
-        }
-        return fieldsMap;
-    }
-
-
-    public static DatabaseTable createDatabaseTable(String tableName, DatabaseField[] fields,
-                                                    PrimaryKey primaryKey) {
-        return new DatabaseTable(tableName, fieldsArrayToMap(fields), primaryKey);
-    }
-
-
-    public static String databaseStringToPrintableString(String string) {
+    /**
+     * @param databaseDate a date in the form {@link #setDateFormat}
+     * @return the given string in the form {@link #printDateFormat}
+     * @throws ContactEwaException if an SQLException occurs
+     */
+    public static String databaseStringToPrintableString(@NotNull String databaseDate) {
         try {
-            return formatDateForPrint(parseDateFromDatabase(string));
+            return formatDateForPrint(parseDateFromDatabase(databaseDate));
         } catch (ParseException ignore) {
 
         }
-        return null;
+        throw new ContactEwaException("Date parse error");
     }
 
 
-    public static String formatDateForPrint(ZonedDateTime zonedDateTime) {
+    /**
+     * @return the given date in the form {@link #printDateFormat}
+     */
+    public static String formatDateForPrint(@NotNull ZonedDateTime zonedDateTime) {
         return printDateFormat.format(Date.from(zonedDateTime.toInstant()));
     }
 
 
-    public static ZonedDateTime parseDateFromDatabase(String date) throws ParseException {
+    /**
+     * @param date a date in the form {@link #setDateFormat}
+     */
+    public static ZonedDateTime parseDateFromDatabase(@NotNull String date) throws ParseException {
         return ZonedDateTime.ofInstant(setDateFormat.parse(date).toInstant(), zoneId);
     }
 
 
-    public void deleteTable() {
+    /**
+     * @throws ContactEwaException if an SQLException occurs
+     */
+    public void dropTable() {
         getConnection();
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("DROP TABLE IF EXISTS " + tableName);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new ContactEwaException("Drop table error");
         }
     }
 
 
     /**
-     * Make a connection to the database and create the table (if it doesn't already exist)
+     * Open a connection to the database, populating {@link #connection}, and create the table if it doesn't already
+     * exist
+     *
+     * @throws ContactEwaException if connection cannot be established
      */
-    public Connection getConnection() {
+    private void getConnection() {
         if (connection == null) {
-            createConnection();
-        }
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(getCreateTableString());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
-    }
-
-
-    /**
-     * Fetches the existing database or creates a new database if one is not found
-     */
-    private static void createConnection() {
-        if (connection == null) {
+            /*
+             * Fetches the existing database or creates a new one
+             */
             try {
                 connection = DriverManager.getConnection(url);
-
                 if (!new File(databaseFileLocation).exists()) {
-                    if (connection != null) {
-                        connection.getMetaData();
-                    }
+                    connection.getMetaData();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw new ContactEwaException("Database connection error");
             }
         }
-    }
 
-
-    /**
-     * @return SQL CREATE statement for this the table
-     */
-    private String getCreateTableString() {
-        final StringBuilder sb = new StringBuilder();
-        for (String fieldName : fields.keySet()) {
-            sb.append(String.format("%s %s,", fieldName, fields.get(fieldName).createTableLine()));
-        }
-        Optional<String> primaryKeyOptional = primaryKey.getPrimaryKeySQLLine(tableName);
-        String primaryKeyString;
-        if (!primaryKeyOptional.isPresent()) {
+        /*
+         * Create table
+         */
+        try (Statement stmt = connection.createStatement()) {
+            final StringBuilder sb = new StringBuilder();
+            for (String fieldName : fields.keySet()) {
+                sb.append(String.format("%s %s,", fieldName, fields.get(fieldName).createTableLine()));
+            }
             sb.deleteCharAt(sb.length() - 1);
-            primaryKeyString = "";
+            stmt.execute(String.format("CREATE TABLE IF NOT EXISTS %s (%s%s);", tableName, sb.toString(),
+                                       primaryKey.getPrimaryKeySQLLine(tableName)));
+        } catch (SQLException e) {
+            throw new ContactEwaException("Table creation error");
         }
-        else {
-            primaryKeyString = primaryKeyOptional.get();
-        }
-        return String.format("CREATE TABLE IF NOT EXISTS %s (%s%s);", tableName, sb.toString(), primaryKeyString);
     }
 
 
     /**
      * Creates and executes an SQL INSERT INTO statement
-     *
-     * @param args Map<field, value> row information to insert
      */
-    public void insert(Map<String, Object> args) {
+    public void insert(@NotNull SetArgs args) {
         // For testing on laptop with outdated compiler - this method can't be used
 //        if (2 < 1) {
 //            throw new IllegalStateException("Currently invalid");
 //        }
         // Check that all required fields are given
+        final Set<String> argsFieldNames = args.getAllFieldNames();
         for (String field : fields.keySet()) {
-            if (fields.get(field).isRequired() && !args.containsKey(field)) {
+            if (fields.get(field).isRequired() && !argsFieldNames.contains(field)) {
                 throw new BadStateException("Required field missing: " + field);
             }
         }
-        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, ", ", 2);
-        String values = "?,".repeat(args.size());
+        final BuildSQLArgsString buildArgs = args.getSetSQLString(", ", 2);
+        String values = "?,".repeat(argsFieldNames.size());
         values = values.substring(0, values.length() - 1);
-        final String sql = String.format("INSERT INTO %s(%s) VALUES (%s)", tableName, buildArgs.string, values);
-        executePreparedStatement(sql, buildArgs.types, buildArgs.values);
+        final String sql = String.format("INSERT INTO %s(%s) VALUES (%s)", tableName, buildArgs.getString(), values);
+        executePreparedStatement(sql, buildArgs.getTypes(), buildArgs.getValues());
     }
 
 
-    private void executePreparedStatement(String sql, List<SQLType> types, List<Object> objects) {
+    /**
+     * Sets the parameters using a prepared statement and executes the statement
+     *
+     * @param sql the SQL statement to execute
+     * @param types the types of the parameters which must be set
+     * @param objects the values of the parameters which must be set
+     * @throws ContactEwaException if an SQLException occurs
+     */
+    private void executePreparedStatement(@NotNull String sql, List<SQLType> types, List<Object> objects) {
         getConnection();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             if (types != null && objects != null) {
@@ -275,17 +293,13 @@ public class DatabaseTable {
             }
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new ContactEwaException("Execute statement error");
         }
     }
 
 
-    private void setValuesInPreparedStatement(PreparedStatement ps, List<SQLType> types, List<Object> objects)
-            throws SQLException {
-        if (ps == null || types == null || objects == null) {
-            throw new IllegalStateException("Null arguments");
-        }
-
+    private void setValuesInPreparedStatement(@NotNull PreparedStatement ps, @NotNull List<SQLType> types,
+                                              @NotNull List<Object> objects) throws SQLException {
         for (int i = 0; i < types.size(); i++) {
             if (objects.get(i) == null) {
                 ps.setNull(i + 1, types.get(i).javaType);
@@ -301,7 +315,7 @@ public class DatabaseTable {
                     break;
                 case DATE:
                     final ZonedDateTime zonedDateTime = (ZonedDateTime) objects.get(i);
-                    ps.setString(i + 1, setDateFormat.format(Date.from(zonedDateTime.toInstant())));
+                    ps.setString(i + 1, formatDateForDatabase(zonedDateTime));
                     break;
                 case INT:
                 case INTEGER:
@@ -318,24 +332,29 @@ public class DatabaseTable {
 
 
     /**
-     * Creates and executes an SQL UPDATE statement
-     *
-     * @param setArgs Map<field, value> columns to update and their new values
-     * @param whereArgs Map<field, value> WHERE arguments which will be ANDed together
+     * @return the given date in the form {@link #setDateFormat}
      */
-    public void updateAND(Map<String, Object> setArgs, @Nullable Map<String, Object> whereArgs) {
-        final BuildSQLArgsString setBuildArgs = new BuildSQLArgsString(setArgs, "=?, ", 2);
-        final List<SQLType> types = setBuildArgs.types;
-        final List<Object> objects = setBuildArgs.values;
+    public static String formatDateForDatabase(@NotNull ZonedDateTime date) {
+        return setDateFormat.format(Date.from(date.withZoneSameInstant(zoneId).toInstant()));
+    }
+
+
+    /**
+     * Creates and executes an SQL UPDATE statement
+     */
+    public void update(@NotNull SetArgs setArgs, Args whereArgs) {
+        final BuildSQLArgsString setBuildArgs = setArgs.getSetSQLString("=?, ", 2);
+        final List<SQLType> types = setBuildArgs.getTypes();
+        final List<Object> objects = setBuildArgs.getValues();
         String sql = "UPDATE %s SET %s";
         if (whereArgs == null) {
-            sql = String.format(sql, tableName, setBuildArgs.string);
+            sql = String.format(sql, tableName, setBuildArgs.getString());
         }
         else {
-            final BuildSQLArgsString whereBuildArgs = new BuildSQLArgsString(whereArgs, "=? AND ", 5);
-            types.addAll(whereBuildArgs.types);
-            objects.addAll(whereBuildArgs.values);
-            sql = String.format(sql + " WHERE %s", tableName, setBuildArgs.string, whereBuildArgs.string);
+            final BuildSQLArgsString whereBuildArgs = whereArgs.getSQLString(false);
+            types.addAll(whereBuildArgs.getTypes());
+            objects.addAll(whereBuildArgs.getValues());
+            sql = String.format(sql + whereBuildArgs.getString(), tableName, setBuildArgs.getString());
         }
         executePreparedStatement(sql, types, objects);
     }
@@ -343,39 +362,28 @@ public class DatabaseTable {
 
     /**
      * Creates and executes an SQL DELETE statement
-     *
-     * @param args Map<field, value> WHERE arguments which will be ANDed together
      */
-    public void deleteAND(Map<String, Object> args) {
-        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(args, "=? AND ", 5);
-        final String sql = String.format("DELETE FROM %s WHERE %s", tableName, buildArgs.string);
-        executePreparedStatement(sql, buildArgs.types, buildArgs.values);
-    }
-
-
-    public Object selectAND(@Nullable Map<String, Object> whereArgs, ResultsSetAction resultsSetAction) {
-        return selectAND(whereArgs, null, null, resultsSetAction);
+    public void delete(@NotNull Args args) {
+        final BuildSQLArgsString buildArgs = args.getSQLString(false);
+        final String sql = String.format("DELETE FROM %s%s", tableName, buildArgs.getString());
+        executePreparedStatement(sql, buildArgs.getTypes(), buildArgs.getValues());
     }
 
 
     /**
      * Create an execute a SELECT * statement
      *
-     * @param whereArgs Map<field, value> WHERE arguments which will be ANDed together
      * @param resultsSetAction what to do with the results set when it's found (must be done within the try/catch
      * containing the prepared statement else rs becomes 'inactive')
-     * @return result of resultsSetAction
+     * @return return value of the parameter {@code resultsSetAction}
      */
-    public Object selectAND(@Nullable Map<String, Object> whereArgs, @Nullable String sqlStatementSuffix,
-                            @Nullable Map<String, Object> suffixValues, ResultsSetAction resultsSetAction) {
-        if (whereArgs == null || whereArgs.size() == 0) {
-            return executePreparedStatement(String.format("SELECT * FROM %s", tableName), null, null, resultsSetAction);
+    public Object select(Args whereArgs, @NotNull ResultsSetAction resultsSetAction) {
+        if (whereArgs == null || whereArgs.isEmpty()) {
+            return executePreparedStatement("SELECT * FROM " + tableName, null, null, resultsSetAction);
         }
-        sqlStatementSuffix = getSuffixString(sqlStatementSuffix, suffixValues);
-        final BuildSQLArgsString buildArgs = new BuildSQLArgsString(whereArgs, "=? AND ", 5);
-        final String sql = String.format(
-                "SELECT * FROM %s WHERE %s%s", tableName, buildArgs.string, sqlStatementSuffix);
-        return executePreparedStatement(sql, buildArgs.types, buildArgs.values, resultsSetAction);
+        final BuildSQLArgsString buildArgs = whereArgs.getSQLString();
+        final String sql = String.format("SELECT * FROM %s%s", tableName, buildArgs.getString());
+        return executePreparedStatement(sql, buildArgs.getTypes(), buildArgs.getValues(), resultsSetAction);
     }
 
 
@@ -383,95 +391,69 @@ public class DatabaseTable {
      * @param types can be null
      * @param objects can be null
      * @param resultsSetAction what to do when the
-     * @return what the ResultsSetAction returns
+     * @return return value of the parameter {@code resultsSetAction}
+     * @throws ContactEwaException if an SQLException occurs
      */
-    private Object executePreparedStatement(String sql, List<SQLType> types, List<Object> objects,
-                                            ResultsSetAction resultsSetAction) {
+    private Object executePreparedStatement(@NotNull String sql, List<SQLType> types, List<Object> objects,
+                                            @NotNull ResultsSetAction resultsSetAction) {
         getConnection();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             if (types != null && objects != null) {
+                // Check that every parameter will be set
+                int placeholders = StringUtils.countMatches(sql, "?");
+                if (types.size() != placeholders || objects.size() != placeholders) {
+                    throw new ContactEwaException("Parameters in SQL not set");
+                }
                 setValuesInPreparedStatement(ps, types, objects);
             }
+            // If types and objects are null, there should be no parameters to set
             else if (sql.contains("?")) {
                 throw new ContactEwaException("Parameters in SQL not set");
             }
-            ResultSet rs = ps.executeQuery();
+            final ResultSet rs = ps.executeQuery();
             return resultsSetAction.execute(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new ContactEwaException("Database query failed");
         }
-        throw new ContactEwaException("Database query failed");
     }
 
 
-    private String getSuffixString(String sqlStatementSuffix, Map<String, Object> suffixValues) {
-        if (sqlStatementSuffix == null) {
-            return "";
-        }
-        else {
-            if (suffixValues == null) {
-                throw new NullPointerException("If a suffix is used, any values used in it must be stated");
-            }
-            else {
-                for (String fieldName : suffixValues.keySet()) {
-                    final Object value = suffixValues.get(fieldName);
-                    if (value == null) {
-                        fieldNameExists(fieldName);
-                    }
-                    else {
-                        checkValidSQLConditionArguments(fieldName, value);
-                    }
-                }
-            }
-        }
-        return sqlStatementSuffix;
-    }
-
-
-    private boolean fieldNameExists(String fieldName) {
-        return fields.keySet().contains(fieldName);
-    }
-
-
-    private void checkValidSQLConditionArguments(String fieldName, Object value) {
-        if (!fieldNameExists(fieldName)) {
+    /**
+     * @throws IllegalArgumentException if fieldName is not a field name for this table
+     */
+    void checkValidFieldName(@NotNull String fieldName) {
+        if (!fields.keySet().contains(fieldName)) {
             throw new IllegalArgumentException("Invalid database field name for " + tableName + ": " + fieldName);
         }
-        else if (!validSQLType(fieldName, value)) {
+    }
+
+
+    /**
+     * @param value the value that will be given for the fieldName e.g. {@code fieldName > value}, or {@code SET
+     * fieldname=value}
+     * @throws IllegalArgumentException if the type of value is inappropriate
+     */
+    void checkValidSQLConditionArguments(@NotNull String fieldName, @Nullable Object value) {
+        if (value != null && !(fields.get(fieldName).getSqlType().className.equals(value.getClass().getName()))) {
             throw new IllegalArgumentException("Invalid argument type for " + fieldName);
         }
-    }
-
-
-    private boolean validSQLType(String fieldName, Object value) {
-        // Bypass type check if the value is null
-        return value == null || (fields.get(fieldName).getSqlType().className.equals(value.getClass().getName()));
-    }
-
-
-    public int getFunctionOfIntColumn(ColumnFunction function, String column, @Nullable Map<String, Object> whereArgs) {
-        return getFunctionOfIntColumn(function, column, null, null, whereArgs);
     }
 
 
     /**
      * @param column must be of type INT
      * @return the column with the function applied to it
-     * @throws NullPointerException if no rows in table
+     * @throws IllegalArgumentException if the column doesn't exist or is of an inappropriate type
+     * @throws NullPointerException if there are no rows in the table
      */
-    public int getFunctionOfIntColumn(ColumnFunction function, String column, String sqlStatementSuffix,
-                                      Map<String, Object> suffixValues, @Nullable Map<String, Object> whereArgs) {
-        if (function == null || column == null) {
-            throw new IllegalArgumentException("Null arguments");
-        }
-        else if (!fields.keySet().contains(column)) {
+    public int getFunctionOfIntColumn(@NotNull ColumnFunction function, @NotNull String column, Args whereArgs) {
+        if (!fields.keySet().contains(column)) {
             throw new IllegalArgumentException("No such column");
         }
-        else if (function.requireIntColType && fields.get(column).getSqlType() != SQLType.INT && fields.get(column)
-                .getSqlType() != SQLType.INTEGER) {
+        else if (function.requireIntColType && fields.get(column).getSqlType() != SQLType.INT
+                && fields.get(column).getSqlType() != SQLType.INTEGER) {
             throw new IllegalArgumentException("Column is not of type int");
         }
-        sqlStatementSuffix = getSuffixString(sqlStatementSuffix, suffixValues);
 
         final ResultsSetAction resultsSetAction = rs -> {
             if (rs.next()) {
@@ -482,16 +464,21 @@ public class DatabaseTable {
             }
         };
         String sql = "SELECT %s(%s) FROM %s";
-        if (whereArgs == null) {
+        if (whereArgs == null || whereArgs.isEmpty()) {
             sql = String.format(sql, function.toString(), column, tableName);
-            return (int) executePreparedStatement(sql + sqlStatementSuffix, null, null, resultsSetAction);
+            return (int) executePreparedStatement(sql, null, null, resultsSetAction);
         }
         else {
-            final BuildSQLArgsString buildArgs = new BuildSQLArgsString(whereArgs, "=? AND ", 5);
+            final BuildSQLArgsString buildArgs = whereArgs.getSQLString();
             sql = String.format(
-                    sql + " WHERE %s" + sqlStatementSuffix, function.toString(), column, tableName, buildArgs.string);
-            return (int) executePreparedStatement(sql, buildArgs.types, buildArgs.values, resultsSetAction);
+                    sql + buildArgs.getString(), function.toString(), column, tableName);
+            return (int) executePreparedStatement(sql, buildArgs.getTypes(), buildArgs.getValues(), resultsSetAction);
         }
+    }
+
+
+    SQLType getFieldType(@NotNull String fieldName) {
+        return fields.get(fieldName).getSqlType();
     }
 
 
@@ -517,41 +504,5 @@ public class DatabaseTable {
 
 
         boolean isRequired();
-    }
-
-
-
-    /**
-     * Used to turn a map into a string to add to the SQL statement along with the values to insert into the prepared
-     * statement and their types
-     */
-    private class BuildSQLArgsString {
-        private List<SQLType> types;
-        private List<Object> values;
-        private String string;
-
-
-        /**
-         * @param args Map<field, value> arguments which will be turned into a string
-         * @param separator in the string what to separate each of the field names using
-         * @param removableLength the amount to remove from the end of the string to remove any trailing field
-         * separators
-         * @throws IllegalArgumentException if the field name or type of the value is invalid
-         */
-        private BuildSQLArgsString(Map<String, Object> args, String separator, int removableLength) {
-            types = new ArrayList<>();
-            values = new ArrayList<>();
-            final StringBuilder sb = new StringBuilder();
-            for (String arg : args.keySet()) {
-                final Object value = args.get(arg);
-                checkValidSQLConditionArguments(arg, value);
-                types.add(fields.get(arg).getSqlType());
-                values.add(value);
-                sb.append(arg);
-                sb.append(separator);
-            }
-            sb.delete(sb.length() - removableLength, sb.length());
-            string = sb.toString();
-        }
     }
 }

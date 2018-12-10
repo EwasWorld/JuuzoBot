@@ -1,12 +1,14 @@
 package CoreBox;
 
+import DatabaseBox.Args;
 import DatabaseBox.DatabaseTable;
 import DatabaseBox.DatabaseWrapper;
+import DatabaseBox.SetArgs;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.time.ZonedDateTime;
@@ -255,21 +257,21 @@ public class ArcheryScores {
 
 
 
-    private static final DatabaseTable roundsRefDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable roundsRefDatabaseTable = new DatabaseTable(
             "ArcheryRoundsRef", RoundsRefDatabaseFields.values());
-    private static final DatabaseTable roundDistancesRefDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable roundDistancesRefDatabaseTable = new DatabaseTable(
             "ArcheryRoundDistnacesRef", RoundDistancesRefDatabaseFields.values());
-    private static final DatabaseTable archersDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable archersDatabaseTable = new DatabaseTable(
             "ArcheryArchers", ArchersDatabaseFields.values());
-    private static final DatabaseTable bowsDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable bowsDatabaseTable = new DatabaseTable(
             "ArcheryBows", BowsDatabaseFields.values());
-    private static final DatabaseTable archerRoundsDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable archerRoundsDatabaseTable = new DatabaseTable(
             "ArcheryArcherRounds", ArcherRoundsDatabaseFields.values());
-    private static final DatabaseTable arrowValuesDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable arrowValuesDatabaseTable = new DatabaseTable(
             "ArcheryArrowValues", ArrowValuesDatabaseFields.values());
     private static final DatabaseWrapper databaseWrapper = new DatabaseWrapper(
-            new DatabaseTable[]{roundsRefDatabaseTable, roundDistancesRefDatabaseTable,
-                    archersDatabaseTable, bowsDatabaseTable, archerRoundsDatabaseTable, arrowValuesDatabaseTable});
+            new DatabaseTable[]{roundsRefDatabaseTable, roundDistancesRefDatabaseTable, archersDatabaseTable,
+                    bowsDatabaseTable, archerRoundsDatabaseTable, arrowValuesDatabaseTable});
 
 
     public static double yardsToMeters(int yards) {
@@ -306,78 +308,66 @@ public class ArcheryScores {
         if (!DatabaseTable.isInTestMode()) {
             throw new IllegalStateException("This action can only be taken in test mode");
         }
-        archerRoundsDatabaseTable.deleteTable();
-        final Map<String, Object> setArgs = new HashMap<>();
-        setArgs.put(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, null);
-        archersDatabaseTable.updateAND(setArgs, null);
+        archerRoundsDatabaseTable.dropTable();
+        final SetArgs setArgs = new SetArgs(archersDatabaseTable);
+        setArgs.addSetArgument(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, null);
+        archersDatabaseTable.update(setArgs, null);
     }
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if archer already exists
      */
-    public static void addArcher(String name) {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        }
-
-        final Map<String, Object> args = Map.of(ArchersDatabaseFields.NAME.fieldName, name);
-        archersDatabaseTable.selectAND(args, rs -> {
+    public static void addArcher(@NotNull String name) {
+        final Args args = new Args(archersDatabaseTable, Map.of(ArchersDatabaseFields.NAME.fieldName, name));
+        archersDatabaseTable.select(args, rs -> {
             if (rs.next()) {
                 throw new BadUserInputException("This archer name already exists");
             }
             return null;
         });
-        archersDatabaseTable.insert(args);
+        archersDatabaseTable.insert(new SetArgs(args));
     }
 
 
     /**
      * @see ArcheryScores#addBow(String, String, Bowsyle, Integer, Integer)
      */
-    public static void addBow(String archerName, String bowName, Bowsyle bowStyle) {
+    public static void addBow(@NotNull String archerName, @NotNull String bowName, @NotNull Bowsyle bowStyle) {
         addBow(archerName, bowName, bowStyle, null, null);
     }
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if bow already exists
      */
-    public static void addBow(String archerName, String bowName, Bowsyle bowStyle, @Nullable Integer indoorHandicap,
-                              @Nullable Integer outdoorHandicap) {
-        if (archerName == null || bowName == null || bowStyle == null) {
-            throw new NullPointerException("Null argument");
-        }
-        final Map<String, Object> bowArgs = new HashMap<>();
-        bowArgs.put(BowsDatabaseFields.ARCHER_ID.fieldName, getArcherID(archerName));
-        bowArgs.put(BowsDatabaseFields.NAME.fieldName, bowName);
-        bowsDatabaseTable.selectAND(bowArgs, rs -> {
+    public static void addBow(@NotNull String archerName, @NotNull String bowName, @NotNull Bowsyle bowStyle,
+                              Integer indoorHandicap, Integer outdoorHandicap) {
+        final Args bowArgs = new Args(bowsDatabaseTable, Map.of(
+                BowsDatabaseFields.ARCHER_ID.fieldName, getArcherID(archerName),
+                BowsDatabaseFields.NAME.fieldName, bowName));
+        bowsDatabaseTable.select(bowArgs, rs -> {
             if (rs.next()) {
                 throw new BadUserInputException("You already have a bow with this name");
             }
             return null;
         });
-        indoorHandicap = getHandicapDbValue(indoorHandicap);
-        outdoorHandicap = getHandicapDbValue(outdoorHandicap);
-        bowArgs.put(BowsDatabaseFields.STYLE.fieldName, bowStyle.toString());
-        bowArgs.put(BowsDatabaseFields.OUTDOOR_HANDICAP.fieldName, outdoorHandicap);
-        bowArgs.put(BowsDatabaseFields.INDOOR_HANDICAP.fieldName, indoorHandicap);
-        bowsDatabaseTable.insert(bowArgs);
+        final SetArgs setArgs = new SetArgs(bowArgs);
+        setArgs.addSetArgument(Map.of(BowsDatabaseFields.STYLE.fieldName, bowStyle.toString(),
+                                      BowsDatabaseFields.OUTDOOR_HANDICAP.fieldName, getHandicapDbValue(indoorHandicap),
+                                      BowsDatabaseFields.INDOOR_HANDICAP.fieldName,
+                                      getHandicapDbValue(outdoorHandicap)));
+        bowsDatabaseTable.insert(setArgs);
     }
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if archer already exists
      */
-    private static int getArcherID(String name) {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        }
-        return (int) archersDatabaseTable.selectAND(
-                Map.of(ArchersDatabaseFields.NAME.fieldName, name), rs -> {
+    private static int getArcherID(@NotNull String name) {
+        return (int) archersDatabaseTable.select(
+                new Args(archersDatabaseTable, ArchersDatabaseFields.NAME.fieldName, name),
+                rs -> {
                     if (rs.next()) {
                         return rs.getInt(archersDatabaseTable.getPrimaryKey());
                     }
@@ -410,9 +400,9 @@ public class ArcheryScores {
      * @param distanceFaceSizes Map<Distance, Face size>
      * @see ArcheryScores#addRoundRef(String, ScoringType, boolean, Set, Map, Map, boolean)
      */
-    public static void addRoundRef(String name, ScoringType scoringType, boolean isOutdoor, Set<Double> distances,
-                                   int distanceArrowCounts, Map<Double, Integer> distanceFaceSizes,
-                                   boolean inner10Scoring) {
+    public static void addRoundRef(@NotNull String name, @NotNull ScoringType scoringType, boolean isOutdoor,
+                                   @NotNull Set<Double> distances, int distanceArrowCounts,
+                                   @NotNull Map<Double, Integer> distanceFaceSizes, boolean inner10Scoring) {
         addRoundRef(name, scoringType, isOutdoor, distances, getAsDistancesMap(distances, distanceArrowCounts),
                     distanceFaceSizes, inner10Scoring);
     }
@@ -422,21 +412,16 @@ public class ArcheryScores {
      * @param distanceArrowCounts Map<Distance, Arrows to shoot>
      * @param distanceFaceSizes Map<Distance, Face size>
      * @param inner10Scoring whether compounds will use inner 10 scoring when doing this round
-     * @throws NullPointerException for null arguments or if distances size is 0
      * @throws BadUserInputException if distances are invalid, if size of distances, arrow counts, and face sizes
      * don't match, or if a round with the name already exists
      */
-    public static void addRoundRef(String name, ScoringType scoringType, boolean isOutdoor, Set<Double> distances,
-                                   Map<Double, Integer> distanceArrowCounts, Map<Double, Integer> distanceFaceSizes,
-                                   boolean inner10Scoring) {
+    public static void addRoundRef(@NotNull String name, @NotNull ScoringType scoringType, boolean isOutdoor,
+                                   @NotNull Set<Double> distances, @NotNull Map<Double, Integer> distanceArrowCounts,
+                                   @NotNull Map<Double, Integer> distanceFaceSizes, boolean inner10Scoring) {
         /*
          * Check inputs
          */
-        if (name == null || scoringType == null || distances == null || distanceArrowCounts == null
-                || distanceFaceSizes == null) {
-            throw new NullPointerException("Null arguments");
-        }
-        else if (distances.size() == 0) {
+        if (distances.size() == 0) {
             throw new NullPointerException("Distances size must be > 0");
         }
         for (double distance : distances) {
@@ -453,8 +438,8 @@ public class ArcheryScores {
         else if (!distances.equals(distanceFaceSizes.keySet())) {
             throw new BadUserInputException("Distances do not match face sizes distances");
         }
-        final Map<String, Object> selectArgs = Map.of(RoundsRefDatabaseFields.NAME.fieldName, name);
-        roundsRefDatabaseTable.selectAND(selectArgs, rs -> {
+        final Args selectArgs = new Args(roundsRefDatabaseTable, RoundsRefDatabaseFields.NAME.fieldName, name);
+        roundsRefDatabaseTable.select(selectArgs, rs -> {
             if (rs.next()) {
                 throw new BadUserInputException("A round with this name already exists");
             }
@@ -464,33 +449,29 @@ public class ArcheryScores {
         /*
          * Add to the database
          */
-        roundsRefDatabaseTable.insert(
-                Map.of(RoundsRefDatabaseFields.NAME.fieldName, name,
-                       RoundsRefDatabaseFields.IS_OUTDOOR.fieldName, isOutdoor,
-                       RoundsRefDatabaseFields.INNER_TEN_SCORING.fieldName, inner10Scoring,
-                       RoundsRefDatabaseFields.SCORING_TYPE.fieldName, scoringType.toString()));
-        int roundRefID = (int) roundsRefDatabaseTable.selectAND(selectArgs, rs -> {
+        roundsRefDatabaseTable.insert(new SetArgs(roundsRefDatabaseTable, Map.of(
+                RoundsRefDatabaseFields.NAME.fieldName, name,
+                RoundsRefDatabaseFields.IS_OUTDOOR.fieldName, isOutdoor,
+                RoundsRefDatabaseFields.INNER_TEN_SCORING.fieldName, inner10Scoring,
+                RoundsRefDatabaseFields.SCORING_TYPE.fieldName, scoringType.toString())));
+        int roundRefID = (int) roundsRefDatabaseTable.select(selectArgs, rs -> {
             rs.next();
             return rs.getInt(roundsRefDatabaseTable.getPrimaryKey());
         });
         for (double distance : distances) {
-            roundDistancesRefDatabaseTable.insert(Map.of(
+            roundDistancesRefDatabaseTable.insert(new SetArgs(roundDistancesRefDatabaseTable, Map.of(
                     RoundDistancesRefDatabaseFields.ROUND_ID.fieldName, roundRefID,
                     RoundDistancesRefDatabaseFields.DISTANCE.fieldName, distance,
                     RoundDistancesRefDatabaseFields.ARROWS.fieldName, distanceArrowCounts.get(distance),
-                    RoundDistancesRefDatabaseFields.FACE_SIZE.fieldName, distanceFaceSizes.get(distance)));
+                    RoundDistancesRefDatabaseFields.FACE_SIZE.fieldName, distanceFaceSizes.get(distance))));
         }
     }
 
 
     /**
      * @return A map containing every distance mapped to i
-     * @throws NullPointerException for null arguments
      */
-    private static Map<Double, Integer> getAsDistancesMap(Set<Double> distances, int i) {
-        if (distances == null) {
-            throw new NullPointerException("Null distances");
-        }
+    private static Map<Double, Integer> getAsDistancesMap(@NotNull Set<Double> distances, int i) {
         final Map<Double, Integer> map = new HashMap<>();
         for (double distance : distances) {
             map.put(distance, i);
@@ -504,9 +485,9 @@ public class ArcheryScores {
      * @param distanceFaceSizes the face size to be used for every distance
      * @see ArcheryScores#addRoundRef(String, ScoringType, boolean, Set, Map, Map, boolean)
      */
-    public static void addRoundRef(String name, ScoringType scoringType, boolean isOutdoor, Set<Double> distances,
-                                   Map<Double, Integer> distanceArrowCounts, int distanceFaceSizes,
-                                   boolean inner10Scoring) {
+    public static void addRoundRef(@NotNull String name, @NotNull ScoringType scoringType, boolean isOutdoor,
+                                   @NotNull Set<Double> distances, @NotNull Map<Double, Integer> distanceArrowCounts,
+                                   int distanceFaceSizes, boolean inner10Scoring) {
         addRoundRef(name, scoringType, isOutdoor, distances, distanceArrowCounts,
                     getAsDistancesMap(distances, distanceFaceSizes), inner10Scoring);
     }
@@ -517,8 +498,9 @@ public class ArcheryScores {
      * @param distanceFaceSizes the face size to be used for every distance
      * @see ArcheryScores#addRoundRef(String, ScoringType, boolean, Set, Map, Map, boolean)
      */
-    public static void addRoundRef(String name, ScoringType scoringType, boolean isOutdoor, Set<Double> distances,
-                                   int distanceArrowCounts, int distanceFaceSizes, boolean inner10Scoring) {
+    public static void addRoundRef(@NotNull String name, @NotNull ScoringType scoringType, boolean isOutdoor,
+                                   @NotNull Set<Double> distances, int distanceArrowCounts, int distanceFaceSizes,
+                                   boolean inner10Scoring) {
         addRoundRef(name, scoringType, isOutdoor, distances, getAsDistancesMap(distances, distanceArrowCounts),
                     getAsDistancesMap(distances, distanceFaceSizes), inner10Scoring);
     }
@@ -530,25 +512,23 @@ public class ArcheryScores {
      * @param bowName if null, the archer must only have one bow saved, this will be used
      * @param ordinal 1st round of this type of the day, etc. if null, rounds with the same archer, bow, name, and date
      * will be found and the next int (starting from 1) used
-     * @throws NullPointerException for null arguments
      * @throws BadStateException if there's already a round in progress
      * @throws BadUserInputException if archer already exists
      */
-    public static void startNewRound(String archerName, @Nullable String bowName, String roundName, ZonedDateTime date,
-                                     @Nullable ShootStatus shootStatus, @Nullable Integer goalScore,
-                                     @Nullable Integer ordinal, @Nullable String notes, boolean countsTowardsHandicap) {
-        if (archerName == null || roundName == null || date == null) {
-            throw new NullPointerException("Archer, round name, and date must be provided");
-        }
-        else if (ordinal != null && ordinal <= 0) {
+    public static void startNewRound(@NotNull String archerName, String bowName, @NotNull String roundName,
+                                     @NotNull ZonedDateTime date, ShootStatus shootStatus, Integer goalScore,
+                                     Integer ordinal, String notes, boolean countsTowardsHandicap) {
+        if (ordinal != null && ordinal <= 0) {
             throw new IllegalStateException("Invalid ordinal");
         }
         else if (goalScore != null && goalScore <= 0) {
             throw new IllegalStateException("Invalid goal score");
         }
-        // Check no current round in progress
-        final Map<String, Object> archerWhereArgs = Map.of(ArchersDatabaseFields.NAME.fieldName, archerName);
-        int archerID = (int) archersDatabaseTable.selectAND(archerWhereArgs, rs -> {
+        /*
+         * Check no current round in progress
+         */
+        final Args archerWhereArgs = new Args(archersDatabaseTable, ArchersDatabaseFields.NAME.fieldName, archerName);
+        int archerID = (int) archersDatabaseTable.select(archerWhereArgs, rs -> {
             if (rs.next()) {
                 if (rs.getBoolean(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName)) {
                     throw new BadStateException("There is already a round in progress");
@@ -560,9 +540,11 @@ public class ArcheryScores {
             }
         });
 
-        // Add the round to the database
-        final Map<String, Object> args = new HashMap<>();
-        args.put(ArcherRoundsDatabaseFields.ARCHER_ID.fieldName, archerID);
+        /*
+         * Add the round to the database
+         */
+        final Args args = new Args(archerRoundsDatabaseTable);
+        args.addWhereField(ArcherRoundsDatabaseFields.ARCHER_ID.fieldName, archerID);
         int bowID;
         if (bowName == null) {
             bowID = getArchersOnlyBowID(archerName);
@@ -570,10 +552,9 @@ public class ArcheryScores {
         else {
             bowID = getBowID(archerID, bowName);
         }
-
-        args.put(ArcherRoundsDatabaseFields.BOW_ID.fieldName, bowID);
-        args.put(ArcherRoundsDatabaseFields.ROUND_REF_ID.fieldName, roundsRefDatabaseTable.selectAND(
-                Map.of(RoundsRefDatabaseFields.NAME.fieldName, roundName),
+        args.addWhereField(ArcherRoundsDatabaseFields.BOW_ID.fieldName, bowID);
+        args.addWhereField(ArcherRoundsDatabaseFields.ROUND_REF_ID.fieldName, roundsRefDatabaseTable.select(
+                new Args(roundsRefDatabaseTable, RoundsRefDatabaseFields.NAME.fieldName, roundName),
                 rs -> {
                     if (rs.next()) {
                         return rs.getInt(roundsRefDatabaseTable.getPrimaryKey());
@@ -582,9 +563,9 @@ public class ArcheryScores {
                         throw new BadUserInputException("Could not find the round with that name");
                     }
                 }));
-        args.put(ArcherRoundsDatabaseFields.DATE.fieldName, date);
+        args.addWhereField(ArcherRoundsDatabaseFields.DATE.fieldName, date);
         if (ordinal == null) {
-            ordinal = 1 + (int) archerRoundsDatabaseTable.selectAND(args, rs -> {
+            ordinal = 1 + (int) archerRoundsDatabaseTable.select(args, rs -> {
                 int maxOrdinal = 0;
                 while (rs.next()) {
                     int current = rs.getInt(ArcherRoundsDatabaseFields.ORDINAL.fieldName);
@@ -595,39 +576,39 @@ public class ArcheryScores {
                 return maxOrdinal;
             });
         }
-        args.put(ArcherRoundsDatabaseFields.ORDINAL.fieldName, ordinal);
-        args.put(ArcherRoundsDatabaseFields.COUNT_TOWARDS_HANDICAP.fieldName, countsTowardsHandicap);
+        args.addWhereField(ArcherRoundsDatabaseFields.ORDINAL.fieldName, ordinal);
+        args.addWhereField(ArcherRoundsDatabaseFields.COUNT_TOWARDS_HANDICAP.fieldName, countsTowardsHandicap);
         if (shootStatus != null) {
-            args.put(ArcherRoundsDatabaseFields.SHOOT_STATUS.fieldName, shootStatus.toString());
+            args.addWhereField(ArcherRoundsDatabaseFields.SHOOT_STATUS.fieldName, shootStatus.toString());
         }
         if (goalScore != null) {
-            args.put(ArcherRoundsDatabaseFields.GOAL_SCORE.fieldName, goalScore);
+            args.addWhereField(ArcherRoundsDatabaseFields.GOAL_SCORE.fieldName, goalScore);
         }
         if (notes != null) {
-            args.put(ArcherRoundsDatabaseFields.NOTES.fieldName, notes);
+            args.addWhereField(ArcherRoundsDatabaseFields.NOTES.fieldName, notes);
         }
-        archerRoundsDatabaseTable.insert(args);
+        archerRoundsDatabaseTable.insert(new SetArgs(args));
 
-        // Set this round as in progress
-        int roundID = (int) archerRoundsDatabaseTable.selectAND(args, rs -> {
+        /*
+         * Set this round as in progress
+         */
+        int roundID = (int) archerRoundsDatabaseTable.select(args, rs -> {
             rs.next();
             return rs.getInt(archerRoundsDatabaseTable.getPrimaryKey());
         });
-        archersDatabaseTable.updateAND(
-                Map.of(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, roundID), archerWhereArgs);
+        archersDatabaseTable.update(new SetArgs(
+                archersDatabaseTable,
+                Map.of(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, roundID)), archerWhereArgs);
     }
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if the archer has more than one bow or no bows
      */
-    private static int getArchersOnlyBowID(String archerName) {
-        if (archerName == null) {
-            throw new NullPointerException("Name cannot be null");
-        }
-        return (int) bowsDatabaseTable.selectAND(
-                Map.of(BowsDatabaseFields.ARCHER_ID.fieldName, getArcherID(archerName)), rs -> {
+    private static int getArchersOnlyBowID(@NotNull String archerName) {
+        return (int) bowsDatabaseTable.select(
+                new Args(bowsDatabaseTable, BowsDatabaseFields.ARCHER_ID.fieldName, getArcherID(archerName)),
+                rs -> {
                     int bowID;
                     if (rs.next()) {
                         bowID = rs.getInt(bowsDatabaseTable.getPrimaryKey());
@@ -646,15 +627,12 @@ public class ArcheryScores {
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if archer doesn't exist
      */
-    private static int getBowID(int archerID, String bowName) {
-        if (bowName == null) {
-            throw new NullPointerException("Null arguments");
-        }
-        return (int) bowsDatabaseTable.selectAND(
-                Map.of(BowsDatabaseFields.ARCHER_ID.fieldName, archerID, BowsDatabaseFields.NAME.fieldName, bowName),
+    private static int getBowID(int archerID, @NotNull String bowName) {
+        return (int) bowsDatabaseTable.select(
+                new Args(bowsDatabaseTable, Map.of(
+                        BowsDatabaseFields.ARCHER_ID.fieldName, archerID, BowsDatabaseFields.NAME.fieldName, bowName)),
                 rs -> {
                     if (rs.next()) {
                         return rs.getInt(bowsDatabaseTable.getPrimaryKey());
@@ -667,14 +645,10 @@ public class ArcheryScores {
 
 
     /**
-     * @throws NullPointerException for null arguments
      * @throws BadUserInputException if scores and isX lengths don't match, for invalid scores, or if isXs on
      * non-10s, or if too many arrows are being added to the round
      */
-    public static void addEnd(String archerName, int[] scores, boolean[] isX) {
-        if (archerName == null || scores == null || isX == null) {
-            throw new NullPointerException("Null arguments");
-        }
+    public static void addEnd(@NotNull String archerName, @NotNull int[] scores, @NotNull boolean[] isX) {
         if (scores.length != isX.length) {
             throw new BadUserInputException("Scores and isX lengths don't match");
         }
@@ -694,12 +668,11 @@ public class ArcheryScores {
             throw new BadUserInputException("Adding this end will add too many arrow scores for the given round");
         }
         for (int i = 0; i < scores.length; i++) {
-            final Map<String, Object> args = new HashMap<>();
-            args.put(ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, roundID);
-            args.put(ArrowValuesDatabaseFields.ARROW_NUMBER.fieldName, ++arrowNumber);
-            args.put(ArrowValuesDatabaseFields.SCORE.fieldName, scores[i]);
-            args.put(ArrowValuesDatabaseFields.IS_X.fieldName, isX[i]);
-            arrowValuesDatabaseTable.insert(args);
+            arrowValuesDatabaseTable.insert(new SetArgs(arrowValuesDatabaseTable, Map.of(
+                    ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, roundID,
+                    ArrowValuesDatabaseFields.ARROW_NUMBER.fieldName, ++arrowNumber,
+                    ArrowValuesDatabaseFields.SCORE.fieldName, scores[i],
+                    ArrowValuesDatabaseFields.IS_X.fieldName, isX[i])));
         }
     }
 
@@ -708,8 +681,9 @@ public class ArcheryScores {
      * @throws BadStateException if there is no round in progress
      */
     private static int getRoundInProgressID(int archerID) {
-        final Object roundID = archersDatabaseTable.selectAND(
-                Map.of(archersDatabaseTable.getPrimaryKey(), archerID), rs -> {
+        final Object roundID = archersDatabaseTable.select(
+                new Args(archersDatabaseTable, archersDatabaseTable.getPrimaryKey(), archerID),
+                rs -> {
                     rs.next();
                     return rs.getInt(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName);
                 });
@@ -722,25 +696,27 @@ public class ArcheryScores {
     }
 
 
-    private static int getArrowsCurrentlyShot(int archerRountID) {
-        final Map<String, Object> startArgs = new HashMap<>();
-        startArgs.put(ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, archerRountID);
+    private static int getArrowsCurrentlyShot(int archerRoundID) {
         return arrowValuesDatabaseTable.getFunctionOfIntColumn(
-                DatabaseTable.ColumnFunction.MAX, ArrowValuesDatabaseFields.ARROW_NUMBER.fieldName, startArgs);
+                DatabaseTable.ColumnFunction.MAX, ArrowValuesDatabaseFields.ARROW_NUMBER.fieldName,
+                new Args(arrowValuesDatabaseTable,
+                         ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, archerRoundID));
     }
 
 
     private static int getTotalArrowCountForRound(int archerRoundID) {
-        int roundRefID = getRoundRefID(archerRoundID);
         return roundDistancesRefDatabaseTable.getFunctionOfIntColumn(
                 DatabaseTable.ColumnFunction.SUM, RoundDistancesRefDatabaseFields.ARROWS.fieldName,
-                Map.of(RoundDistancesRefDatabaseFields.ROUND_ID.fieldName, roundRefID));
+                new Args(roundDistancesRefDatabaseTable,
+                         RoundDistancesRefDatabaseFields.ROUND_ID.fieldName, getRoundRefID(archerRoundID)));
     }
 
 
     private static int getRoundRefID(int archerRoundID) {
-        return (int) archerRoundsDatabaseTable.selectAND(
-                Map.of(archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID), rs -> {
+        return (int) archerRoundsDatabaseTable.select(
+                new Args(archerRoundsDatabaseTable,
+                         archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID),
+                rs -> {
                     rs.next();
                     return rs.getInt(ArcherRoundsDatabaseFields.ROUND_REF_ID.fieldName);
                 });
@@ -750,13 +726,9 @@ public class ArcheryScores {
     /**
      * Set the archer's in progress round as complete and update their handicap
      *
-     * @throws NullPointerException for null arguments
      * @throws BadStateException if there aren't enough arrows added to the round
      */
-    public static void setRoundComplete(String archerName) {
-        if (archerName == null) {
-            throw new NullPointerException("Null arguments");
-        }
+    public static void setRoundComplete(@NotNull String archerName) {
         int archerID = getArcherID(archerName);
         int archerRoundID = getRoundInProgressID(archerID);
         if (getArrowsCurrentlyShot(archerRoundID) != getTotalArrowCountForRound(archerRoundID)) {
@@ -766,15 +738,16 @@ public class ArcheryScores {
         /*
          * Set no round in progress
          */
-        final Map<String, Object> removeInProgressArgs = new HashMap<>();
-        removeInProgressArgs.put(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, null);
-        archersDatabaseTable.updateAND(removeInProgressArgs, null);
+        final SetArgs setArgs = new SetArgs(archersDatabaseTable);
+        setArgs.addSetArgument(ArchersDatabaseFields.IN_PROGRESS_ROUND_ID.fieldName, null);
+        archersDatabaseTable.update(setArgs, null);
 
         /*
          * Update handicap
          */
-        archerRoundsDatabaseTable.selectAND(
-                Map.of(archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID), archerRoundRs -> {
+        archerRoundsDatabaseTable.select(
+                new Args(archerRoundsDatabaseTable, archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID),
+                archerRoundRs -> {
                     archerRoundRs.next();
                     if (!archerRoundRs.getBoolean(ArcherRoundsDatabaseFields.COUNT_TOWARDS_HANDICAP.fieldName)) {
                         return null;
@@ -784,8 +757,9 @@ public class ArcheryScores {
                      * Indoor or outdoor
                      */
                     int roundRefID = archerRoundRs.getInt(ArcherRoundsDatabaseFields.ROUND_REF_ID.fieldName);
-                    final boolean isOutdoor = (boolean) roundsRefDatabaseTable.selectAND(
-                            Map.of(roundsRefDatabaseTable.getPrimaryKey(), roundRefID), rs -> {
+                    final boolean isOutdoor = (boolean) roundsRefDatabaseTable.select(
+                            new Args(roundsRefDatabaseTable, roundsRefDatabaseTable.getPrimaryKey(), roundRefID),
+                            rs -> {
                                 rs.next();
                                 return rs.getBoolean(RoundsRefDatabaseFields.IS_OUTDOOR.fieldName);
                             });
@@ -801,8 +775,8 @@ public class ArcheryScores {
                      * Find new handicap
                      */
                     int bowID = archerRoundRs.getInt(ArcherRoundsDatabaseFields.BOW_ID.fieldName);
-                    final Map<String, Object> bowWhereArgs = Map.of(bowsDatabaseTable.getPrimaryKey(), bowID);
-                    DatabaseTable.ResultsSetAction getNewHandicapRSA = findHcRs -> {
+                    final Args bowWhereArgs = new Args(bowsDatabaseTable, bowsDatabaseTable.getPrimaryKey(), bowID);
+                    final DatabaseTable.ResultsSetAction getNewHandicapRSA = findHcRs -> {
                         findHcRs.next();
                         int currentHandicap = findHcRs.getInt(bowHandicapFieldName);
 
@@ -826,31 +800,33 @@ public class ArcheryScores {
                             } catch (ParseException e) {
                                 roundDate = ZonedDateTime.now();
                             }
-                            final String dateFieldName = ArcherRoundsDatabaseFields.DATE.fieldName;
-                            return archerRoundsDatabaseTable.selectAND(
-                                    Map.of(ArcherRoundsDatabaseFields.ARCHER_ID.fieldName, archerID,
-                                           ArcherRoundsDatabaseFields.BOW_ID.fieldName, bowID),
+                            final Args args = new Args(archerRoundsDatabaseTable, Map.of(
+                                    ArcherRoundsDatabaseFields.ARCHER_ID.fieldName, archerID,
+                                    ArcherRoundsDatabaseFields.BOW_ID.fieldName, bowID));
+                            args.addCustomWhereField(
+                                    ArcherRoundsDatabaseFields.DATE.fieldName,
                                     String.format(
-                                            " AND %s > datetime('now', '-1 years') ORDER BY %s",
-                                            dateFieldName, dateFieldName),
-                                    Map.of(dateFieldName, roundDate),
-                                    threeScoresRs -> {
-                                        int count = 0;
-                                        int[] handicaps = new int[3];
-                                        // Get the three most recent handicaps
-                                        while (threeScoresRs.next() && count < 3) {
-                                            handicaps[count] = getHandicap(
-                                                    threeScoresRs.getInt(archerRoundsDatabaseTable.getPrimaryKey()));
-                                            count++;
-                                        }
-                                        if (count < 3) {
-                                            return Optional.empty();
-                                        }
-                                        else {
-                                            return Optional.of(Math.floorDiv(
-                                                    handicaps[0] + handicaps[1] + handicaps[2], 3));
-                                        }
-                                    });
+                                            "datetime('%s', '-1 years')",
+                                            DatabaseTable.formatDateForDatabase(roundDate)),
+                                    Args.Operator.GREATER_THAN);
+                            args.setOrderBy(ArcherRoundsDatabaseFields.DATE.fieldName, true);
+                            return archerRoundsDatabaseTable.select(args, threeScoresRs -> {
+                                int count = 0;
+                                int[] handicaps = new int[3];
+                                // Get the three most recent handicaps
+                                while (threeScoresRs.next() && count < 3) {
+                                    handicaps[count] = getHandicap(
+                                            threeScoresRs.getInt(archerRoundsDatabaseTable.getPrimaryKey()));
+                                    count++;
+                                }
+                                if (count < 3) {
+                                    return Optional.empty();
+                                }
+                                else {
+                                    return Optional.of(Math.floorDiv(
+                                            handicaps[0] + handicaps[1] + handicaps[2], 3));
+                                }
+                            });
                         }
                     };
 
@@ -858,9 +834,10 @@ public class ArcheryScores {
                      * Update handicap in database
                      */
                     //noinspection unchecked
-                    ((Optional<Integer>) bowsDatabaseTable.selectAND(bowWhereArgs, getNewHandicapRSA)).ifPresent(
-                            newHandicap -> bowsDatabaseTable.updateAND(
-                                    Map.of(bowHandicapFieldName, newHandicap), bowWhereArgs));
+                    ((Optional<Integer>) bowsDatabaseTable.select(bowWhereArgs, getNewHandicapRSA)).ifPresent(
+                            newHandicap -> bowsDatabaseTable.update(new SetArgs(
+                                    bowsDatabaseTable,
+                                    Map.of(bowHandicapFieldName, newHandicap)), bowWhereArgs));
                     return null;
                 });
     }
@@ -885,7 +862,7 @@ public class ArcheryScores {
      * @param arrows get the handicap only for the first this many arrows (if null then for a full round)
      * @return the worst handicap for the given score and round (e.g. 599 portsmouth can be 3, 4, or 5 so return 5)
      */
-    public static int getHandicapForRound(int roundRefID, int score, boolean inner10Only, @Nullable Integer arrows) {
+    public static int getHandicapForRound(int roundRefID, int score, boolean inner10Only, Integer arrows) {
         if (arrows != null && arrows <= 0) {
             throw new IllegalArgumentException("Arrows must be greater than 0");
         }
@@ -925,7 +902,8 @@ public class ArcheryScores {
     private static int getScoreForRound(int archerRoundID) {
         return arrowValuesDatabaseTable.getFunctionOfIntColumn(
                 DatabaseTable.ColumnFunction.SUM, ArrowValuesDatabaseFields.SCORE.fieldName,
-                Map.of(ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, archerRoundID));
+                new Args(arrowValuesDatabaseTable,
+                         ArrowValuesDatabaseFields.ARCHER_ROUNDS_ID.fieldName, archerRoundID));
     }
 
 
@@ -933,11 +911,11 @@ public class ArcheryScores {
      * @return whether the bow used in the given round uses the inner ten only
      */
     private static boolean isBowInnerTen(int archerRoundID) {
-        final int bowID = (int) archerRoundsDatabaseTable.selectAND(
-                Map.of(archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID),
+        final int bowID = (int) archerRoundsDatabaseTable.select(
+                new Args(archerRoundsDatabaseTable, archerRoundsDatabaseTable.getPrimaryKey(), archerRoundID),
                 rs -> rs.getInt(ArcherRoundsDatabaseFields.BOW_ID.fieldName));
-        return (boolean) bowsDatabaseTable.selectAND(
-                Map.of(bowsDatabaseTable.getPrimaryKey(), bowID),
+        return (boolean) bowsDatabaseTable.select(
+                new Args(bowsDatabaseTable, bowsDatabaseTable.getPrimaryKey(), bowID),
                 rs -> Bowsyle.valueOf(rs.getString(BowsDatabaseFields.STYLE.fieldName)).inner10Only);
     }
 
@@ -948,9 +926,9 @@ public class ArcheryScores {
      * @param arrows get the score only for the first this many arrows (if null then for a full round)
      * @return The score for the given handicap and round
      */
-    public static int getScoreForRound(int roundRefID, int handicap, boolean inner10Only, @Nullable Integer arrows) {
-        return (int) roundsRefDatabaseTable.selectAND(
-                Map.of(roundsRefDatabaseTable.getPrimaryKey(), roundRefID),
+    public static int getScoreForRound(int roundRefID, int handicap, boolean inner10Only, Integer arrows) {
+        return (int) roundsRefDatabaseTable.select(
+                new Args(roundsRefDatabaseTable, roundsRefDatabaseTable.getPrimaryKey(), roundRefID),
                 rs1 -> {
                     // Set inner 10 to false if the round doesn't use inner 10
                     boolean inner10OnlyLamda = inner10Only;
@@ -964,52 +942,44 @@ public class ArcheryScores {
                     final boolean inner10OnlyLamda2 = inner10OnlyLamda;
 
                     // Get score
-                    return roundDistancesRefDatabaseTable.selectAND(
-                            Map.of(RoundDistancesRefDatabaseFields.ROUND_ID.fieldName, roundRefID),
-                            String.format(" ORDER BY %s DESC", RoundDistancesRefDatabaseFields.DISTANCE.fieldName),
-                            new HashMap<>() {
-                                {
-                                    put(RoundDistancesRefDatabaseFields.DISTANCE.fieldName, null);
+                    final Args args = new Args(roundDistancesRefDatabaseTable,
+                                               RoundDistancesRefDatabaseFields.ROUND_ID.fieldName, roundRefID);
+                    args.setOrderBy(RoundDistancesRefDatabaseFields.DISTANCE.fieldName, false);
+                    return roundDistancesRefDatabaseTable.select(args, rs -> {
+                        int currentArrowCount = 0;
+                        double score = 0;
+                        while (rs.next()) {
+                            double distance = rs.getDouble(RoundDistancesRefDatabaseFields.DISTANCE.fieldName);
+                            int arrowCount = rs.getInt(RoundDistancesRefDatabaseFields.ARROWS.fieldName);
+                            int faceSize = rs.getInt(RoundDistancesRefDatabaseFields.FACE_SIZE.fieldName);
+                            if (arrows == null || currentArrowCount < arrows) {
+                                if (arrows != null && currentArrowCount + arrowCount > arrows) {
+                                    arrowCount = arrows - currentArrowCount;
                                 }
-                            },
-                            rs -> {
-                                int currentArrowCount = 0;
-                                double score = 0;
-                                while (rs.next()) {
-                                    double distance = rs.getDouble(RoundDistancesRefDatabaseFields.DISTANCE.fieldName);
-                                    int arrowCount = rs.getInt(RoundDistancesRefDatabaseFields.ARROWS.fieldName);
-                                    int faceSize = rs.getInt(RoundDistancesRefDatabaseFields.FACE_SIZE.fieldName);
-                                    if (arrows == null || currentArrowCount < arrows) {
-                                        if (arrows != null && currentArrowCount + arrowCount > arrows) {
-                                            arrowCount = arrows - currentArrowCount;
-                                        }
-                                        score += arrowCount * scoringType.averageScorePerArrow(
-                                                distance, faceSize, handicap, inner10OnlyLamda2);
-                                        currentArrowCount += arrowCount;
-                                    }
-                                }
-                                return (int) Math.round(score); // Truncate
-                            });
+                                score += arrowCount * scoringType.averageScorePerArrow(distance, faceSize, handicap,
+                                                                                       inner10OnlyLamda2);
+                                currentArrowCount += arrowCount;
+                            }
+                        }
+                        return (int) Math.round(score); // Truncate
+                    });
                 });
     }
 
 
-    public static void setBowHandicap(String archerName, String bowName, @Nullable Integer indoorHandicap,
-                                      @Nullable Integer outdoorHandicap) {
-        if (archerName == null || bowName == null) {
-            throw new NullPointerException("Null arguments");
-        }
-        indoorHandicap = getHandicapDbValue(indoorHandicap);
-        outdoorHandicap = getHandicapDbValue(outdoorHandicap);
-
-        bowsDatabaseTable.updateAND(
-                Map.of(BowsDatabaseFields.INDOOR_HANDICAP.fieldName, indoorHandicap,
-                       BowsDatabaseFields.OUTDOOR_HANDICAP.fieldName, outdoorHandicap),
-                Map.of(bowsDatabaseTable.getPrimaryKey(), getBowID(getArcherID(archerName), bowName)));
+    public static void setBowHandicap(@NotNull String archerName, @NotNull String bowName, Integer indoorHandicap,
+                                      Integer outdoorHandicap) {
+        bowsDatabaseTable.update(
+                new SetArgs(
+                        bowsDatabaseTable,
+                        Map.of(BowsDatabaseFields.INDOOR_HANDICAP.fieldName, getHandicapDbValue(indoorHandicap),
+                               BowsDatabaseFields.OUTDOOR_HANDICAP.fieldName, getHandicapDbValue(outdoorHandicap))),
+                new Args(bowsDatabaseTable,
+                         bowsDatabaseTable.getPrimaryKey(), getBowID(getArcherID(archerName), bowName)));
     }
 
 
-    public static int getBowIndoorHandicap(String archerName, String bowName) {
+    public static int getBowIndoorHandicap(@NotNull String archerName, @NotNull String bowName) {
         return getBowHandicap(archerName, bowName, BowsDatabaseFields.INDOOR_HANDICAP.fieldName);
     }
 
@@ -1017,13 +987,11 @@ public class ArcheryScores {
     /**
      * @param fieldName BowsTable field name for the desired handicap (indoor or outdoor)
      */
-    private static int getBowHandicap(String archerName, String bowName, String fieldName) {
-        if (archerName == null || bowName == null || fieldName == null) {
-            throw new NullPointerException("Null arguments");
-        }
-
-        return (int) bowsDatabaseTable.selectAND(
-                Map.of(bowsDatabaseTable.getPrimaryKey(), getBowID(getArcherID(archerName), bowName)),
+    private static int getBowHandicap(@NotNull String archerName, @NotNull String bowName,
+                                      @NotNull String fieldName) {
+        return (int) bowsDatabaseTable.select(
+                new Args(bowsDatabaseTable,
+                         bowsDatabaseTable.getPrimaryKey(), getBowID(getArcherID(archerName), bowName)),
                 rs -> {
                     rs.next();
                     return rs.getInt(fieldName);
@@ -1031,7 +999,7 @@ public class ArcheryScores {
     }
 
 
-    public static int getBowOutdoorHandicap(String archerName, String bowName) {
+    public static int getBowOutdoorHandicap(@NotNull String archerName, @NotNull String bowName) {
         return getBowHandicap(archerName, bowName, BowsDatabaseFields.OUTDOOR_HANDICAP.fieldName);
     }
 

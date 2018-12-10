@@ -24,9 +24,10 @@ public class GameSessionTests {
         DatabaseTable.setTestMode();
     }
 
+
     @After
     public void tearDown() {
-        GameSession.getDatabaseWrapper().deleteAllTables();
+        GameSession.getDatabaseWrapper().dropAllTables();
     }
 
 
@@ -57,7 +58,6 @@ public class GameSessionTests {
         GameSession.addPlayer("POP", "Player1");
         GameSession.addPlayer("POP", "Player2");
         Assert.assertTrue(GameSession.checkRowCounts(1, 2));
-
 
         boolean exceptionThrown = false;
         try {
@@ -129,6 +129,7 @@ public class GameSessionTests {
         System.out.println(GameSession.getAllSessionTimes("Player2"));
         System.out.println("--------------------------");
         System.out.println(GameSession.getAllSessionTimes(IDs.eywaID));
+        System.out.println("--------------------------");
 
         boolean exceptionThrown = false;
         try {
@@ -137,6 +138,16 @@ public class GameSessionTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
+
+        GameSession.addGameToDatabase("B1", "Game B 1", IDs.eywaID);
+        GameSession.addGameToDatabase("A1", "Game A 1", IDs.eywaID);
+        GameSession.addGameToDatabase("C1", "Game C 1", IDs.eywaID);
+        GameSession.addGameToDatabase("D1", "Game D 1", IDs.eywaID);
+        GameSession.addSessionTime(IDs.eywaID, "A1", ZonedDateTime.now().plusDays(1));
+        GameSession.addSessionTime(IDs.eywaID, "B1", ZonedDateTime.now().plusDays(2));
+        GameSession.addSessionTime(IDs.eywaID, "C1", ZonedDateTime.now().minusDays(2));
+        GameSession.addSessionTime(IDs.eywaID, "D1", ZonedDateTime.now().minusHours(2));
+        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID));
     }
 
 
@@ -179,7 +190,6 @@ public class GameSessionTests {
             exceptionThrown = true;
         }
         Assert.assertTrue(exceptionThrown);
-
     }
 
 

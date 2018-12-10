@@ -1,6 +1,8 @@
 package CharacterBox.AttackBox;
 
 import DatabaseBox.DatabaseTable;
+import DatabaseBox.SetArgs;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.*;
@@ -14,35 +16,33 @@ public class WeaponProficiencies implements Serializable {
     private Set<Weapon.WeaponsEnum> specificProficiencies = new HashSet<>();
 
 
-    public void add(Weapon.WeaponProficiencyEnum proficiency) {
+    public void add(@NotNull Weapon.WeaponProficiencyEnum proficiency) {
         typeProficiencies.add(proficiency);
     }
 
 
-    public void add(Weapon.WeaponsEnum proficiency) {
+    public void add(@NotNull Weapon.WeaponsEnum proficiency) {
         specificProficiencies.add(proficiency);
     }
 
 
-    public boolean contains(Weapon.WeaponsEnum proficiency) {
+    public boolean contains(@NotNull Weapon.WeaponsEnum proficiency) {
         return specificProficiencies.contains(proficiency)
                 || typeProficiencies.contains(proficiency.getWeaponProficiency());
     }
 
 
-    public List<Map<String, Object>> toDatabaseArgs(DatabaseTable.DatabaseField proficiencyFieldName, DatabaseTable.DatabaseField typeField) {
-        final List<Map<String, Object>> args = new ArrayList<>();
+    public List<SetArgs> toDatabaseArgs(@NotNull DatabaseTable databaseTable,
+                                        @NotNull DatabaseTable.DatabaseField proficiencyFieldName,
+                                        @NotNull DatabaseTable.DatabaseField typeField) {
+        final List<SetArgs> args = new ArrayList<>();
         for (Weapon.WeaponProficiencyEnum proficiency : typeProficiencies) {
-            final Map<String, Object> proficiencyArgs = new HashMap<>();
-            proficiencyArgs.put(typeField.getFieldName(), databaseTypeType);
-            proficiencyArgs.put(proficiencyFieldName.getFieldName(), proficiency.toString());
-            args.add(proficiencyArgs);
+            args.add(new SetArgs(databaseTable, Map.of(typeField.getFieldName(), databaseTypeType,
+                                                       proficiencyFieldName.getFieldName(), proficiency.toString())));
         }
         for (Weapon.WeaponsEnum proficiency : specificProficiencies) {
-            final Map<String, Object> proficiencyArgs = new HashMap<>();
-            proficiencyArgs.put(typeField.getFieldName(), databaseTypeSpecific);
-            proficiencyArgs.put(proficiencyFieldName.getFieldName(), proficiency.toString());
-            args.add(proficiencyArgs);
+            args.add(new SetArgs(databaseTable, Map.of(typeField.getFieldName(), databaseTypeSpecific,
+                                                       proficiencyFieldName.getFieldName(), proficiency.toString())));
         }
         return args;
     }

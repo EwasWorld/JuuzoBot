@@ -219,7 +219,7 @@ public class CharacterCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / deleteAND";
+        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / delete";
     }
 
 

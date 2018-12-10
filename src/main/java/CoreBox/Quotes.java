@@ -1,15 +1,18 @@
 package CoreBox;
 
+import DatabaseBox.Args;
 import DatabaseBox.DatabaseTable;
+import DatabaseBox.SetArgs;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
+import ExceptionsBox.ContactEwaException;
 import ExceptionsBox.FeatureUnavailableException;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -23,17 +26,14 @@ import java.util.Random;
  * refactored: 27/09/18
  */
 public class Quotes implements Serializable {
-    // TODO this isn't the intended useage of setDateFormatStr
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DatabaseTable.setDateFormatStr);
-    private static DatabaseTable databaseTable = DatabaseTable.createDatabaseTable(
-            "Quotes", QuoteDatabaseFields.values());
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/M/yy z");
+    private static DatabaseTable databaseTable = new DatabaseTable("Quotes", QuoteDatabaseFields.values());
     private String author;
     private ZonedDateTime date;
     private String message;
 
 
-
-    public Quotes(String author, ZonedDateTime date, String message) {
+    public Quotes(@NotNull String author, @NotNull ZonedDateTime date, @NotNull String message) {
         this.author = author;
         this.date = date;
         this.message = message;
@@ -43,7 +43,7 @@ public class Quotes implements Serializable {
     /**
      * Add a message to the message queue so that it can be found later if someone tries to quote it
      */
-    public static void addMessage(String author, String contents) {
+    public static void addMessage(@NotNull String author, @NotNull String contents) {
         MessageHolder.addMessage(author, contents);
     }
 
@@ -51,21 +51,20 @@ public class Quotes implements Serializable {
     /**
      * Saves the specified message (matched using startsWith)
      */
-    public static String addQuote(String searchMessage) {
-        Quotes quote = MessageHolder.findQuote(searchMessage);
-
-        Map<String, Object> args = new HashMap<>();
-        args.put(QuoteDatabaseFields.AUTHOR.fieldName, quote.author);
-        args.put(QuoteDatabaseFields.DATE.fieldName, quote.date);
-        args.put(QuoteDatabaseFields.MESSAGE.fieldName, quote.message);
-        databaseTable.insert(args);
-
+    public static String addQuote(@NotNull String searchMessage) {
+        final Quotes quote = MessageHolder.findQuote(searchMessage);
+        databaseTable.insert(new SetArgs(databaseTable, Map.of(QuoteDatabaseFields.AUTHOR.fieldName, quote.author,
+                                                               QuoteDatabaseFields.DATE.fieldName, quote.date,
+                                                               QuoteDatabaseFields.MESSAGE.fieldName, quote.message)));
         return getQuote(size());
     }
 
 
     /**
      * @return the specific quote as a string of author, time, date
+     * @throws BadStateException if there are no quotes or if the quote number is bad
+     * @throws BadUserInputException if the quote number is out of bounds
+     * @throws ContactEwaException if a ParseException is thrown from the data parsing
      */
     public static String getQuote(int index) {
         int size = size();
@@ -81,29 +80,23 @@ public class Quotes implements Serializable {
         else if (index < 0) {
             throw new BadUserInputException("A positive number please");
         }
-        else {
-            final Map<String, Object> args = new HashMap<>();
-            args.put(databaseTable.getPrimaryKey(), index);
-            final Quotes quote = (Quotes) databaseTable.selectAND(args, rs -> {
-                if (rs.next()) {
+
+        return (String) databaseTable.select(
+                new Args(databaseTable, databaseTable.getPrimaryKey(), index),
+                rs -> {
+                    if (!rs.next()) {
+                        throw new BadStateException("There is no quote with the id " + index);
+                    }
                     try {
-                        return new Quotes(
+                        Quotes quote = new Quotes(
                                 rs.getString(QuoteDatabaseFields.AUTHOR.fieldName),
                                 DatabaseTable.parseDateFromDatabase(rs.getString(QuoteDatabaseFields.DATE.fieldName)),
                                 rs.getString(QuoteDatabaseFields.MESSAGE.fieldName));
+                        return String.format("Quote number %d\n%s", index, quote.toString());
                     } catch (ParseException ignore) {
-                        return null;
+                        throw new ContactEwaException("Quote date parser problem");
                     }
-                }
-                return null;
-            });
-            if (quote != null) {
-                return String.format("Quote number %d\n%s", index, quote.toString());
-            }
-            else {
-                throw new BadStateException("There is no quote with the id " + index);
-            }
-        }
+                });
     }
 
 
@@ -135,6 +128,7 @@ public class Quotes implements Serializable {
 
     /**
      * @return a random quote
+     * @throws BadStateException if there are no saved quotes
      */
     public static String getQuote() {
         if (size() == 0) {
@@ -148,10 +142,9 @@ public class Quotes implements Serializable {
      * Deletes the specified saved quote from the bot
      */
     public static void removeQuote(int index) {
+
         getQuote(index);
-        final Map<String, Object> args = new HashMap<>();
-        args.put(databaseTable.getPrimaryKey(), index);
-        databaseTable.deleteAND(args);
+        databaseTable.delete(new Args(databaseTable, databaseTable.getPrimaryKey(), index));
     }
 
 
@@ -161,7 +154,7 @@ public class Quotes implements Serializable {
      */
     public static void clearMessagesAndQuotes() {
         MessageHolder.clearMessages();
-        databaseTable.deleteTable();
+        databaseTable.dropTable();
     }
 
 

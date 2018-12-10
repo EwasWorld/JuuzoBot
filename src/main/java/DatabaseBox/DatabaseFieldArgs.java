@@ -1,6 +1,11 @@
 package DatabaseBox;
 
+import org.jetbrains.annotations.NotNull;
+
+
+
 /**
+ * Gives the properties of a database field
  * created: 27/09/18
  */
 class DatabaseFieldArgs {
@@ -9,7 +14,7 @@ class DatabaseFieldArgs {
     private String options;
 
 
-    DatabaseFieldArgs(DatabaseTable.SQLType sqlType, String options, boolean isRequired) {
+    DatabaseFieldArgs(@NotNull DatabaseTable.SQLType sqlType, @NotNull String options, boolean isRequired) {
         this.sqlType = sqlType;
         this.options = options;
         if (isRequired) {
@@ -18,7 +23,7 @@ class DatabaseFieldArgs {
     }
 
 
-    DatabaseFieldArgs(DatabaseTable.SQLType sqlType, boolean isRequired) {
+    DatabaseFieldArgs(@NotNull DatabaseTable.SQLType sqlType, boolean isRequired) {
         this.sqlType = sqlType;
         if (isRequired) {
             this.options = notNull;
@@ -29,6 +34,9 @@ class DatabaseFieldArgs {
     }
 
 
+    /**
+     * @return the part of a CREATE TABLE string that comes after the name of the field
+     */
     String createTableLine() {
         return String.format("%s %s", sqlType.getSqlName(), options);
     }

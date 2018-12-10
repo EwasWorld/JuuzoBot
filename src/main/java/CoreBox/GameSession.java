@@ -1,13 +1,12 @@
 package CoreBox;
 
-import DatabaseBox.DatabaseTable;
-import DatabaseBox.DatabaseWrapper;
-import DatabaseBox.PrimaryKey;
+import DatabaseBox.*;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
 import ExceptionsBox.FeatureUnavailableException;
 import net.dv8tion.jda.core.entities.Guild;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.text.ParseException;
@@ -20,17 +19,19 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 
 /**
- * refactored 22/11/18
  * TODO Optimisation reduce the number of database calls for things like checking shortnames (try to have it only
  * happen once for any action)
+ * TODO Change short name from key to row index as key
+ * refactored 22/11/18
  */
 public class GameSession {
-    private static final DatabaseTable sessionsDatabaseTable = DatabaseTable.createDatabaseTable(
+    private static final DatabaseTable sessionsDatabaseTable = new DatabaseTable(
             "Sessions", SessionsDatabaseFields.values(), new PrimaryKey(Collections.singleton(
-                    SessionsDatabaseFields.SHORT_NAME.fieldName)));
-    private static final DatabaseTable playersDatabaseTable = DatabaseTable.createDatabaseTable(
+            SessionsDatabaseFields.SHORT_NAME.fieldName)));
+    private static final DatabaseTable playersDatabaseTable = new DatabaseTable(
             "SessionPlayers", SessionPlayersDatabaseFields.values());
-    private static final DatabaseWrapper databaseWrapper = new DatabaseWrapper(new DatabaseTable[] {sessionsDatabaseTable, playersDatabaseTable});
+    private static final DatabaseWrapper databaseWrapper = new DatabaseWrapper(
+            new DatabaseTable[]{sessionsDatabaseTable, playersDatabaseTable});
 
 
     /**
@@ -38,7 +39,7 @@ public class GameSession {
      */
     public static boolean checkRowCounts(int sessions, int players) {
         DatabaseWrapper.checkDatabaseInTestMode();
-        return databaseWrapper.checkRowCounts(new int[] {sessions, players});
+        return databaseWrapper.checkRowCounts(new int[]{sessions, players});
     }
 
 
@@ -57,27 +58,24 @@ public class GameSession {
      * @param dmID the ID of the DM
      * @throws BadUserInputException if the short name is not unique
      */
-    public static void addGameToDatabase(String shortName, String fullName, String dmID) {
+    public static void addGameToDatabase(@NotNull String shortName, @NotNull String fullName, @NotNull String dmID) {
         if (shortName.equals("")) {
             throw new BadUserInputException("Short name cannot be nothing");
         }
-        if (shortNameExists(shortName)) {
+        else if (shortNameExists(shortName)) {
             throw new BadUserInputException(
                     "There's already a game with that short name, you'll have to choose another I'm afraid");
         }
 
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        args.put(SessionsDatabaseFields.FULL_NAME.getFieldName(), fullName);
-        args.put(SessionsDatabaseFields.DM_ID.getFieldName(), dmID);
-        sessionsDatabaseTable.insert(args);
+        sessionsDatabaseTable.insert(new SetArgs(sessionsDatabaseTable, Map.of(
+                SessionsDatabaseFields.FULL_NAME.fieldName, fullName, SessionsDatabaseFields.DM_ID.fieldName, dmID,
+                SessionsDatabaseFields.SHORT_NAME.fieldName, shortName)));
     }
 
 
-    private static boolean shortNameExists(String shortName) {
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        return (boolean) sessionsDatabaseTable.selectAND(args, ResultSet::next);
+    private static boolean shortNameExists(@NotNull String shortName) {
+        return (boolean) sessionsDatabaseTable.select(new Args(
+                sessionsDatabaseTable, SessionsDatabaseFields.SHORT_NAME.fieldName, shortName), ResultSet::next);
     }
 
 
@@ -87,7 +85,7 @@ public class GameSession {
      * @param userID the user who wants to add a session time
      * @throws BadUserInputException if the game specified does not belong to the user
      */
-    public static void addSessionTime(String userID, String shortName, ZonedDateTime date) {
+    public static void addSessionTime(@NotNull String userID, @NotNull String shortName, @NotNull ZonedDateTime date) {
         if (!getDmId(shortName).equals(userID)) {
             throw new BadUserInputException("This isn't your game, only the DM can change the session time");
         }
@@ -99,38 +97,35 @@ public class GameSession {
      * @return the id of the dm associated with the shortname
      * @throws BadUserInputException if the game is not found
      */
-    private static String getDmId(String shortName) {
+    private static String getDmId(@NotNull String shortName) {
         if (!shortNameExists(shortName)) {
             throw new BadUserInputException("I can't seem to find the game " + shortName);
         }
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        return (String) sessionsDatabaseTable.selectAND(args, rs -> {
-            rs.next();
-            return rs.getString(SessionsDatabaseFields.DM_ID.getFieldName());
-        });
+        return (String) sessionsDatabaseTable.select(
+                new Args(sessionsDatabaseTable, SessionsDatabaseFields.SHORT_NAME.fieldName, shortName),
+                rs -> {
+                    rs.next();
+                    return rs.getString(SessionsDatabaseFields.DM_ID.fieldName);
+                });
     }
 
 
     /**
      * Updates the next session time for a given session
      */
-    private static void addSessionTimeToSpecificSession(String shortName, ZonedDateTime date) {
-        final Map<String, Object> setArgs = new HashMap<>();
-        setArgs.put(SessionsDatabaseFields.SESSION_TIME.getFieldName(), date);
-        final Map<String, Object> whereArgs = new HashMap<>();
-        whereArgs.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        sessionsDatabaseTable.updateAND(setArgs, whereArgs);
+    private static void addSessionTimeToSpecificSession(@NotNull String shortName, @NotNull ZonedDateTime date) {
+        sessionsDatabaseTable.update(
+                new SetArgs(sessionsDatabaseTable, Map.of(SessionsDatabaseFields.SESSION_TIME.fieldName, date)),
+                new Args(sessionsDatabaseTable, SessionsDatabaseFields.SHORT_NAME.fieldName, shortName));
     }
 
 
     /**
      * Updates the session associated with the dm with a date for the next session
      *
-     * @return the shortname of the session the time has been added to
-     * @throws BadUserInputException if the dm does not dm exactly one game
+     * @return the short name of the session the time has been added to
      */
-    public static String addSessionTime(String dmID, ZonedDateTime date) {
+    public static String addSessionTime(@NotNull String dmID, @NotNull ZonedDateTime date) {
         final String shortName = getDmsOnlyGame(dmID);
         addSessionTimeToSpecificSession(shortName, date);
         return shortName;
@@ -141,7 +136,7 @@ public class GameSession {
      * @return the shortName of the only game the dmID runs
      * @throws BadUserInputException if the dm does not dm exactly one game
      */
-    private static String getDmsOnlyGame(String dmID) {
+    private static String getDmsOnlyGame(@NotNull String dmID) {
         String[] dmGames = getDmGamesShortNames(dmID);
         if (dmGames.length == 0) {
             throw new BadUserInputException("You don't dm any games");
@@ -156,16 +151,16 @@ public class GameSession {
     /**
      * @return short names of all the games that the given dm runs
      */
-    private static String[] getDmGamesShortNames(String dmID) {
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.DM_ID.getFieldName(), dmID);
-        return (String[]) sessionsDatabaseTable.selectAND(args, rs -> {
-            final List<String> shortNames = new ArrayList<>();
-            while (rs.next()) {
-                shortNames.add(rs.getString(SessionsDatabaseFields.SHORT_NAME.getFieldName()));
-            }
-            return shortNames.toArray(new String[0]);
-        });
+    private static String[] getDmGamesShortNames(@NotNull String dmID) {
+        return (String[]) sessionsDatabaseTable.select(
+                new Args(sessionsDatabaseTable, SessionsDatabaseFields.DM_ID.fieldName, dmID),
+                rs -> {
+                    final List<String> shortNames = new ArrayList<>();
+                    while (rs.next()) {
+                        shortNames.add(rs.getString(SessionsDatabaseFields.SHORT_NAME.fieldName));
+                    }
+                    return shortNames.toArray(new String[0]);
+                });
     }
 
 
@@ -174,78 +169,108 @@ public class GameSession {
      *
      * @throws BadUserInputException if the game is not found or if the player is already in the game
      */
-    public static void addPlayer(String shortName, String playerID) {
+    public static void addPlayer(@NotNull String shortName, @NotNull String playerID) {
         if (!shortNameExists(shortName)) {
             throw new BadUserInputException("I can't seem to find the game " + shortName);
         }
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        args.put(SessionPlayersDatabaseFields.PLAYER.getFieldName(), playerID);
-        playersDatabaseTable.selectAND(args, rs -> {
+        final Args args = new Args(playersDatabaseTable, Map.of(
+                SessionPlayersDatabaseFields.SHORT_NAME.fieldName, shortName,
+                SessionPlayersDatabaseFields.PLAYER.fieldName, playerID));
+
+        playersDatabaseTable.select(args, rs -> {
             if (rs.next()) {
                 throw new BadUserInputException("This player has already been added to the game");
             }
             return null;
         });
-        playersDatabaseTable.insert(args);
+        playersDatabaseTable.insert(new SetArgs(args));
     }
 
 
     /**
-     * TODO Sort sessions by next session (soonest first)
-     *
-     * @return All games the player takes part in with their next session time or n/a
+     * @return All games the player takes part in with their next session time or n/a (sorted oldest-newest
      * @throws BadUserInputException if the game is not found
      */
-    public static String getAllSessionTimes(String playerID) {
+    public static String getAllSessionTimes(@NotNull String playerID) {
         final String[] playerGamesArray = getPlayerGamesShortNames(playerID);
         final String[] dmGamesArray = getDmGamesShortNames(playerID);
         if (playerGamesArray.length == 0 && dmGamesArray.length == 0) {
             throw new BadUserInputException("You don't seem to be added to any games (or DMing any)");
         }
 
-        final String format = "%s%s - %s\n";
+        final String format = "%s%s: %s\n";
         final String dmStar = "*";
         final List<String> playerGames = new LinkedList<>(Arrays.asList(playerGamesArray));
         final List<String> dmGames = new LinkedList<>(Arrays.asList(dmGamesArray));
-        return (String) sessionsDatabaseTable.selectAND(null, rs -> {
-            final StringBuilder sb = new StringBuilder("Note: name* means you DM this game\n");
+        final Args args = new Args(sessionsDatabaseTable);
+        args.setOrderBy(SessionsDatabaseFields.SESSION_TIME.fieldName, true);
+        return (String) sessionsDatabaseTable.select(args, rs -> {
+            final String pastGame = "^";
+            final StringBuilder sb = new StringBuilder();
+            // force games with no date to the bottom of the list
+            final StringBuilder sbNoDate = new StringBuilder();
             while (rs.next()) {
-                final String shortName = rs.getString(SessionsDatabaseFields.SHORT_NAME.getFieldName());
+                final String shortName = rs.getString(SessionsDatabaseFields.SHORT_NAME.fieldName);
                 boolean isDmGame = dmGames.contains(shortName);
                 if (playerGames.contains(shortName) || isDmGame) {
                     String dmStarUse = "";
                     if (isDmGame) {
                         dmStarUse = dmStar;
                     }
-                    final String date = rs.getString(SessionsDatabaseFields.SESSION_TIME.getFieldName());
-                    if (date != null) {
+                    final ZonedDateTime gameTime;
+                    try {
+                        gameTime = DatabaseTable.parseDateFromDatabase(
+                                rs.getString(SessionsDatabaseFields.SESSION_TIME.fieldName));
+                        if (gameTime.isBefore(ZonedDateTime.now())) {
+                            if (gameTime.isBefore(ZonedDateTime.now().minusDays(1))) {
+                                throw new IllegalArgumentException("Old date");
+                            }
+                            else {
+                                dmStarUse += pastGame;
+                            }
+                        }
                         sb.append(String.format(format, shortName, dmStarUse,
-                                                DatabaseTable.databaseStringToPrintableString(date)));
-                    }
-                    else {
-                        sb.append(String.format(format, shortName, dmStarUse, "n/a"));
+                                                DatabaseTable.formatDateForPrint(gameTime)));
+                    } catch (ParseException | NullPointerException | IllegalArgumentException e) {
+                        sbNoDate.append(String.format(format, shortName, dmStarUse, "n/a"));
                     }
                     playerGames.remove(shortName);
                     dmGames.remove(shortName);
                 }
             }
-            sb.deleteCharAt(sb.length() - 1);
+            sb.append(sbNoDate);
+            // key
+            final boolean isDM = sb.indexOf(dmStar) != -1;
+            final boolean isPastGame = sb.indexOf(pastGame) != -1;
+            if (isDM || isPastGame) {
+                sb.append("Note: ");
+                if (isDM) {
+                    sb.append(pastGame);
+                    sb.append(" = games in the past");
+                }
+                if (isPastGame) {
+                    if (isDM) {
+                        sb.append(", ");
+                    }
+                    sb.append(dmStar);
+                    sb.append(" = games you DM");
+                }
+            }
             return sb.toString();
         });
     }
 
 
-    private static String[] getPlayerGamesShortNames(String playerID) {
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionPlayersDatabaseFields.PLAYER.getFieldName(), playerID);
-        return (String[]) playersDatabaseTable.selectAND(args, rs -> {
-            final List<String> shortNames = new ArrayList<>();
-            while (rs.next()) {
-                shortNames.add(rs.getString(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName()));
-            }
-            return shortNames.toArray(new String[0]);
-        });
+    private static String[] getPlayerGamesShortNames(@NotNull String playerID) {
+        return (String[]) playersDatabaseTable.select(
+                new Args(playersDatabaseTable, SessionPlayersDatabaseFields.PLAYER.fieldName, playerID),
+                rs -> {
+                    final List<String> shortNames = new ArrayList<>();
+                    while (rs.next()) {
+                        shortNames.add(rs.getString(SessionPlayersDatabaseFields.SHORT_NAME.fieldName));
+                    }
+                    return shortNames.toArray(new String[0]);
+                });
     }
 
 
@@ -254,7 +279,7 @@ public class GameSession {
      * @return a string mentioning all players with a countdown to next session
      * @throws BadUserInputException if the game doesn't belong to the user who made the call
      */
-    public static String getSessionReminder(String shortName, String userID, Guild guild) {
+    public static String getSessionReminder(@NotNull String shortName, @NotNull String userID, @NotNull Guild guild) {
         if (!getDmId(shortName).equals(userID)) {
             throw new BadUserInputException("This isn't your game, only the DM can send a reminder");
         }
@@ -266,7 +291,7 @@ public class GameSession {
      * @return a string containing a mention to all players in the game and a countdown to the next session
      * @throws BadStateException if there is no time for the session or the time is in the past
      */
-    private static String getSessionReminderAux(String shortName, Guild guild) {
+    private static String getSessionReminderAux(@NotNull String shortName, @NotNull Guild guild) {
         final ZonedDateTime date = getNextSession(shortName);
         if (date == null) {
             throw new BadStateException("There is no next session set for this game");
@@ -297,13 +322,17 @@ public class GameSession {
      * @throws BadUserInputException if the game is not found
      * @throws BadStateException if the game time is non-existent or in the past
      */
-    public static ZonedDateTime getNextSession(String shortName) {
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        return (ZonedDateTime) sessionsDatabaseTable.selectAND(args, rs -> {
-            if (rs.next()) {
-                final String date = rs.getString(SessionsDatabaseFields.SESSION_TIME.getFieldName());
-                if (date != null) {
+    public static ZonedDateTime getNextSession(@NotNull String shortName) {
+        return (ZonedDateTime) sessionsDatabaseTable.select(
+                new Args(sessionsDatabaseTable, SessionsDatabaseFields.SHORT_NAME.fieldName, shortName),
+                rs -> {
+                    if (!rs.next()) {
+                        throw new BadUserInputException("I can't seem to find the game " + shortName);
+                    }
+                    final String date = rs.getString(SessionsDatabaseFields.SESSION_TIME.fieldName);
+                    if (date == null) {
+                        throw new BadStateException("There is no time set for this session, ask the DM to add one");
+                    }
                     final ZonedDateTime zonedDateTime;
                     try {
                         zonedDateTime = DatabaseTable.parseDateFromDatabase(date);
@@ -316,15 +345,7 @@ public class GameSession {
                     else {
                         return zonedDateTime;
                     }
-                }
-                else {
-                    throw new BadStateException("There is no time set for this session, ask the DM to add one");
-                }
-            }
-            else {
-                throw new BadUserInputException("I can't seem to find the game " + shortName);
-            }
-        });
+                });
     }
 
 
@@ -332,35 +353,34 @@ public class GameSession {
      * @return an array of all the players in the given game
      * @throws BadUserInputException if the game is not found
      */
-    private static String[] getPlayersInGame(String shortName) {
+    private static String[] getPlayersInGame(@NotNull String shortName) {
         if (!shortNameExists(shortName)) {
             throw new BadUserInputException("I can't seem to find the game " + shortName);
         }
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        return (String[]) playersDatabaseTable.selectAND(args, rs -> {
-            final List<String> players = new ArrayList<>();
-            while (rs.next()) {
-                players.add(rs.getString(SessionPlayersDatabaseFields.PLAYER.getFieldName()));
-            }
-            return players.toArray(new String[0]);
-        });
+        return (String[]) playersDatabaseTable.select(
+                new Args(playersDatabaseTable, SessionPlayersDatabaseFields.SHORT_NAME.fieldName, shortName), rs -> {
+                    final List<String> players = new ArrayList<>();
+                    while (rs.next()) {
+                        players.add(rs.getString(SessionPlayersDatabaseFields.PLAYER.fieldName));
+                    }
+                    return players.toArray(new String[0]);
+                });
     }
 
 
     /**
      * @return a string showing the time until the given date
      */
-    private static String getStringTimeUntil(ZonedDateTime date) {
+    private static String getStringTimeUntil(@NotNull ZonedDateTime date) {
         final long totalSeconds = ZonedDateTime.now().until(date, SECONDS);
         final TimeUnit timeUnitOfDifference = TimeUnit.SECONDS;
         return String.format("%d days, %d hrs %d mins %d secs", timeUnitOfDifference.toDays(totalSeconds),
-                             timeUnitOfDifference.toHours(totalSeconds) - TimeUnit.DAYS
-                                     .toHours(timeUnitOfDifference.toDays(totalSeconds)),
-                             timeUnitOfDifference.toMinutes(totalSeconds) - TimeUnit.HOURS
-                                     .toMinutes(timeUnitOfDifference.toHours(totalSeconds)),
-                             timeUnitOfDifference.toSeconds(totalSeconds) - TimeUnit.MINUTES
-                                     .toSeconds(timeUnitOfDifference.toMinutes(totalSeconds)));
+                             timeUnitOfDifference.toHours(totalSeconds)
+                                     - TimeUnit.DAYS.toHours(timeUnitOfDifference.toDays(totalSeconds)),
+                             timeUnitOfDifference.toMinutes(totalSeconds)
+                                     - TimeUnit.HOURS.toMinutes(timeUnitOfDifference.toHours(totalSeconds)),
+                             timeUnitOfDifference.toSeconds(totalSeconds)
+                                     - TimeUnit.MINUTES.toSeconds(timeUnitOfDifference.toMinutes(totalSeconds)));
     }
 
 
@@ -368,7 +388,7 @@ public class GameSession {
      * @param dmID must only dm one game for which the reminder will be created for
      * @return string mentioning all players with a countdown to next session
      */
-    public static String getSessionReminder(String dmID, Guild guild) {
+    public static String getSessionReminder(@NotNull String dmID, @NotNull Guild guild) {
         return getSessionReminderAux(getDmsOnlyGame(dmID), guild);
     }
 
@@ -378,31 +398,29 @@ public class GameSession {
      *
      * @throws BadUserInputException if the game is not found
      */
-    public static void deleteGame(String shortName) {
+    public static void deleteGame(@NotNull String shortName) {
         if (!shortNameExists(shortName)) {
             throw new BadUserInputException("I can't seem to find the game " + shortName);
         }
-        final Map<String, Object> args = new HashMap<>();
-        args.put(SessionsDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        sessionsDatabaseTable.deleteAND(args);
-        final Map<String, Object> playersArgs = new HashMap<>();
-        playersArgs.put(SessionPlayersDatabaseFields.SHORT_NAME.getFieldName(), shortName);
-        playersDatabaseTable.deleteAND(playersArgs);
+        sessionsDatabaseTable.delete(new Args(sessionsDatabaseTable,
+                                              SessionsDatabaseFields.SHORT_NAME.fieldName, shortName));
+        playersDatabaseTable.delete(new Args(playersDatabaseTable,
+                                             SessionPlayersDatabaseFields.SHORT_NAME.fieldName, shortName));
     }
 
 
     /**
-     * TODO Sort alphabetically
-     *
      * @return a list of all games in the database
      */
     public static String getGamesList() {
-        return (String) sessionsDatabaseTable.selectAND(null, rs -> {
+        final Args args = new Args(sessionsDatabaseTable);
+        args.setOrderBy(SessionsDatabaseFields.FULL_NAME.fieldName, true);
+        return (String) sessionsDatabaseTable.select(args, rs -> {
             final StringBuilder sb = new StringBuilder();
             while (rs.next()) {
-                sb.append(rs.getString(SessionsDatabaseFields.SHORT_NAME.getFieldName()));
+                sb.append(rs.getString(SessionsDatabaseFields.SHORT_NAME.fieldName));
                 sb.append(" - ");
-                sb.append(rs.getString(SessionsDatabaseFields.FULL_NAME.getFieldName()));
+                sb.append(rs.getString(SessionsDatabaseFields.FULL_NAME.fieldName));
                 sb.append("\n");
             }
             return sb.toString();
@@ -410,12 +428,12 @@ public class GameSession {
     }
 
 
-    public static void setAutoReminder(String shortName, boolean value) {
+    public static void setAutoReminder(@NotNull String shortName, boolean value) {
         throw new FeatureUnavailableException();
     }
 
 
-    public static boolean getAutoReminder(String shortName) {
+    public static boolean getAutoReminder(@NotNull String shortName) {
         throw new FeatureUnavailableException();
     }
 

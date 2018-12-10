@@ -3,6 +3,7 @@ package CharacterBox;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 
@@ -111,6 +112,7 @@ public class CharacterConstants {
     }
 
 
+    @Nullable
     public static AbilityEnum convertAbilityToEnum(String ability) {
         try {
             return AbilityEnum.valueOf(ability.toUpperCase());

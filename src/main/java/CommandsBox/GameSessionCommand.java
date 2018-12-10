@@ -183,7 +183,8 @@ public class GameSessionCommand extends AbstractCommand {
         DATEFORMAT {
             @Override
             public void execute(String args, MessageReceivedEvent event) {
-                sendMessage(event.getChannel(), DatabaseTable.setDateFormatStr);
+                // TODO This no longer allows dates in different timezones to be added, custom setDate with z
+                sendMessage(event.getChannel(), DatabaseTable.getSetDateFormatStr());
             }
         }
     }

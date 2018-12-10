@@ -34,15 +34,6 @@ public class QuoteCommand extends AbstractCommand {
      * {@inheritDoc}
      */
     @Override
-    public String getArguments() {
-        return "add {start of message} / get [quote number] / remove {quote number} / reindex / deleteAND all";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.NORMAL;
     }
@@ -64,6 +55,15 @@ public class QuoteCommand extends AbstractCommand {
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "add {start of message} / get [quote number] / remove {quote number} / reindex / deleteall";
     }
 
 
