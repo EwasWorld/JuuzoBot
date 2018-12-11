@@ -1,46 +1,66 @@
 package CommandsBox;
 
-import CoreBox.AbstractCommand;
 import CoreBox.GrogList;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 
 
+/**
+ * updated style 10/12/18
+ */
 public class PotionCommand extends AbstractCommand {
-    @Override
-    public String getCommand() {
-        return "potion";
-    }
-
-
-    @Override
-    public String getDescription() {
-        return "drink an Essence of Balthazar potion";
-    }
-
-
-    @Override
-    public String getArguments() {
-        return "";
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(String args, MessageReceivedEvent event) {
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
         sendMessage(event.getChannel(), GrogList.drinkGrog(event.getAuthor().getName()));
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "potion";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "drink an Essence of Balthazar potion";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "";
     }
 }

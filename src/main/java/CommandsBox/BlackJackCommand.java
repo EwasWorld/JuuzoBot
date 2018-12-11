@@ -1,7 +1,6 @@
 package CommandsBox;
 
 import BlackJackBox.GameInstance;
-import CoreBox.AbstractCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
@@ -9,6 +8,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageReaction;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +39,8 @@ public class BlackJackCommand extends AbstractCommand {
      * @return true if the reaction belonged to this method
      */
     public static boolean executeFromRemoveReaction(Long messageID, String emoji, Member player) {
-        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage.getIdLong()) {
+        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage
+                .getIdLong()) {
             return false;
         }
         final Optional<BlackJackEmojiArgument> argumentOptional = emojiToPlayArgument(emoji);
@@ -72,7 +73,8 @@ public class BlackJackCommand extends AbstractCommand {
      * @return true if the reaction belonged to this method
      */
     public static boolean executeFromAddReaction(Long messageID, MessageReaction messageReaction, Member player) {
-        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage.getIdLong()) {
+        if (gameInstance == null || currentGamesChannelMessage == null || messageID != currentGamesChannelMessage
+                .getIdLong()) {
             return false;
         }
         final Optional<BlackJackEmojiArgument> argument = emojiToPlayArgument(
@@ -167,53 +169,6 @@ public class BlackJackCommand extends AbstractCommand {
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getCommand() {
-        return "blackjack";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        return "Create a game of blackjack, have whoever you want join, then start it";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        // TODO Optimisation - better way of doing this in enum - maybe give each a help string?
-        return "{new / reprint / bet {main} {side} {side} / end}";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void execute(String args, MessageReceivedEvent event) {
-        checkPermission(event.getMember());
-        executeSecondaryArgument(BlackJackArgument.class, args, event);
-    }
-
-
     private static void endGame() {
         voidGameMessage("FORCEFULLY ENDED");
         gameInstance = null;
@@ -236,21 +191,83 @@ public class BlackJackCommand extends AbstractCommand {
      * {@inheritDoc}
      */
     @Override
+    CommandInterface[] getSecondaryCommands() {
+        return BlackJackArgument.values();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.NORMAL;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
+        checkPermission(event.getMember());
+        executeSecondaryArgument(BlackJackArgument.class, 1, args, event);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "blackjack";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "Create a game of blackjack, have some people join, then start it";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Rank getRequiredRank() {
         return Rank.USER;
     }
 
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        // TODO Optimisation remove duplication of this across classes with secondary commands
+        final StringBuilder sb = new StringBuilder();
+        for (BlackJackArgument argument : BlackJackArgument.values()) {
+            sb.append(argument.getCommand());
+            sb.append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        return sb.toString();
+    }
+
+
+    /**
      * Arguments that are triggered from the blackjack command args
      */
-    private enum BlackJackArgument implements SecondaryCommandAction {
+    private enum BlackJackArgument implements CommandInterface {
         NEW {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (gameInstance == null) {
                     gameInstance = new GameInstance(event.getMember());
                     sendMessage(event.getTextChannel(), gameInstance.toString());
@@ -260,13 +277,40 @@ public class BlackJackCommand extends AbstractCommand {
                             "Game already created, try joining it (if you can't find it try !blackjack reprint");
                 }
             }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Create a new game";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "";
+            }
         },
         END {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (gameInstance != null) {
                     endGame();
                 }
@@ -274,13 +318,40 @@ public class BlackJackCommand extends AbstractCommand {
                     throw new BadStateException("There doesn't seem to be a game running, try making a new one");
                 }
             }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Forcefully end the game";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "";
+            }
         },
         REPRINT {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (gameInstance != null) {
                     voidGameMessage("GAME REPRINTED");
                     sendMessage(event.getTextChannel(), gameInstance.toString());
@@ -289,13 +360,40 @@ public class BlackJackCommand extends AbstractCommand {
                     throw new BadStateException("There doesn't seem to be a game running, try making a new one");
                 }
             }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Reprint the game (use if the board messes up or command emojis are not showing)";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "";
+            }
         },
         BET {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (gameInstance == null) {
                     throw new BadStateException("There must be a game running");
                 }
@@ -336,17 +434,80 @@ public class BlackJackCommand extends AbstractCommand {
                 currentGamesChannelMessage.editMessage(gameInstance.toString()).queue();
                 event.getMessage().delete().queue();
             }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Add some bets to the game";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "{main bet} {perfect pairs bet} {21+3 bet}";
+            }
         },
         KILL {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (getRank(event.getMember()).hasPermission(Rank.ADMIN)) {
                     gameInstance = null;
                 }
             }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Forcefully end the game instance";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.ADMIN;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "";
+            }
+        };
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getCommand() {
+            return this.toString().toLowerCase().replaceAll("_", " ");
         }
     }
 
@@ -361,7 +522,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.join(player);
             }
 
@@ -370,7 +531,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
                 if (this.removeReaction) {
                     throw new ContactEwaException("Bad BlackJackArgument declaration");
                 }
@@ -382,7 +543,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 if (gameInstance != null) {
                     gameInstance.startGame();
                 }
@@ -393,7 +554,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         HIT("hit", Emoji.PUNCH, true) {
@@ -401,7 +562,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.hitMe(player);
             }
 
@@ -410,7 +571,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         STAND("stand", Emoji.RAISED_HAND, true) {
@@ -418,7 +579,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.stand(player);
             }
 
@@ -427,7 +588,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         SPLIT("split", Emoji.METAL, true) {
@@ -435,7 +596,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.split(player);
             }
 
@@ -444,7 +605,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         LEAVE("leave game", Emoji.WAVE, false) {
@@ -452,7 +613,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.leave(player);
             }
 
@@ -461,7 +622,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         END("end game", Emoji.X, false) {
@@ -469,7 +630,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 endGame();
             }
 
@@ -478,7 +639,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         MAIN_BET("default main bet", Emoji.MONEYBAG, false) {
@@ -486,7 +647,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.placeDefaultMainBet(player);
             }
 
@@ -495,7 +656,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
                 if (this.removeReaction) {
                     throw new ContactEwaException("Bad BlackJackArgument declaration");
                 }
@@ -507,7 +668,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.placeDefaultSideBets(player);
             }
 
@@ -516,7 +677,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
                 if (this.removeReaction) {
                     throw new ContactEwaException("Bad BlackJackArgument declaration");
                 }
@@ -528,7 +689,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.betSplit(player);
             }
 
@@ -537,7 +698,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         },
         DOUBLE_DOWN("double down", Emoji.ONE_FINGER, true) {
@@ -545,7 +706,7 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void addAction(Member player) {
+            public void addAction(@NotNull Member player) {
                 gameInstance.doubleDown(player);
             }
 
@@ -554,14 +715,14 @@ public class BlackJackCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void removeAction(Member player) {
+            public void removeAction(@NotNull Member player) {
             }
         };
 
         private static Map<Emoji, BlackJackEmojiArgument> emojiMappings = setEmojiMappings();
+        protected boolean removeReaction;
         private String description;
         private Emoji emoji;
-        protected boolean removeReaction;
         private boolean resetAllReactions = false;
 
 

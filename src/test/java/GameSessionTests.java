@@ -8,8 +8,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -124,16 +129,16 @@ public class GameSessionTests {
         GameSession.addPlayer("POP", "Player1");
         GameSession.addPlayer("POP", "Player2");
         GameSession.addPlayer("YE", "Player2");
-        System.out.println(GameSession.getAllSessionTimes("Player1"));
+        System.out.println(GameSession.getAllSessionTimes("Player1", 0));
         System.out.println("--------------------------");
-        System.out.println(GameSession.getAllSessionTimes("Player2"));
+        System.out.println(GameSession.getAllSessionTimes("Player2", 0));
         System.out.println("--------------------------");
-        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID));
+        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID, 0));
         System.out.println("--------------------------");
 
         boolean exceptionThrown = false;
         try {
-            System.out.println(GameSession.getAllSessionTimes("sdufhjskldjg"));
+            System.out.println(GameSession.getAllSessionTimes("sdufhjskldjg", 0));
         } catch (BadUserInputException e) {
             exceptionThrown = true;
         }
@@ -147,7 +152,7 @@ public class GameSessionTests {
         GameSession.addSessionTime(IDs.eywaID, "B1", ZonedDateTime.now().plusDays(2));
         GameSession.addSessionTime(IDs.eywaID, "C1", ZonedDateTime.now().minusDays(2));
         GameSession.addSessionTime(IDs.eywaID, "D1", ZonedDateTime.now().minusHours(2));
-        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID));
+        System.out.println(GameSession.getAllSessionTimes(IDs.eywaID, 0));
     }
 
 

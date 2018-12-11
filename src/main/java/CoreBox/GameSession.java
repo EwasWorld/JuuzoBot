@@ -114,6 +114,12 @@ public class GameSession {
      * Updates the next session time for a given session
      */
     private static void addSessionTimeToSpecificSession(@NotNull String shortName, @NotNull ZonedDateTime date) {
+        // Bypass this check when testing
+        if (date.isBefore(ZonedDateTime.now()) && !DatabaseTable.isInTestMode()) {
+            throw new BadUserInputException(
+                    "It's generally ill advised to organise an event to happen in the past... try a time in the "
+                            + "future.");
+        }
         sessionsDatabaseTable.update(
                 new SetArgs(sessionsDatabaseTable, Map.of(SessionsDatabaseFields.SESSION_TIME.fieldName, date)),
                 new Args(sessionsDatabaseTable, SessionsDatabaseFields.SHORT_NAME.fieldName, shortName));
@@ -191,7 +197,7 @@ public class GameSession {
      * @return All games the player takes part in with their next session time or n/a (sorted oldest-newest
      * @throws BadUserInputException if the game is not found
      */
-    public static String getAllSessionTimes(@NotNull String playerID) {
+    public static String getAllSessionTimes(@NotNull String playerID, int gmtOffset) {
         final String[] playerGamesArray = getPlayerGamesShortNames(playerID);
         final String[] dmGamesArray = getDmGamesShortNames(playerID);
         if (playerGamesArray.length == 0 && dmGamesArray.length == 0) {
@@ -230,7 +236,7 @@ public class GameSession {
                             }
                         }
                         sb.append(String.format(format, shortName, dmStarUse,
-                                                DatabaseTable.formatDateForPrint(gameTime)));
+                                                DatabaseTable.formatDateForPrint(gameTime, gmtOffset)));
                     } catch (ParseException | NullPointerException | IllegalArgumentException e) {
                         sbNoDate.append(String.format(format, shortName, dmStarUse, "n/a"));
                     }
@@ -245,15 +251,15 @@ public class GameSession {
             if (isDM || isPastGame) {
                 sb.append("Note: ");
                 if (isDM) {
-                    sb.append(pastGame);
-                    sb.append(" = games in the past");
+                    sb.append(dmStar);
+                    sb.append(" = games you DM");
                 }
                 if (isPastGame) {
                     if (isDM) {
                         sb.append(", ");
                     }
-                    sb.append(dmStar);
-                    sb.append(" = games you DM");
+                    sb.append(pastGame);
+                    sb.append(" = games in the past");
                 }
             }
             return sb.toString();

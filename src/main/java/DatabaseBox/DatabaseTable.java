@@ -2,6 +2,7 @@ package DatabaseBox;
 
 import CoreBox.Bot;
 import ExceptionsBox.BadStateException;
+import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -71,12 +72,11 @@ public class DatabaseTable {
     /*
      * Database connection
      */
-    private static final String databaseFileLocation = "Juuzo2.db";
+    private static final String databaseFileLocation = "Juuzo.db";
     // Used to establish the connection to the database
     private static final String urlPrefix = "jdbc:sqlite:" + Bot.getPathToJuuzoBot();
     /*
      * Date formats (all dates are stored in UTC)
-     * TODO FIX All dates are not being stored in UTC Q.Q plz fix
      */
     // Date format given as an argument and stored in the database
     private static String setDateFormatStr = "yyyy-M-dd HH:mm";
@@ -177,9 +177,9 @@ public class DatabaseTable {
      * @return the given string in the form {@link #printDateFormat}
      * @throws ContactEwaException if an SQLException occurs
      */
-    public static String databaseStringToPrintableString(@NotNull String databaseDate) {
+    public static String databaseStringToPrintableString(@NotNull String databaseDate, int gmtTimeZoneOffset) {
         try {
-            return formatDateForPrint(parseDateFromDatabase(databaseDate));
+            return formatDateForPrint(parseDateFromDatabase(databaseDate), gmtTimeZoneOffset);
         } catch (ParseException ignore) {
 
         }
@@ -188,9 +188,15 @@ public class DatabaseTable {
 
 
     /**
+     * @param gmtTimeZoneOffset the timezone to display the date in
      * @return the given date in the form {@link #printDateFormat}
+     * @throws BadUserInputException if the timezone is invalid
      */
-    public static String formatDateForPrint(@NotNull ZonedDateTime zonedDateTime) {
+    public static String formatDateForPrint(@NotNull ZonedDateTime zonedDateTime, int gmtTimeZoneOffset) {
+        if (gmtTimeZoneOffset > 12 || gmtTimeZoneOffset < -14) {
+            throw new BadUserInputException("Timezones only go from GMT-14 to GMT+12!");
+        }
+        printDateFormat.setTimeZone(TimeZone.getTimeZone(String.format("GMT%+d", gmtTimeZoneOffset)));
         return printDateFormat.format(Date.from(zonedDateTime.toInstant()));
     }
 

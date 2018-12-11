@@ -2,6 +2,7 @@ package CoreBox;
 
 
 import BlackJackBox.GameInstance;
+import CommandsBox.AbstractCommand;
 import CommandsBox.BlackJackCommand;
 import CommandsBox.CharacterCommand;
 import ExceptionsBox.BadStateException;
@@ -99,7 +100,7 @@ public class Bot {
     }
 
 
-    static boolean isIsLocked() {
+    public static boolean isIsLocked() {
         return isLocked;
     }
 
@@ -174,7 +175,7 @@ public class Bot {
                     throw new BadStateException("I'm so broken right now I just can't even");
                 }
                 if (!commands.containsKey(command)) {
-                    throw new BadUserInputException("I have no memory of this command");
+                    throw new BadUserInputException("I have no memory of this command (!help)");
                 }
                 commands.get(command).execute(args, event);
             } catch (BadUserInputException | BadStateException | IncorrectPermissionsException e) {

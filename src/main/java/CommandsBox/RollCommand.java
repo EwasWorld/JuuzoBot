@@ -1,45 +1,35 @@
 package CommandsBox;
 
 import CharacterBox.UserCharacter;
-import CoreBox.AbstractCommand;
 import CoreBox.Die;
 import ExceptionsBox.BadUserInputException;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 
 
+/**
+ * updated style 10/12/18
+ */
 public class RollCommand extends AbstractCommand {
     private static final String invalidFormat = "Invalid input see !help for details";
 
 
-    @Override
-    public String getCommand() {
-        return "roll";
-    }
-
-
-    @Override
-    public String getDescription() {
-        return "roll a die or skill check, saving throw, or initiative";
-    }
-
-
-    @Override
-    public String getArguments() {
-        return "[adv/dis] [quantity] d {die size} [modifier] **OR** {skill/ability/initiative} "
-                + "e.g !roll adv 1d20+3 **OR** !roll strength";
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.NORMAL;
+        return HelpCommand.HelpVisibility.DND;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(String args, MessageReceivedEvent event) {
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
         checkPermission(event.getMember());
         args = args.replace(" ", "");
         if (args.equals("")) {
@@ -64,9 +54,40 @@ public class RollCommand extends AbstractCommand {
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "roll";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "roll a die or skill check, saving throw, or initiative";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "[adv/dis] [quantity] d {die size} [modifier] **OR** {skill/ability/initiative} "
+                + "e.g !roll adv 1d20+3 **OR** !roll strength";
     }
 
 
@@ -80,8 +101,8 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
-     * Returns the roll string for a message in the format [adv/dis] [quantity] d {size} [modifier]
+    /**
+     * @return the roll string for a message in the format [adv/dis] [quantity] d {size} [modifier]
      */
     public static String roll(String message) {
         final Die.RollType rollType = getRollType(message);
@@ -101,7 +122,7 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
+    /**
      * If message doesn't begin with 'adv' or 'dis' it returns normal (otherwise returns the corresponding type)
      */
     private static Die.RollType getRollType(String message) {
@@ -117,7 +138,7 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
+    /**
      * Splits a message in the format $d$ where $ does not contain 'd's
      * TODO Optimisation is there a better way to check the format of the input message?
      */
@@ -135,12 +156,12 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
-     * Takes a string in the format ($ is an integer)
-     *      '$' dieSize
-     *      '$+$' dieSize and positive modifier
-      *     '$-$' dieSize and negative modifier
-     * Return: {dieSize, modifier}
+    /**
+     * @param message a string in the format
+     * '#' dieSize
+     * '#+#' dieSize and positive modifier
+     * '#-#' dieSize and negative modifier
+     * @return {dieSize, modifier}
      */
     private static int[] separateDieAndModifier(String message) {
         if (!hasModifier(message)) {
@@ -170,9 +191,10 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
+    /**
      * Parses the quantity
-     * Returns 1 if no quantity was given
+     *
+     * @return 1 if no quantity was given
      */
     private static int getQuantity(String quantityStr) {
         if (quantityStr.length() != 0) {
@@ -184,9 +206,9 @@ public class RollCommand extends AbstractCommand {
     }
 
 
-    /*
-     * Takes a string of a dieSize (and modifier)
-     * Returns whether the modifier is present
+    /**
+     * @param message a string of a dieSize (and modifier)
+     * @return whether the modifier is present
      */
     private static boolean hasModifier(String message) {
         return message.contains("+") || message.contains("-");

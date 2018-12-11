@@ -1,40 +1,31 @@
 package CommandsBox;
 
-import CoreBox.AbstractCommand;
 import CoreBox.Bot;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 import static CommandsBox.HelpCommand.getExecuteHelpVisibility;
 
 
 
+/**
+ * updated style 10/12/18
+ */
 public class GetCommandsCommand extends AbstractCommand {
-    @Override
-    public String getCommand() {
-        return "commands";
-    }
-
-
-    @Override
-    public String getDescription() {
-        return "List possible commands without descriptions";
-    }
-
-
-    @Override
-    public String getArguments() {
-        return "[char]";
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.NORMAL;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(String args, MessageReceivedEvent event) {
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
         checkPermission(event.getMember());
 
         final Rank rank = getRank(event.getMember());
@@ -51,8 +42,38 @@ public class GetCommandsCommand extends AbstractCommand {
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "commands";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "List possible commands without descriptions";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "[char]";
     }
 }

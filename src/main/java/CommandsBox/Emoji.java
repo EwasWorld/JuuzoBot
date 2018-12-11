@@ -21,7 +21,8 @@ public enum Emoji {
     VULCAN("vulcan", "vulcan_salute", "\uD83D\uDD96"), ONE_FINGER("point_up", "☝"), ZERO("zero", "0⃣ "),
     ONE("one", "1⃣ "), TWO("two", "2⃣ "), THREE("three", "3⃣ "), FOUR("four", "4⃣ "), FIVE("five", "5⃣ "),
     SIX("six", "6⃣ "), SEVEN("seven", "7⃣ "), EIGHT("eight", "8⃣ "), NINE("nine", "9⃣ "),
-    TEN("keycap_ten", "\uD83D\uDD1F"), LETTER_A(":regional_indicator_a:", ":regional_indicator_symbol_a:", "🇦"),
+    TEN("keycap_ten", "\uD83D\uDD1F"),
+    LETTER_A(":regional_indicator_a:", ":regional_indicator_symbol_a:", "🇦"),
     LETTER_B(":regional_indicator_b:", ":regional_indicator_symbol_b:", "🇧"),
     LETTER_C(":regional_indicator_c:", ":regional_indicator_symbol_c:", "🇨"),
     LETTER_D(":regional_indicator_d:", ":regional_indicator_symbol_d:", "🇩"),
@@ -55,6 +56,11 @@ public enum Emoji {
     private String unicode2char;
 
 
+    Emoji(String discordAlias, String unicodeFullString) {
+        this(discordAlias, null, unicodeFullString);
+    }
+
+
     Emoji(String discordAlias, String emojiManagerAliasAlt, String unicodeFullString) {
         final String aliasSurround = ":";
         this.discordAlias = aliasSurround + discordAlias.replaceAll(aliasSurround, "") + aliasSurround;
@@ -69,11 +75,6 @@ public enum Emoji {
         if (unicode2char == null) {
             throw new IllegalArgumentException("Could not find alias " + discordAlias + " in EmojiManager");
         }
-    }
-
-
-    Emoji(String discordAlias, String unicodeFullString) {
-        this(discordAlias, null, unicodeFullString);
     }
 
 

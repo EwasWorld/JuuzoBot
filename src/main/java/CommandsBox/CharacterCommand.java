@@ -6,7 +6,6 @@ import CharacterBox.BroadInfo.Clazz;
 import CharacterBox.BroadInfo.Race;
 import CharacterBox.BroadInfo.SubRace;
 import CharacterBox.UserCharacter;
-import CoreBox.AbstractCommand;
 import ExceptionsBox.BadStateException;
 import ExceptionsBox.BadUserInputException;
 import ExceptionsBox.ContactEwaException;
@@ -15,7 +14,9 @@ import com.google.common.collect.HashBiMap;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageReaction;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -172,6 +173,34 @@ public class CharacterCommand extends AbstractCommand {
      * {@inheritDoc}
      */
     @Override
+    CommandInterface[] getSecondaryCommands() {
+        return SecondaryArg.values();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HelpCommand.HelpVisibility getHelpVisibility() {
+        return HelpCommand.HelpVisibility.DND;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
+        checkPermission(event.getMember());
+        executeSecondaryArgument(SecondaryArg.class, 2, args, event);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getCommand() {
         return "char";
     }
@@ -190,25 +219,6 @@ public class CharacterCommand extends AbstractCommand {
      * {@inheritDoc}
      */
     @Override
-    public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.CHARACTER;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void execute(String args, MessageReceivedEvent event) {
-        checkPermission(event.getMember());
-        executeSecondaryArgument(SecondaryArg.class, args, event);
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Rank getRequiredRank() {
         return Rank.USER;
     }
@@ -219,7 +229,13 @@ public class CharacterCommand extends AbstractCommand {
      */
     @Override
     public String getArguments() {
-        return "new {name} / description / attack {victim} / get weapons list / change weapon {weapon} / delete";
+        final StringBuilder sb = new StringBuilder();
+        for (SecondaryArg argument : SecondaryArg.values()) {
+            sb.append(argument.getCommand());
+            sb.append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        return sb.toString();
     }
 
 
@@ -241,29 +257,54 @@ public class CharacterCommand extends AbstractCommand {
 
 
 
-    private enum SecondaryArg implements SecondaryCommandAction {
+    private enum SecondaryArg implements CommandInterface {
         NEW("New character for ") {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 if (args.length() == 0) {
                     throw new BadUserInputException("No name for your brave adventurer?");
                 }
-
                 String message = messageStart + event.getMember().getAsMention() + "\n";
-                long authorID = event.getAuthor().getIdLong();
+                final long authorID = event.getAuthor().getIdLong();
                 if (partialCharacters.containsKey(authorID)) {
                     message
                             += "You're already in the process of making a character, but I guess you can start again."
                             + "..\n";
                 }
-
                 partialCharacters.put(authorID, new UserCharacter(args));
                 creationStages.put(authorID, CreationStage.RACE);
                 message += CreationStage.RACE.optionsToString(null);
                 sendMessage(event.getChannel(), message);
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Create a new character";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "{character name}";
             }
         },
         DELETE {
@@ -271,9 +312,54 @@ public class CharacterCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
-                UserCharacter.deleteCharacter(event.getAuthor().getId(), args);
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
+                final List<User> mentioned = event.getMessage().getMentionedUsers();
+                if (mentioned.size() == 0) {
+                    UserCharacter.deleteCharacter(event.getAuthor().getId(), args);
+                }
+                else {
+                    // Allow admins to delete any character
+                    checkPermission(event.getMember(), Rank.ADMIN);
+                    if (mentioned.size() > 1) {
+                        throw new BadUserInputException("Only mention one person");
+                    }
+                    int mentionLength = args.split(" ")[0].length() + 1;
+                    if (args.length() > mentionLength) {
+                        UserCharacter.deleteCharacter(mentioned.get(0).getId(), args.substring(mentionLength));
+                    }
+                    else {
+                        throw new BadUserInputException(
+                                "What is the name of the character to be deleted? Put this after the @user)");
+                    }
+                }
                 sendMessage(event.getChannel(), "Character deleted");
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Delete one of your character (admins can delete any character)";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "[@character owner (admins only)] {character name}";
             }
         },
         ATTACK {
@@ -282,31 +368,112 @@ public class CharacterCommand extends AbstractCommand {
              * @param args {victim}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 final String[] splitArgs = SecondaryArg.splitArgsNameAndOther(args);
                 sendMessage(
                         event.getChannel(),
                         UserCharacter.attack(event.getAuthor().getId(), splitArgs[0], splitArgs[1]));
             }
-        },
-        WEAPONSLIST {
+
+
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
-                sendMessage(event.getChannel(), Weapon.getWeaponsList());
+            public String getDescription() {
+                return "Your character shall attempt a vicious attack on the unsuspecting victim";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "{character name} {victim's name}";
             }
         },
-        CHANGEWEAPON {
+        WEAPONS_LIST {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
+                sendMessage(event.getChannel(), Weapon.getWeaponsList());
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "All available weapons";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "";
+            }
+        },
+        CHANGE_WEAPON {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 final String[] splitArgs = SecondaryArg.splitArgsNameAndOther(args);
                 UserCharacter.changeCharacterWeapon(event.getAuthor().getId(), splitArgs[0], splitArgs[1]);
                 sendMessage(event.getChannel(), "Weapon change successful, enjoy your new toy.");
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "Swap your character's weapon for a new one";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "{character name} {weapon name}";
             }
         },
         DESCRIPTION {
@@ -314,8 +481,35 @@ public class CharacterCommand extends AbstractCommand {
              * {@inheritDoc}
              */
             @Override
-            public void execute(String args, MessageReceivedEvent event) {
+            public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
                 sendMessage(event.getChannel(), UserCharacter.getCharacterDescription(event.getAuthor().getId(), args));
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getDescription() {
+                return "A description of your mighty warrior";
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Rank getRequiredRank() {
+                return Rank.USER;
+            }
+
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public String getArguments() {
+                return "{character name}";
             }
         };
 
@@ -345,6 +539,15 @@ public class CharacterCommand extends AbstractCommand {
             else {
                 return new String[]{args.substring(0, endLength), other};
             }
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getCommand() {
+            return this.toString().toLowerCase().replaceAll("_", " ");
         }
     }
 

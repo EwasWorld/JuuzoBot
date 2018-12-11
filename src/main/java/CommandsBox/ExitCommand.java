@@ -1,46 +1,66 @@
 package CommandsBox;
 
-import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 
 
+/**
+ * updated style 10/12/18
+ */
 public class ExitCommand extends AbstractCommand {
-    @Override
-    public String getCommand() {
-        return "exit";
-    }
-
-
-    @Override
-    public String getDescription() {
-        return "Save and exit the box";
-    }
-
-
-    @Override
-    public String getArguments() {
-        return "";
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.ADMIN;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(String args, MessageReceivedEvent event) {
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
         sendMessage(event.getChannel(), "Bye bye :c");
         System.exit(0);
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "exit";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "Save and exit the box";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.ADMIN;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "";
     }
 }

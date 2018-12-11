@@ -1,46 +1,67 @@
 package CommandsBox.Fun;
 
+import CommandsBox.AbstractCommand;
 import CommandsBox.HelpCommand;
-import CoreBox.AbstractCommand;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 
 
+/**
+ * updated style 10/12/18
+ */
 public class JuicyCommand extends AbstractCommand {
-    @Override
-    public String getCommand() {
-        return "juicy";
-    }
-
-
-    @Override
-    public String getDescription() {
-        return "makes things extra juicy";
-    }
-
-
-    @Override
-    public String getArguments() {
-        return "";
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
         return HelpCommand.HelpVisibility.NONE;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(String args, MessageReceivedEvent event) {
+    public void execute(@NotNull String args, @NotNull MessageReceivedEvent event) {
         checkPermission(event.getMember());
-
         sendMessage(event.getChannel(), "How about a smoothie?  :tangerine:  :tangerine: ");
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCommand() {
+        return "juicy";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "makes things extra juicy";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArguments() {
+        return "";
     }
 }
