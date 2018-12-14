@@ -224,21 +224,6 @@ public class CharacterCommand extends AbstractCommand {
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        final StringBuilder sb = new StringBuilder();
-        for (SecondaryArg argument : SecondaryArg.values()) {
-            sb.append(argument.getCommand());
-            sb.append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
-    }
-
-
     private interface CreationStageActions {
         /**
          * Update the character with the desired update for the stage

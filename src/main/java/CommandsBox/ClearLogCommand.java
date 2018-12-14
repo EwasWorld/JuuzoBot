@@ -55,13 +55,4 @@ public class ClearLogCommand extends AbstractCommand {
     public Rank getRequiredRank() {
         return Rank.CREATOR;
     }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        return "";
-    }
 }

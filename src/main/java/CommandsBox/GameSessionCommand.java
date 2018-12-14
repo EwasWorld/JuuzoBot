@@ -42,7 +42,7 @@ public class GameSessionCommand extends AbstractCommand {
      */
     @Override
     public HelpCommand.HelpVisibility getHelpVisibility() {
-        return HelpCommand.HelpVisibility.SESSION;
+        return HelpCommand.HelpVisibility.DND;
     }
 
 
@@ -80,21 +80,6 @@ public class GameSessionCommand extends AbstractCommand {
     @Override
     public Rank getRequiredRank() {
         return Rank.USER;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        final StringBuilder sb = new StringBuilder();
-        for (SecondaryArg argument : SecondaryArg.values()) {
-            sb.append(argument.getCommand());
-            sb.append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
     }
 
 

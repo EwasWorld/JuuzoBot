@@ -55,13 +55,4 @@ public class ShutUpCommand extends AbstractCommand {
     public Rank getRequiredRank() {
         return Rank.ADMIN;
     }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        return "";
-    }
 }

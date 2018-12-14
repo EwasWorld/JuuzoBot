@@ -60,13 +60,4 @@ public class ConfettiCommand extends AbstractCommand {
     public Rank getRequiredRank() {
         return Rank.USER;
     }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        return "";
-    }
 }

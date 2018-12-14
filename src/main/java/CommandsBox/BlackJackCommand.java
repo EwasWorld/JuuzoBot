@@ -243,22 +243,6 @@ public class BlackJackCommand extends AbstractCommand {
 
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        // TODO Optimisation remove duplication of this across classes with secondary commands
-        final StringBuilder sb = new StringBuilder();
-        for (BlackJackArgument argument : BlackJackArgument.values()) {
-            sb.append(argument.getCommand());
-            sb.append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
-    }
-
-
-    /**
      * Arguments that are triggered from the blackjack command args
      */
     private enum BlackJackArgument implements CommandInterface {

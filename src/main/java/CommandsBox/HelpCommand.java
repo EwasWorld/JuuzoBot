@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * refactored 10/12/18
  */
 public class HelpCommand extends AbstractCommand {
-    public enum HelpVisibility {NONE, DND, SESSION, NORMAL, ADMIN}
+    public enum HelpVisibility {NONE, DND, NORMAL, ADMIN}
 
 
 

@@ -68,21 +68,6 @@ public class QuoteCommand extends AbstractCommand {
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        final StringBuilder sb = new StringBuilder();
-        for (QuoteArgument argument : QuoteArgument.values()) {
-            sb.append(argument.getCommand());
-            sb.append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
-    }
-
-
     private enum QuoteArgument implements CommandInterface {
         ADD {
             /**

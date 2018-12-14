@@ -54,13 +54,4 @@ public class ExitCommand extends AbstractCommand {
     public Rank getRequiredRank() {
         return Rank.ADMIN;
     }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getArguments() {
-        return "";
-    }
 }

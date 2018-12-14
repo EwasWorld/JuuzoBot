@@ -135,7 +135,18 @@ public abstract class AbstractCommand implements CommandInterface {
      * {@inheritDoc}
      */
     @Override
-    public abstract String getArguments();
+    public String getArguments() {
+        if (getSecondaryCommands().length == 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (CommandInterface argument : getSecondaryCommands()) {
+            sb.append(argument.getCommand());
+            sb.append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        return sb.toString();
+    }
 
 
     /**
